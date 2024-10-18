@@ -1,1 +1,5 @@
+# stuff
 *.cpython*
+
+# LARGE DATA 
+GALFA_HI*.fits
