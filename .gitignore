@@ -2,4 +2,4 @@
 *.cpython*
 
 # LARGE DATA 
-GALFA_HI*.fits
+GALFA_HI_RA*.fits
