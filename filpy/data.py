@@ -9,12 +9,8 @@ class PathVar():
     def __init__(self, path: str = '') -> None:
         self.PATH = path  if path != '' else PathVar.this_dir()
 
-    def split(self) -> list[str]:
-        if self.PATH[0] == os.sep:
-            return [os.sep] + self.PATH.split(os.sep)
-        else:
-            return self.PATH.split(os.sep)
-        
+    def split(self) -> tuple[str,str]:
+        return os.path.split(self.PATH)
 
     def copy(self) -> 'PathVar':
         return PathVar(self.PATH)
@@ -23,9 +19,10 @@ class PathVar():
         new_path = os.path.join(self.PATH,path)
         return PathVar(path=new_path)
      
-    def __sub__(self, up: int) -> 'PathVar':
-        path_list = self.split()
-        new_path = os.path.join(*path_list[:-up])
+    def __sub__(self, iter: int) -> 'PathVar':
+        new_path = self.PATH
+        for _ in range(iter):
+            new_path = os.path.split(new_path)[0]
         return PathVar(path=new_path)
     
     def __str__(self) -> str:
@@ -63,5 +60,6 @@ class FileVar(PathVar):
 
 
 PKG_DIR = PathVar()
+print(PKG_DIR)
 PROJECT_DIR = PKG_DIR - 1
 print(PROJECT_DIR)
