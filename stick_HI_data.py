@@ -79,7 +79,9 @@ step = float(head1['CDELT2'])
 ## AXIS
 naxis1 = int(head1['NAXIS2'])
 naxis2 = int(head2['NAXIS2'])
-new_axis = naxis1 + naxis2 - 1
+new_axis = new_data.shape[1]
+print(naxis1-1 + naxis2-sim_pos)
+print(new_axis)
 new_header['NAXIS2'] = new_axis
 print('New Axis', new_axis)
 
