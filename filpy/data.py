@@ -1,4 +1,7 @@
 import os
+from pandas import read_csv
+import astropy.units as u
+
 
 class PathVar():
     
@@ -54,12 +57,19 @@ class FileVar(PathVar):
         else: 
             self.FILE[key] = item
 
-
     def __str__(self) -> str:
         return str(self.path())
 
 
+## Paths
 PKG_DIR = PathVar()
-print(PKG_DIR)
 PROJECT_DIR = PKG_DIR - 1
-print(PROJECT_DIR)
+MBM40_DIR = PROJECT_DIR + 'MBM40'
+DATA_FILE = FileVar(filename='data.csv', dirpath=MBM40_DIR)
+CO_FILES, HI_FILES, IR_FILES = read_csv(DATA_FILE.path()).to_numpy().transpose()
+CO_PATHS = FileVar(CO_FILES, MBM40_DIR + 'CO')
+HI_PATHS = FileVar(HI_FILES, MBM40_DIR + 'HI')
+IR_PATHS = FileVar(IR_FILES, MBM40_DIR + 'IR')
+
+U_VEL = u.km / u.s
+u.add_enabled_units(u.def_unit(['K (Tb)'], represents=u.K))

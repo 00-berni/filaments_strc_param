@@ -1,5 +1,8 @@
 from .data import * 
-from .fitstuff import get_data_fit, showfits
-import astropy.units as u
+from .stuff import *
+from .fit_stuff import get_data_fit, showfits
 
-u_vel = u.km / u.s
+
+INITIAL_STR = f"Package Dir: {PKG_DIR}\nProject Dir: {PROJECT_DIR}"
+
+print(INITIAL_STR)
