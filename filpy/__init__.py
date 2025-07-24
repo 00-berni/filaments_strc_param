@@ -1,6 +1,7 @@
 from .data import * 
+from .display import * 
 from .stuff import *
-from .fit_stuff import get_data_fit, showfits
+from .fit_stuff import get_data_fit
 
 
 INITIAL_STR = f"Package Dir: {PKG_DIR}\nProject Dir: {PROJECT_DIR}"
