@@ -3,7 +3,7 @@ import numpy as np
 from numpy import ndarray
 from astropy.io import fits
 from astropy.io.fits import HDUList
-
+from .display import show_image
 
 def hotpx_remove(data: ndarray) -> ndarray:
     """To remove hot pixels from the image
@@ -34,36 +34,36 @@ def hotpx_remove(data: ndarray) -> ndarray:
 
 
 
-def showfits(data: np.ndarray, v: int = -1, title: str = '', n: int = None, norm: str ='linear', dim: list[int] = [10,7], labels: tuple[str,str] = ('',''), ticks: tuple[ndarray[float] | None, ndarray[float] | None] = (None,None), tickslabel: tuple[ ndarray[str | float] | None,  ndarray[str | float] | None] = (None, None),**kwimg) -> None:
-    """Function to display the fits image.
-    filename
-    You can display simply the image or set a figure number and a title.
+# def showfits(data: np.ndarray, v: int = -1, title: str = '', n: int = None, norm: str ='linear', dim: list[int] = [10,7], labels: tuple[str,str] = ('',''), ticks: tuple[ndarray[float] | None, ndarray[float] | None] = (None,None), tickslabel: tuple[ ndarray[str | float] | None,  ndarray[str | float] | None] = (None, None),**kwimg) -> None:
+#     """Function to display the fits image.
+#     filename
+#     You can display simply the image or set a figure number and a title.
 
-    :param data: image matrix of fits file
-    :type data: np.ndarray
-    :param v: cmap parameter: 1 for false colors, 0 for grayscale, -1 for reversed grayscale; defaults to -1
-    :type v: int, optional
-    :param title: title of the image, defaults to ''
-    :type title: str, optional
-    :param n: figure number, defaults to None
-    :type n: int, optional
-    :param dim: figure size, defaults to [10,7]
-    :type dim: list[int], optional
-    """
-    plt.figure(n,figsize=dim)
-    plt.title(title)
-    if v == 1 : color = 'viridis'
-    elif v == 0 : color = 'gray'
-    else : color = 'gray_r'
-    plt.imshow(data, cmap=color, norm=norm, origin='lower',**kwimg)
-    plt.colorbar()
-    # plt.xlabel(labels[0])
-    # plt.ylabel(labels[1])
-    # if_stat = lambda tck : tck[0] is None and tck[1] is None  
-    # if if_stat(ticks) and not if_stat(tickslabel):
-    #     ticks = (np.arange(*tickslabel[0].shape), np.arange(*tickslabel[1].shape))     
-    # plt.xticks(ticks[0],tickslabel[0])
-    # plt.yticks(ticks[1],tickslabel[1])
+#     :param data: image matrix of fits file
+#     :type data: np.ndarray
+#     :param v: cmap parameter: 1 for false colors, 0 for grayscale, -1 for reversed grayscale; defaults to -1
+#     :type v: int, optional
+#     :param title: title of the image, defaults to ''
+#     :type title: str, optional
+#     :param n: figure number, defaults to None
+#     :type n: int, optional
+#     :param dim: figure size, defaults to [10,7]
+#     :type dim: list[int], optional
+#     """
+#     plt.figure(n,figsize=dim)
+#     plt.title(title)
+#     if v == 1 : color = 'viridis'
+#     elif v == 0 : color = 'gray'
+#     else : color = 'gray_r'
+#     plt.imshow(data, cmap=color, norm=norm, origin='lower',**kwimg)
+#     plt.colorbar()
+#     # plt.xlabel(labels[0])
+#     # plt.ylabel(labels[1])
+#     # if_stat = lambda tck : tck[0] is None and tck[1] is None  
+#     # if if_stat(ticks) and not if_stat(tickslabel):
+#     #     ticks = (np.arange(*tickslabel[0].shape), np.arange(*tickslabel[1].shape))     
+#     # plt.xticks(ticks[0],tickslabel[0])
+#     # plt.yticks(ticks[1],tickslabel[1])
 
 
 def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], v: int = -1, title: str = '', n: int = None, dim: list[int] = [10,7], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, ndarray]:
@@ -114,5 +114,5 @@ def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], v: i
     data = data[ly:ry,lx:rx]
     # hot px correction
     # Spectrum image
-    if display_plots == True: showfits(data, v=v,title=title,n=n,dim=dim, **imgargs) 
+    if display_plots == True: show_image(data, v=v,title=title,dim=dim, **imgargs) 
     return hdul,data
