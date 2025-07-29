@@ -8,7 +8,7 @@ from scipy.spatial import KDTree
 
 from time import time
 
-dim = 50
+dim = 80
 xx, yy = np.meshgrid(np.arange(dim),np.arange(dim))
 np.random.seed(10)
 data = np.random.random((dim,dim)) 
@@ -90,7 +90,9 @@ print('Compilation time:', end1-start1,'s')
 # exit()
 # distances = np.ravel([r[0] for r in res])
 # correlations = np.ravel([r[1] for r in res])
+print('dist')
 unq_dist = np.unique(res_dist)
+print('dist end')
 correlations = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
 
 filpy.quickplot((unq_dist,correlations),fmt='.--')
