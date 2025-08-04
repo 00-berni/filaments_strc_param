@@ -8,15 +8,18 @@ from scipy.spatial import KDTree
 
 from time import time
 
-dim = 100
+dim = 10
 xx, yy = np.meshgrid(np.arange(dim),np.arange(dim))
 np.random.seed(10)
 data = np.random.random((dim,dim)) 
+
 
 def mydist(*args):
     return distance(*args)
 
 filpy.show_image(data,cmap='viridis')
+# plt.show()
+# exit()
 all_pos = [ (i,j) for i in range(data.shape[0]) for j in range(data.shape[1])]
 all_pos = np.asarray(all_pos).T
 # start = time()
@@ -96,9 +99,52 @@ print('dist end')
 correlations = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
 print('Compilation time:', end1-start1,'s')
 
+correlations /= correlations.max()
+
 filpy.quickplot((unq_dist,correlations),fmt='.--')
 
 plt.show()
+
+# # #
+
+data = np.zeros((dim,dim))
+data[::3] = 20
+
+all_pos = [ (i,j) for i in range(data.shape[0]) for j in range(data.shape[1])]
+all_pos = np.asarray(all_pos).T
+
+start = time()
+res_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
+# res_dist = np.array([list(distance(all_pos[:,N],all_pos[:,N:])) for N in range(all_pos.shape[1])],dtype='object').sum()
+end = time()
+print('Compilation time:', end-start,'s')
+print(type(res_dist),len(res_dist))
+# del res_dist
+# start = time()
+# res_corr = [calc_corr_ij(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])]
+# end = time()
+start1 = time()
+res_corr = np.concatenate([calc_corr_ij(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
+end1 = time()
+# print('Compilation time:', end-start,'s')
+print('Compilation time:', end1-start1,'s')
+
+
+# exit()
+# distances = np.ravel([r[0] for r in res])
+# correlations = np.ravel([r[1] for r in res])
+print('dist')
+unq_dist = np.unique(res_dist)
+print('dist end')
+correlations1 = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
+print('Compilation time:', end1-start1,'s')
+
+correlations1 /= correlations1.max()
+
+filpy.quickplot((unq_dist,correlations1-correlations),fmt='.--')
+
+plt.show()
+
 
 # corr = correlate2d(data,data)
 # lags = correlation_lags(len(data),len(data))
