@@ -12,9 +12,9 @@ dim = 22
 xx, yy = np.meshgrid(np.arange(dim),np.arange(dim))
 np.random.seed(10)
 data = np.random.random((dim,dim)) 
-# data = np.zeros((dim,dim))
 PARAM = 3
-# data[::PARAM,::PARAM] = 1
+data = np.zeros((dim,dim))
+data[::PARAM,::PARAM] = 1
 
 data_mean = data.mean()
 
@@ -102,17 +102,46 @@ unq_dist = np.unique(res_dist)
 print('dist end')
 correlations = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
 print('Compilation time:', end1-start1,'s')
-correlations = abs(correlations)
+# correlations = abs(correlations)
 
 # correlations /= correlations.max()
 
 filpy.quickplot((unq_dist,correlations),fmt='.--')
-# for i in range(10):
-#     for j in range(10):
-#         d = distance((0,0),(i,j))*PARAM
-#         if d > np.max(unq_dist):
-#             break
-#         plt.axvline(d,color='red',linestyle='dotted')
+for i in range(10):
+    for j in range(10):
+        d = distance((0,0),(i,j))*PARAM
+        if d > np.max(unq_dist):
+            break
+        plt.axvline(d,color='red',linestyle='dotted')
+plt.show()
+
+## FFT
+data_fft = fft2(data)
+tmp = data_fft * np.conjugate(data_fft)
+tmp_img = np.abs(ifft2(np.abs(tmp)))
+del tmp
+MID = dim // 2
+print(tmp_img.shape,MID)
+corr_img = np.copy(tmp_img)
+corr_img[ : MID, : MID] = tmp_img[MID : , MID : ]
+corr_img[MID : , MID : ] = tmp_img[ : MID, : MID]
+corr_img[ : MID, MID : ] = tmp_img[MID : , : MID]
+corr_img[MID : , : MID] = tmp_img[ : MID, MID : ]
+filpy.show_image(tmp_img)
+filpy.show_image(corr_img)
+
+distances = np.array([ [distance((i,j),(MID+0.5,MID+0.5)) for i in range(dim)] for j in range(dim)])
+unq_dist = np.unique(distances)
+
+correlations = np.array([np.sum(corr_img[distances == d]) for d in unq_dist])
+
+filpy.quickplot((unq_dist,correlations),fmt='.--')
+for i in range(10):
+    for j in range(10):
+        d = distance((0,0),(i,j))*PARAM
+        if d > np.max(unq_dist):
+            break
+        plt.axvline(d,color='red',linestyle='dotted')
 plt.show()
 
 # # #
