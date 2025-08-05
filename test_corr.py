@@ -8,13 +8,13 @@ from scipy.spatial import KDTree
 
 from time import time
 
-dim = 10
+dim = 22
 xx, yy = np.meshgrid(np.arange(dim),np.arange(dim))
 np.random.seed(10)
 data = np.random.random((dim,dim)) 
-data = np.zeros((dim,dim))
+# data = np.zeros((dim,dim))
 PARAM = 3
-data[::PARAM,::PARAM] = 20
+# data[::PARAM,::PARAM] = 1
 
 data_mean = data.mean()
 
@@ -100,18 +100,19 @@ print('Compilation time:', end1-start1,'s')
 print('dist')
 unq_dist = np.unique(res_dist)
 print('dist end')
-correlations = np.array([abs(np.sum(res_corr[res_dist == d])) for d in unq_dist])
+correlations = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
 print('Compilation time:', end1-start1,'s')
+correlations = abs(correlations)
 
 # correlations /= correlations.max()
 
 filpy.quickplot((unq_dist,correlations),fmt='.--')
-for i in range(1,10):
-    if i*PARAM > np.max(unq_dist):
-        break
-    plt.axvline(i*PARAM,color='red')
-    plt.axvline(i*PARAM*np.sqrt(2),color='green')
-    plt.axvline(i*np.sqrt(10),color='orange')
+# for i in range(10):
+#     for j in range(10):
+#         d = distance((0,0),(i,j))*PARAM
+#         if d > np.max(unq_dist):
+#             break
+#         plt.axvline(d,color='red',linestyle='dotted')
 plt.show()
 
 # # #
