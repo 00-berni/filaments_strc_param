@@ -34,17 +34,24 @@ class PathVar():
 
 class FileVar(PathVar):
 
-    def __init__(self, filename: str | list[str], dirpath: str | PathVar = '') -> None:
-        self.DIR  = dirpath if isinstance(dirpath, PathVar) else PathVar(path = dirpath)
+    def __init__(self, filename: str | list[str], dirpath: str | PathVar = '', path: bool = False) -> None:
+        if path: 
+            dirpath  = PathVar(path = os.path.dirname(filename))
+            filename = os.path.split(filename)[-1]
+        self.PATH = dirpath if isinstance(dirpath, PathVar) else PathVar(path = dirpath)
         self.FILE = filename
 
     def path(self) -> str | list[str]:
         filename = self.FILE 
-        dirname = self.DIR.copy()
+        dirname = self.PATH.copy()
         if isinstance(filename,str): 
             return (dirname + filename).PATH
         else:
             return [(dirname + name).PATH for name in filename]
+
+    def copy(self) -> 'FileVar':
+        new_file = FileVar(filename=self.FILE,dirpath=self.PATH,path=False)
+        return new_file
 
     def __getitem__(self,item: int) -> str:
         path = self.path()
