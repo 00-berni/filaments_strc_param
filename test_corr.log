@@ -1,0 +1,14 @@
+INFO:__main__: Call the function `compute_correlation`
+INFO:__main__: `diagonal_dist` parameter set to True
+DEBUG:__main__: Copy the data and remove the mean
+DEBUG:__main__: Compute all positions in the grid
+DEBUG:__main__: pos : compilation time: 0.0009791851043701172 s
+DEBUG:__main__: Compute all distances in the grid
+DEBUG:__main__: dist : compilation time: 0.0546109676361084 s
+INFO:__main__: Compute the array with the unique distances
+DEBUG:__main__: Compute each element
+DEBUG:__main__: elem : compilation time: 0.031493425369262695 s
+DEBUG:__main__: all_elm_shape = (3126250,)
+INFO:__main__: Compute the correlation
+INFO:__main__: corr : compilation time: 2.4482316970825195 s
+INFO:__main__: END
