@@ -9,7 +9,7 @@ from typing import Sequence, Any
 
 
 def quickplot(data: Sequence[ndarray] | ndarray, numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
-    """Function to display a plot quickly.
+    """Display a plot quickly.
 
     Parameters
     ----------
@@ -52,7 +52,7 @@ def quickplot(data: Sequence[ndarray] | ndarray, numfig: int = None, fmt: str = 
     if grid: plt.grid(which='both',linestyle='--',alpha=0.2,color='grey')
 
 
-def plot_image(fig: Figure, ax: Axes, data: ndarray, v: int = 0, subtitle: str = '',colorbar: bool = True, **figargs) -> None:
+def plot_image(fig: Figure, ax: Axes, data: ndarray, subtitle: str = '',colorbar: bool = True, **figargs) -> None:
     """To plot fits images
 
     Parameters
@@ -63,10 +63,10 @@ def plot_image(fig: Figure, ax: Axes, data: ndarray, v: int = 0, subtitle: str =
         axes variable
     data : Spectrum
         target
-    v : int, optional
-        color-code, by default `-1`
-    subtitle : str 
+    subtitle : str, optional 
         subtitle, by default `''`
+    colobar : bool, optional
+        if `True` the colorbar is displayed too
     **figargs
         parameters of `matplotlib.pyplot.imshow()`
     """
@@ -123,8 +123,8 @@ def show_image(data: ndarray | list[ndarray], num_plots: Sequence[int] = (1,1), 
     
     Parameters
     ----------
-    data : Spectrum
-        target
+    data : ndarray | list[ndarray]
+        target(s)
     num_plots : Sequence[int], optional
         shape of grid of plots, by default `(1,1)`
     dim : Sequence[int], optional
@@ -132,16 +132,18 @@ def show_image(data: ndarray | list[ndarray], num_plots: Sequence[int] = (1,1), 
     title : str, optional
         title of the image, by default `''`
     show : bool, optional
-        if `True` it displays the figure, by default `False`
+        if `True` it displays the figure and the function returns `None`, by default `False`
+    projection : str | None, optional
+        the projection of each subplot
     **figargs
         parameters of `plot_image()` and `matplotlib.pyplot.imshow()`
     
     Returns
     -------
     fig : Figure
-        figure
+        figure if `show` is `False`
     axs : Axes | ndarray
-        axes
+        axes if `show` is `False`
     """
     fig, axs = plt.subplots(*num_plots, figsize=dim, subplot_kw={'projection': projection}) 
     if num_plots != (1,1): 

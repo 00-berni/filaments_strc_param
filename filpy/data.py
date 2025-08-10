@@ -4,25 +4,80 @@ import astropy.units as u
 
 
 class PathVar():
-    
+    """Handle the paths
+
+    Attributes
+    ----------
+    PATH : str
+        directory path
+    """
     @staticmethod
     def this_dir() -> str:
+        """Compute the current directory
+
+        Returns
+        -------
+        dir_path : str
+            current directory path
+        """
         return os.path.dirname(os.path.realpath(__file__))
 
     def __init__(self, path: str = '') -> None:
+        """Construct the path variable
+
+        Parameters
+        ----------
+        path : str, optional
+            path of the directory. If `path == ''` the current 
+            directory path is set, by default ''
+        """
         self.PATH = path  if path != '' else PathVar.this_dir()
 
     def split(self) -> tuple[str,str]:
+        """Split the last directory from the global path
+
+        Returns
+        -------
+        global_path : str
+            directory path
+        last_dir : str
+            directory/file name
+        """
         return os.path.split(self.PATH)
 
     def copy(self) -> 'PathVar':
-        return PathVar(self.PATH)
+        """Copy the class variable"""
+        return PathVar(path=self.PATH)
 
     def __add__(self, path: str) -> 'PathVar':
+        """Join two paths
+
+        Parameters
+        ----------
+        path : str
+            path to be attached
+
+        Returns
+        -------
+        new_path : PathVar
+            joined paths
+        """
         new_path = os.path.join(self.PATH,path)
         return PathVar(path=new_path)
      
     def __sub__(self, iter: int) -> 'PathVar':
+        """Compute the path nth directory back
+
+        Parameters
+        ----------
+        iter : int
+            the number of directory to bring back
+
+        Returns
+        -------
+        new_path : PathVar
+            computed new_path
+        """
         new_path = self.PATH
         for _ in range(iter):
             new_path = os.path.split(new_path)[0]
@@ -33,15 +88,48 @@ class PathVar():
      
 
 class FileVar(PathVar):
+    """Handle the file(s) path(s)
+
+    Attributes
+    ----------
+    PATH : PathVar
+        directory path
+    FILE : str | list[str]
+        file name or list of files names
+        
+    Parents
+    -------
+    PathVar
+    """
 
     def __init__(self, filename: str | list[str], dirpath: str | PathVar = '', path: bool = False) -> None:
+        """Construct the file(s) path(s) variable
+
+        Parameters
+        ----------
+        filename : str | list[str]
+            file name or list of files names
+        dirpath : str | PathVar, optional
+            directory path, by default ''
+        path : bool, optional
+            if `True` the `filename` path is computed, by default False
+        """
         if path: 
-            dirpath  = PathVar(path = os.path.dirname(filename))
+            dirpath  = os.path.dirname(filename)
             filename = os.path.split(filename)[-1]
-        self.PATH = dirpath if isinstance(dirpath, PathVar) else PathVar(path = dirpath)
+        if isinstance(dirpath, PathVar): dirpath = dirpath.PATH
+        
+        super().__init__(path=dirpath)
         self.FILE = filename
 
     def path(self) -> str | list[str]:
+        """Compute the file(s) path(s)
+
+        Returns
+        -------
+        path_str : str | list[str]
+            the path or a list of paths
+        """
         filename = self.FILE 
         dirname = self.PATH.copy()
         if isinstance(filename,str): 
@@ -50,15 +138,37 @@ class FileVar(PathVar):
             return [(dirname + name).PATH for name in filename]
 
     def copy(self) -> 'FileVar':
+        """Copy the variable"""
         new_file = FileVar(filename=self.FILE,dirpath=self.PATH,path=False)
         return new_file
 
     def __getitem__(self,item: int) -> str:
+        """Select a certain file path from a list of ones
+
+        Parameters
+        ----------
+        item : int
+            the position of the chosen path
+
+        Returns
+        -------
+        path_i : str
+            the chosen path
+        """
         path = self.path()
         if isinstance(path,str): return TypeError('Variable is not subscriptable')
         else: return path[item]
     
     def __setitem__(self,key:int,item:str) -> None:
+        """Modify a file name of a list of paths
+
+        Parameters
+        ----------
+        key : int
+            chosen file
+        item : str
+            new name
+        """
         if isinstance(self.FILE,str): 
             return TypeError('Variable is not subscriptable')
         else: 

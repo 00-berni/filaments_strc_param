@@ -6,7 +6,7 @@ from astropy.io.fits import HDUList
 from .display import show_image
 
 def hotpx_remove(data: ndarray) -> ndarray:
-    """To remove hot pixels from the image
+    """Remove hot pixels from the image
 
     Parameters
     ----------
@@ -66,36 +66,29 @@ def hotpx_remove(data: ndarray) -> ndarray:
 #     # plt.yticks(ticks[1],tickslabel[1])
 
 
-def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], v: int = -1, title: str = '', n: int = None, dim: list[int] = [10,7], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, ndarray]:
-    """Function to open fits file and extract data.
-    
-    It brings the path and extracts the data, giving a row image.
-    
-    You can set a portion of image and also the correction for hotpx.
+def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, ndarray]:
+    """Open fits file and extract data. 
 
-    It calls the functions: 
-      - `hotpx_remove()`
-      - `showfits()`
+    Parameters
+    ----------
+    path : str
+        path of the fits file
+    lims : list[int  |  None], optional
+        edges of the fits, by default [None,None,None,None]
+        `lims` parameter controls the x and y extremes in such the form [lower y, higher y, lower x, higher x]
+    hotpx : bool, optional
+        parameter to remove or not the hot pixels, by default True
+    display_plots : bool, optional
+        if `True` a row image is displayed, by default True
+    **imgargs
+        arguments of `display.show_image()`
 
-    :param path: path of the fits file
-    :type path: str
-    :param lims: edges of the fits, defaults to [None,None,None,None]
-    :type lims: list[int | None], optional
-    :param hotpx: parameter to remove or not the hot pixels, defaults to True
-    :type hotpx: bool, optional
-    :param v: cmap parameter: 1 for false colors, 0 for grayscale, -1 for reversed grayscale; defaults to -1
-    :type v: int, optional
-    :param title: title of the image, defaults to ''
-    :type title: str, optional
-    :param n: figure number, defaults to None
-    :type n: int, optional
-    :param dim: figure size, defaults to [10,7]
-    :type dim: list[int], optional
-
-    :return: `hdul` list of the chosen fits file and `data` of the spectrum
-    :rtype: tuple
-
-    .. note:: `lims` parameter controls the x and y extremes in such the form [lower y, higher y, lower x, higher x]
+    Returns
+    -------
+    hdul : HDUList
+        hdul list of the fits
+    data : ndarray
+        fits data
     """
     # open the file
     hdul = fits.open(path)
@@ -114,5 +107,5 @@ def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], v: i
     data = data[ly:ry,lx:rx]
     # hot px correction
     # Spectrum image
-    if display_plots == True: show_image(data, v=v,title=title,dim=dim, **imgargs) 
+    if display_plots == True: show_image(data, **imgargs) 
     return hdul,data
