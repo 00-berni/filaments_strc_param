@@ -1,0 +1,50 @@
+from .. import filpy
+import tracemalloc
+import linecache
+import logging
+
+__all__ = ['filpy',
+           'tracemalloc',
+           'logging', 
+           'display_top', 
+           'log_path'
+           ]
+
+def log_path(file_path: filpy.FileVar) -> str:
+    """Compute the path of the log file
+
+    Parameters
+    ----------
+    file_path : FileVar
+        path of the current file
+
+    Returns
+    -------
+    log_path : str
+        log path
+    """
+    log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
+    return file_path.DIR.__add__(log_name).PATH
+
+def display_top(snapshot, key_type='lineno', limit=10, logger: logging.Logger = logging.getLogger(__name__)) -> None:
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    str_mem = "Top %s lines" % limit + '\n'
+    for index, stat in enumerate(top_stats[:limit], 1):
+        frame = stat.traceback[0]
+        str_mem = str_mem + "#%s: %s:%s: %.4f MiB" % (index, frame.filename, frame.lineno, stat.size / 1024**2) + '\n'
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        if line:
+            str_mem = str_mem + '    %s\n' % line
+    logger.debug(str_mem[:-1])
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        logger.debug("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+    logger.debug("Total allocated size: %.4f MiB" % (total / 1024**2))
