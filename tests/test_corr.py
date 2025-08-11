@@ -1,29 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import filpy
 from scipy.fft import fft,ifft, fft2, ifft2
-from filpy import distance
 from time import time
-import logging
 import argparse
+from .test_func import *
+
+# build the logger
 logger_name = __name__ 
 logger = logging.getLogger(logger_name)
+logger.setLevel('DEBUG')
 
 ## DATA
 FILE_NAME = filpy.FileVar(__file__,path=True)   #: path of the file
 
-# build the logger
-logger.setLevel('DEBUG')
-ch_f = logging.FileHandler(filename=filpy.log_path(FILE_NAME), mode='w')
-ch_e = logging.StreamHandler()
-frm_f = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
-frm_e = logging.Formatter('%(levelname)s: %(message)s')
-ch_f.setFormatter(frm_f)
-ch_e.setFormatter(frm_e)
-ch_e.setLevel('INFO')
-
 
 def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
+    tracemalloc.start()
     logger.info('Call the function `compute_correlation`')
     logger.info(f'`diagonal_dist` parameter set to {diagonal_dist}')
     logger.debug('Copy the data and remove the mean')
@@ -35,13 +27,20 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     logger.debug(f'pos : compilation time: {end-start} s')
 
     if diagonal_dist:
+        # snap_dist = tracemalloc.take_snapshot()
         logger.debug('Compute all distances in the grid')
         start = time()
-        all_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
+        all_dist = np.concatenate([filpy.distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
         end = time()
         logger.debug(f'dist : compilation time: {end-start} s')
         logger.info('Compute the array with the unique distances')
         unq_dist = np.unique(all_dist) if diagonal_dist else np.unique(all_dist.astype(int))
+        # snap_dist1 = tracemalloc.take_snapshot()
+        # top_stats = snap_dist1.compare_to(snap_dist, 'lineno')
+        # logger.debug("[ Top 10 ]")
+        # for stat in top_stats[:10]:
+        #     logger.debug(stat)
+
 
         logger.debug('Compute each element')
         start = time()
@@ -50,11 +49,13 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
         logger.debug(f'elem : compilation time: {end-start} s')
         logger.debug(f'all_elm_shape = {all_elem.shape}')
 
+        # snapshot1 = tracemalloc.take_snapshot()
+
         logger.info('Compute the correlation')
         start = time()
         correlations = np.array([np.sum(all_elem[all_dist == d]) for d in unq_dist])
         end = time()
-        logger.info(f'corr : compilation time: {end-start} s')
+        logger.info(f'corr : compilation time: {(end-start)/60:.3f} m')
     
     else:
         xdim, ydim = field.shape
@@ -70,8 +71,13 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
                                          for nx,ny in zip(range(int(xdim-d)),range(int(ydim-d)))]) for d in unq_dist[1:]])
         correlations = np.append([(field**2).sum()],correlations)
         end = time()
-        logger.info(f'corr : compilation time: {end-start} s')
-
+        logger.info(f'corr : compilation time: {(end-start)/60:.3f} m')
+    snapshot2 = tracemalloc.take_snapshot()
+    display_top(snapshot2,logger=logger)
+    # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+    # logger.debug("[ Top 10 ]")
+    # for stat in top_stats[:10]:
+    #     logger.debug(stat)
     if display_plot:
         filpy.quickplot((unq_dist,correlations),fmt='.-')
         plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
@@ -80,7 +86,7 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
         if diagonal_dist:
             for i in range(div):
                 for j in range(i,div):
-                    d = distance((0,0),(i,j))*PARAM
+                    d = filpy.distance((0,0),(i,j))*PARAM
                     plt.axvline(d,color='red',linestyle='dotted')
                     plt.annotate(f'({i},{j})',(d,correlations.max()),(d+0.02,correlations.max()))
         else:
@@ -99,19 +105,28 @@ if __name__ == '__main__':
     parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all'],default=None)
     parser.add_argument("test",help='selected test',type=str,choices=['lattice','random'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
+    parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
     parser.add_argument("-d","--dim", help='field size',type=int, action='store',default=32)
     parser.add_argument("-s","--seed", help='set seed', type=int, action='store',default=10)
     parser.add_argument("-e","--edges", help='set max and min of noise', required=False, nargs=2, action='store',default=[0,2])
     parser.add_argument("-l","--lag", help='set the lag of the lattice', required=False, type=int, action='store',default=5)
-    parser.add_argument("-v","--value", help='set the value of the alttice', required=False, type=int, action='store',default=1)
+    parser.add_argument("-v","--value", help='set the value of the lattice', required=False, type=int, action='store',default=1)
     parser.add_argument("-i","--iter", help='set the number of iterations',required=False, type=int, action='store',default=10)
+    parser.add_argument("-p","--plot",help='plot data or not',action='store_false')
     
     args = parser.parse_args()
     if args.log is not None:
         log = args.log[0] if len(args.log) != 0 else 'all'
         if log in ['all','file']:
+            ch_f = logging.FileHandler(filename=filpy.log_path(FILE_NAME), mode=args.mode)
+            frm_f = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
+            ch_f.setFormatter(frm_f)
             logger.addHandler(ch_f)
         if log in ['all','bash']:
+            ch_e = logging.StreamHandler()
+            frm_e = logging.Formatter('%(levelname)s: %(message)s')
+            ch_e.setFormatter(frm_e)
+            ch_e.setLevel('INFO')
             logger.addHandler(ch_e)
 
     dim = args.dim    #: size of the field 
@@ -123,7 +138,7 @@ if __name__ == '__main__':
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
-        _ = compute_correlation(data,args.no_diag)
+        _ = compute_correlation(data,args.no_diag,args.plot)
 
     ## RANDOM SIGNAL
     elif args.test == 'random':
