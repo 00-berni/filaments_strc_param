@@ -87,19 +87,16 @@ class PathVar():
         return self.PATH 
      
 
-class FileVar(PathVar):
+class FileVar():
     """Handle the file(s) path(s)
 
     Attributes
     ----------
-    PATH : PathVar
+    DIR : PathVar
         directory path
     FILE : str | list[str]
         file name or list of files names
         
-    Parents
-    -------
-    PathVar
     """
 
     def __init__(self, filename: str | list[str], dirpath: str | PathVar = '', path: bool = False) -> None:
@@ -117,9 +114,9 @@ class FileVar(PathVar):
         if path: 
             dirpath  = os.path.dirname(filename)
             filename = os.path.split(filename)[-1]
-        if isinstance(dirpath, PathVar): dirpath = dirpath.PATH
+        if isinstance(dirpath, str): dirpath = PathVar(path=dirpath)
         
-        super().__init__(path=dirpath)
+        self.DIR  = dirpath.copy()
         self.FILE = filename
 
     def path(self) -> str | list[str]:
@@ -131,7 +128,7 @@ class FileVar(PathVar):
             the path or a list of paths
         """
         filename = self.FILE 
-        dirname = self.PATH.copy()
+        dirname = self.DIR.copy()
         if isinstance(filename,str): 
             return (dirname + filename).PATH
         else:
@@ -170,7 +167,7 @@ class FileVar(PathVar):
             new name
         """
         if isinstance(self.FILE,str): 
-            return TypeError('Variable is not subscriptable')
+            raise TypeError('Variable is not subscriptable')
         else: 
             self.FILE[key] = item
 

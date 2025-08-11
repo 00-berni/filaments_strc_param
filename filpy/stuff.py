@@ -20,7 +20,7 @@ def log_path(file_path: FileVar) -> str:
         log path
     """
     log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
-    return file_path.PATH.__add__(log_name).PATH
+    return file_path.DIR.__add__(log_name).PATH
 
 def reorganize_index(idxes: tuple | NDArray, axis: int | None, shape: tuple) -> tuple:
     """Convert a 1D positions in a nD positions
