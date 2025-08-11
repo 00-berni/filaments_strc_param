@@ -102,7 +102,7 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
 if __name__ == '__main__':
     # set parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all'],default=None)
+    parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all','DEBUG', 'INFO'],default=None)
     parser.add_argument("test",help='selected test',type=str,choices=['lattice','random'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
     parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
@@ -120,13 +120,18 @@ if __name__ == '__main__':
         if log in ['all','file']:
             ch_f = logging.FileHandler(filename=filpy.log_path(FILE_NAME), mode=args.mode)
             frm_f = logging.Formatter('%(levelname)s:%(name)s: %(message)s')
+            if len(args.log) == 2:
+                ch_f.setLevel(args.log[1])
             ch_f.setFormatter(frm_f)
             logger.addHandler(ch_f)
         if log in ['all','bash']:
             ch_e = logging.StreamHandler()
             frm_e = logging.Formatter('%(levelname)s: %(message)s')
             ch_e.setFormatter(frm_e)
-            ch_e.setLevel('INFO')
+            if len(args.log) == 2:
+                ch_e.setLevel(args.log[1])
+            else:
+                ch_e.setLevel('INFO')
             logger.addHandler(ch_e)
 
     dim = args.dim    #: size of the field 
