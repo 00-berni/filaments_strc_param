@@ -4,6 +4,8 @@ from scipy.fft import fft,ifft, fft2, ifft2
 from time import time
 import argparse
 from .test_func import *
+import math
+import warnings
 
 # build the logger
 logger_name = __name__ 
@@ -13,6 +15,43 @@ logger.setLevel('DEBUG')
 ## DATA
 FILE_NAME = filpy.FileVar(__file__,path=True)   #: path of the file
 
+
+def factorization(n):
+    """Source: https://stackoverflow.com/questions/32871539/can-this-integer-factorization-in-python-be-improved
+
+    Parameters
+    ----------
+    n : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    factors = []
+
+    def get_factor(n):
+        x_fixed = 2            
+        cycle_size = 2
+        x = 2
+        factor = 1
+        while factor == 1:
+            for _ in range(cycle_size):
+                if factor > 1: break
+                x = (x * x + 1) % n
+                factor = math.gcd(x - x_fixed, n)
+
+            cycle_size *= 2
+            x_fixed = x
+        return factor
+
+    while n > 1:
+        next = get_factor(n)
+        factors.append(next)
+        n //= next
+
+    return factors
 
 def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
     tracemalloc.start()
@@ -27,10 +66,19 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     logger.debug(f'pos : compilation time: {end-start} s')
 
     if diagonal_dist:
+
+        logger.info('Compute where')
+        
+
         # snap_dist = tracemalloc.take_snapshot()
         logger.debug('Compute all distances in the grid')
         start = time()
-        all_dist = np.concatenate([filpy.distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
+        prova = np.array([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])], dtype='object')
+        end = time()
+        logger.debug(f'prova : compilation time: {end-start} s')
+
+        start = time()
+        all_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
         end = time()
         logger.debug(f'dist : compilation time: {end-start} s')
         logger.info('Compute the array with the unique distances')
@@ -43,6 +91,11 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
 
 
         logger.debug('Compute each element')
+        start = time()
+        prova1 = np.array([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])],dtype='object')
+        end = time()
+        logger.debug(f'prova1 : compilation time: {end-start} s')
+        logger.debug(f'prova1_shape = {prova1.shape}')
         start = time()
         all_elem = np.concatenate([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])])
         end = time()
@@ -59,7 +112,6 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     
     else:
         xdim, ydim = field.shape
-        logger.debug('')
         logger.info('Compute the array with the unique distances')
         unq_dist = np.arange(max(*field.shape))
 
@@ -72,6 +124,7 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
         correlations = np.append([(field**2).sum()],correlations)
         end = time()
         logger.info(f'corr : compilation time: {(end-start)/60:.3f} m')
+    logger.info(f'corr size = {correlations.size}')
     snapshot2 = tracemalloc.take_snapshot()
     display_top(snapshot2,logger=logger)
     # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
@@ -86,7 +139,7 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
         if diagonal_dist:
             for i in range(div):
                 for j in range(i,div):
-                    d = filpy.distance((0,0),(i,j))*PARAM
+                    d = distance((0,0),(i,j))*PARAM
                     plt.axvline(d,color='red',linestyle='dotted')
                     plt.annotate(f'({i},{j})',(d,correlations.max()),(d+0.02,correlations.max()))
         else:
@@ -97,6 +150,85 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
 
     logger.info('END')
     return unq_dist, correlations
+
+
+def single_value(field: np.ndarray, dist: float, n_px: tuple[int,int], logger: logging.Logger, precision: int = 15, only_diag: bool = False) -> float:
+    xdim, ydim = field.shape
+    x, y = n_px
+    logger.debug(f'Pos ({x},{y})')
+    # logger.debug('Compute (i,j)')
+    # start = time()
+    logger.debug(f'sq dist = {dist**2}')
+    edges = (np.ceil(dist)-1, np.floor(dist)+1) if not only_diag else (np.ceil(dist)-1, np.floor(dist))
+    i = np.arange(-min(x,edges[0]),min(xdim-x, edges[1]))
+    if only_diag: i = i[i!=0]
+    j = np.round(np.sqrt(dist**2 - i**2),decimals=precision)
+    logger.debug(f'initial elements\n{i}\t{j}')
+    pos = np.logical_and(np.mod(j,1) == 0, j <= ydim-1 - y)
+    # logger.debug(f'i cond {np.mod(j,1) == 0}')
+    # logger.debug(f'ii cond {j <= ydim-1 - y}')
+    # logger.debug(f'pos\n{pos}')
+    # end = time()
+    # logger.debug(f'i,j : computational time {end-start} s')
+    if np.any(pos):        
+        i = i[pos].astype(int) 
+        j = j[pos].astype(int)
+        logger.debug(f'Post elements\n{i}\t{j}')
+        corr_xy = np.sum(field[x,y]*field[x+i,y+j])
+    else:
+        corr_xy = 0
+    return corr_xy
+
+
+    
+def new_corr(field: np.ndarray, dist: float, logger: logging.Logger,precision: int = 15) -> float:
+    logger.debug(f'Run new_corr function for dist {dist}')
+    xdim, ydim = field.shape
+    if (xdim**2+ydim**2) < dist:
+        warnings.warn('Out')
+        corr = 0
+    elif dist == 0:
+        corr = (field**2).sum()
+    elif dist.is_integer():
+        dist = int(dist)
+        logger.debug('Compute the array with the unique distances')
+        logger.debug('Compute the correlation')
+        start = time()
+        corr = 0
+        if dist < min(xdim,ydim):
+            logger.debug('Interger computation')
+            logger.debug(f'{xdim-dist} - {ydim-dist}')
+            corr += np.sum([ 
+                        np.sum(field[nx,:] * field[nx+dist,:]) + 
+                        np.sum(field[:,ny] * field[:,ny+dist]) 
+                        for nx,ny in zip(range(xdim-dist),range(ydim-dist))])                
+        if dist > 3:
+            elems, counts = np.unique(factorization(dist), return_counts=True)
+            square_cond = np.logical_and(elems%4 == 3, counts%2 != 0)
+            if not np.all(square_cond):
+                logger.debug('Perfect squares')
+                x = np.arange(xdim)
+                y = np.arange(ydim)
+                logger.debug('Compute all the positions')
+                x, y = np.meshgrid(x,y)
+                logger.debug('Start the routine to compute correlation')
+                corr += np.sum([ single_value(field,dist,(i,j),logger,precision=precision,only_diag=True) for i,j in zip(x.flatten(),y.flatten())])
+        end = time()
+        logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
+
+    else:
+        xdim, ydim = field.shape
+        x = np.arange(xdim)
+        y = np.arange(ydim)
+        logger.debug('Compute all the positions')
+        x, y = np.meshgrid(x,y)
+        logger.debug('Start the routine to compute correlation')
+        # start = time()
+        corr = np.sum([ single_value(field,dist,(i,j),logger,precision=precision,only_diag=False) for i,j in zip(x.flatten(),y.flatten())])
+        # end = time()
+        # logger.info(f'Computational time {(end-start)/60} m')
+    logger.debug('END')
+    return corr
 
 ## PIPELINE
 if __name__ == '__main__':
@@ -113,7 +245,9 @@ if __name__ == '__main__':
     parser.add_argument("-v","--value", help='set the value of the lattice', required=False, type=int, action='store',default=1)
     parser.add_argument("-i","--iter", help='set the number of iterations',required=False, type=int, action='store',default=10)
     parser.add_argument("-p","--plot",help='plot data or not',action='store_false')
-    
+    parser.add_argument("--method",help='the function type',action='store',type=str, choices=['old','new'], default='new')
+    parser.add_argument("--dist",help='distances',action="store",type=str,default="{'dist': [0,5,10]}")
+
     args = parser.parse_args()
     if args.log is not None:
         log = args.log[0] if len(args.log) != 0 else 'all'
@@ -135,31 +269,83 @@ if __name__ == '__main__':
             logger.addHandler(ch_e)
 
     dim = args.dim    #: size of the field 
+    logger.info(f'size = ({dim},{dim})')
     if args.test == 'lattice':
         # build the field
         np.random.seed(args.seed)
         data = np.random.uniform(*args.edges,size=(dim,dim))  #: random signal
-        PARAM = 5                           #: lag of the lattice
+        PARAM = args.lag                           #: lag of the lattice
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
-        _ = compute_correlation(data,args.no_diag,args.plot)
+        print(args.method)
+        if args.method == 'old':
+            _ = compute_correlation(data,args.no_diag,args.plot)
+        elif args.method == 'new':
+             
+            d_dict = eval(args.dist)
+            if 'dist' in d_dict.keys():
+                dists = np.sort(d_dict['dist'])
+            else:
+                if not 'down' in d_dict.keys():
+                    d_dict['down'] = 0
+                if not 'top' in d_dict.keys():
+                    d_dict['top'] = 30
+                if not 'len' in d_dict.keys():
+                    d_dict['len'] = 50
+                values = (d_dict['down'],d_dict['top'],d_dict['len'])           
+                dists = np.linspace(*values)
+
+            field = np.copy(data) - data.mean()
+            start = time()
+            corr = np.array([new_corr(field,d,logger) for d in dists] )
+            end = time()
+            logger.info(f'Computational time {(end-start)/60} m')
+            if args.plot:
+                filpy.quickplot((dists,corr),fmt='.--')
+                plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
+                div = int(field.shape[0]//PARAM)
+                if field.shape[0]%PARAM != 0: div += 1 
+                for i in range(div):
+                    d = i*PARAM
+                    plt.axvline(d,color='red',linestyle='dotted')
+                plt.show()
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+
 
     ## RANDOM SIGNAL
     elif args.test == 'random':
         corr = 0
         ITER = args.iter
         logger.info('START the ROUTINE')
-        for i in range(ITER):
-            logger.debug(f'ITERATION n. {i:00d}')
-            start = time()
-            u_d, tmp_c = compute_correlation(np.random.uniform(-1,1,size=(dim,dim)),False,display_plot=False)
-            corr += tmp_c
-            if i != 0:
-                logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')
-            end = time()
-            logger.debug(f'Iteration : computational time {end-start} s')
-            logger.debug(f'END')
+        if args.method == 'old':
+            routine_start = time()
+            for i in range(ITER):
+                logger.debug(f'ITERATION n. {i:00d}')
+                start = time()
+                u_d, tmp_c = compute_correlation(np.random.uniform(-1,1,size=(dim,dim)),False,display_plot=False)
+                corr += tmp_c
+                if i != 0:
+                    logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')
+                end = time()
+                logger.debug(f'Iteration : computational time {end-start} s')
+                logger.debug(f'END')
+        elif args.method == 'new':
+            u_d = np.sort([np.sqrt(i**2+j**2) for i in range(10) for j in range(10)])
+            routine_start = time()
+            for i in range(ITER):
+                logger.info(f'ITERATION n. {i:02d}')
+                start = time()
+                tmp_c = np.array([new_corr(np.random.uniform(-1,1,size=(dim,dim)),dist=d,logger=logger) for d in u_d])
+                corr += tmp_c
+                if i != 0:
+                    logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')
+                end = time()
+                logger.debug(f'Iteration : computational time {end-start} s')
+                logger.debug(f'END')
+        routine_end = time()
+        logger.info(f'Computational time routine : {(routine_end-routine_start)/60} m')
         logger.info('END ROUTINE')
         corr /= ITER
         filpy.quickplot((u_d,corr),fmt='.-')
