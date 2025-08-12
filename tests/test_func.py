@@ -1,4 +1,5 @@
 from .. import filpy
+import numpy as np
 import tracemalloc
 import linecache
 import logging
@@ -7,8 +8,27 @@ __all__ = ['filpy',
            'tracemalloc',
            'logging', 
            'display_top', 
-           'log_path'
+           'log_path',
+           'distance'
            ]
+
+def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -> float | np.ndarray:
+    """Compute the Euclidean distance between two projectionist
+
+    Parameters
+    ----------
+    p1 : tuple[int,int] | np.ndarray
+        point 1
+    p2 : tuple[int,int] | np.ndarray
+        point 2
+
+    Returns
+    -------
+    distance : float | np.ndarray
+        Euclidean distance
+    """
+    return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
 
 def log_path(file_path: filpy.FileVar) -> str:
     """Compute the path of the log file
