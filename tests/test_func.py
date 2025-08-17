@@ -3,13 +3,14 @@ import numpy as np
 import tracemalloc
 import linecache
 import logging
+import psutil
 
 __all__ = ['filpy',
            'tracemalloc',
            'logging', 
            'display_top', 
            'log_path',
-           'distance'
+           'ram_usage'
            ]
 
 def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -> float | np.ndarray:
@@ -45,6 +46,11 @@ def log_path(file_path: filpy.FileVar) -> str:
     """
     log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
     return file_path.DIR.__add__(log_name).PATH
+
+def ram_usage() -> float:
+    process = psutil.Process()
+    usage = process.memory_info().rss
+    return usage
 
 def display_top(snapshot, key_type='lineno', limit=10, logger: logging.Logger = logging.getLogger(__name__)) -> None:
     snapshot = snapshot.filter_traces((
