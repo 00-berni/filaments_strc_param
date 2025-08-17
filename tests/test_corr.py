@@ -4,6 +4,7 @@ from scipy.fft import fft,ifft, fft2, ifft2
 from time import time
 import argparse
 from .test_func import *
+from .test_func import distance
 import math
 import warnings
 
@@ -15,6 +16,93 @@ logger.setLevel('DEBUG')
 ## DATA
 FILE_NAME = filpy.FileVar(__file__,path=True)   #: path of the file
 
+def single_dist(field: np.ndarray, dist: float, all_pos: np.ndarray, debug: bool = True) -> float:
+    positions = lambda index : all_pos[:,index:][:,np.argwhere(distance(all_pos[:,index],all_pos[:,index:]) == dist)]    
+    if debug:
+        start = time()
+    corr = np.sum([np.sum(field[*all_pos[:,N]] * field[*positions(N)])  for N in range(all_pos.shape[1]-1)])
+    if debug:
+        end = time()
+        logger.debug(f'corr : compilation time: {end-start} s')
+    return corr
+
+def integer_correlation(field: np.ndarray, distances: np.ndarray) -> np.ndarray:
+    xdim, ydim = field.shape
+    x = np.arange(xdim)
+    y = np.arange(ydim)
+    yy, xx = np.meshgrid(y,x)
+    logger.debug('Compute pxs')
+    start = time()
+    pxs = np.array([np.sqrt(d**2-np.arange(1,d)**2) for d in distances])
+    pxs = pxs[np.mod(pxs,1) == 0]
+    end = time()
+    logger.debug(f'px : compilation time: {(end-start)/60:.3f} m')
+    logger.info('Compute the correlation')
+    start = time()
+    correlations = np.array([np.sum([ 
+                                     np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
+                                     np.sum(field[:,y[:-d]] * field[:,y[:-d]+d]) +
+                                     np.sum([field[xx[:-i,:-j],yy[:-i,:-j]]*field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
+                                             field[xx[i:,:-j],yy[i:,:-j]]*field[xx[i:,:-j]-i,yy[i:,:-j]+j]
+                                             for i,j in zip(pxs,pxs[::-1])])
+                                    ]) for d in distances])
+    end = time()
+    logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
+    return correlations
+
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, display_plot: bool = True) -> None:
+    usage_start = ram_usage()
+    tracemalloc.start()
+    logger.info('Call the function `TEST`')
+    logger.debug('Copy the data and remove the mean')
+    field = np.copy(field) - field.mean()
+    logger.debug('Compute all positions in the grid')
+    xdim, ydim = field.shape
+    start = time()
+    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    all_pos = np.array([xx.flatten(),yy.flatten()])
+    del xx,yy
+    end = time()
+    logger.debug(f'pos : compilation time: {end-start} s')
+    if isinstance(bins,(float,int)):
+        if bins == 0:
+            corr = (field**2).sum()
+        else:
+            corr = single_dist(field=field,dist=bins,all_pos=all_pos)
+    else:
+        bins = np.asarray(bins)
+        bins = bins[bins != 0]
+        corr = np.zeros(bins.size)
+        int_pos = np.mod(bins,1) == 0
+        logger.info('Check integers')
+        if np.any(int_pos):
+            logger.debug('Interger are present')
+            corr[int_pos] = integer_correlation(field,bins[int_pos])
+        else:
+            logger.info('Run the routine')
+            start = time()
+            corr = np.array([single_dist(field=field,dist=d,all_pos=all_pos,debug=True) for d in bins])
+            end = time()
+            logger.info(f'corr : compilation time: {(end-start)/60} m')
+        if not no_zero:
+            corr = np.append([(field**2).sum()],corr)
+            bins = np.append([0],bins)
+        # logger.debug(f'Positions:\n{pos}')
+    snapshot = tracemalloc.take_snapshot()
+    display_top(snapshot,logger=logger)
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end -usage_start)/1024**3} Gb')
+    logger.info('END')
+    if display_plot and not isinstance(bins,(float,int)):
+        filpy.quickplot((bins,corr),fmt='--.')
+        plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
+        div = int(field.shape[0]//PARAM)
+        if field.shape[0]%PARAM != 0: div += 1 
+        for i in range(div):
+            d = i*PARAM
+            plt.axvline(d,color='red',linestyle='dotted')
+        plt.show()
+    return corr
 
 def factorization(n):
     """Source: https://stackoverflow.com/questions/32871539/can-this-integer-factorization-in-python-be-improved
@@ -54,14 +142,18 @@ def factorization(n):
     return factors
 
 def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
+    usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `compute_correlation`')
     logger.info(f'`diagonal_dist` parameter set to {diagonal_dist}')
     logger.debug('Copy the data and remove the mean')
     field = np.copy(field) - field.mean()
     logger.debug('Compute all positions in the grid')
+    xdim, ydim = field.shape
     start = time()
-    all_pos = np.array([ (i,j) for i in range(field.shape[0]) for j in range(field.shape[1])]).T
+    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    all_pos = np.array([xx.flatten(),yy.flatten()])
+    del xx,yy
     end = time()
     logger.debug(f'pos : compilation time: {end-start} s')
 
@@ -147,21 +239,22 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
                 d = i*PARAM
                 plt.axvline(d,color='red',linestyle='dotted')
         plt.show()
-
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end -usage_start)/1024**3} Gb')
     logger.info('END')
     return unq_dist, correlations
 
 
-def single_value(field: np.ndarray, dist: float, n_px: tuple[int,int], logger: logging.Logger, precision: int = 15, only_diag: bool = False) -> float:
+def diagonal_values(field: np.ndarray, dist: float, n_px: tuple[int,int], logger: logging.Logger, precision: int = 15) -> float:
     xdim, ydim = field.shape
     x, y = n_px
     logger.debug(f'Pos ({x},{y})')
     # logger.debug('Compute (i,j)')
     # start = time()
     logger.debug(f'sq dist = {dist**2}')
-    edges = (np.ceil(dist)-1, np.floor(dist)+1) if not only_diag else (np.ceil(dist)-1, np.floor(dist))
+    edges = (np.ceil(dist)-1, np.floor(dist))
     i = np.arange(-min(x,edges[0]),min(xdim-x, edges[1]))
-    if only_diag: i = i[i!=0]
+    i = i[i!=0]
     j = np.round(np.sqrt(dist**2 - i**2),decimals=precision)
     logger.debug(f'initial elements\n{i}\t{j}')
     pos = np.logical_and(np.mod(j,1) == 0, j <= ydim-1 - y)
@@ -182,9 +275,27 @@ def single_value(field: np.ndarray, dist: float, n_px: tuple[int,int], logger: l
 
     
 def new_corr(field: np.ndarray, dist: float, logger: logging.Logger,precision: int = 15) -> float:
+    """Compute correlation for a certain lag
+
+    Parameters
+    ----------
+    field : np.ndarray
+        data from which mean was subtracted
+    dist : float
+        lag between pixels
+    logger : logging.Logger
+        logger
+    precision : int, optional
+        set the precision of each real number computation, by default 15
+
+    Returns
+    -------
+    corr : float
+        computed tpcf
+    """
     logger.debug(f'Run new_corr function for dist {dist}')
-    xdim, ydim = field.shape
-    if (xdim**2+ydim**2) < dist:
+    xdim, ydim = field.shape    #: size of the field
+    if (xdim**2+ydim**2) < dist: 
         warnings.warn('Out')
         corr = 0
     elif dist == 0:
@@ -212,10 +323,9 @@ def new_corr(field: np.ndarray, dist: float, logger: logging.Logger,precision: i
                 logger.debug('Compute all the positions')
                 x, y = np.meshgrid(x,y)
                 logger.debug('Start the routine to compute correlation')
-                corr += np.sum([ single_value(field,dist,(i,j),logger,precision=precision,only_diag=True) for i,j in zip(x.flatten(),y.flatten())])
+                corr += np.sum([ diagonal_values(field,dist,(i,j),logger,precision=precision) for i,j in zip(x.flatten(),y.flatten())])
         end = time()
         logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
-
     else:
         xdim, ydim = field.shape
         x = np.arange(xdim)
@@ -224,7 +334,7 @@ def new_corr(field: np.ndarray, dist: float, logger: logging.Logger,precision: i
         x, y = np.meshgrid(x,y)
         logger.debug('Start the routine to compute correlation')
         # start = time()
-        corr = np.sum([ single_value(field,dist,(i,j),logger,precision=precision,only_diag=False) for i,j in zip(x.flatten(),y.flatten())])
+        corr = np.sum([ diagonal_values(field,dist,(i,j),logger,precision=precision) for i,j in zip(x.flatten(),y.flatten())])
         # end = time()
         # logger.info(f'Computational time {(end-start)/60} m')
     logger.debug('END')
@@ -235,12 +345,12 @@ if __name__ == '__main__':
     # set parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all','DEBUG', 'INFO'],default=None)
-    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random'],default='lattice')
+    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
     parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
     parser.add_argument("-d","--dim", help='field size',type=int, action='store',default=32)
     parser.add_argument("-s","--seed", help='set seed', type=int, action='store',default=10)
-    parser.add_argument("-e","--edges", help='set max and min of noise', required=False, nargs=2, action='store',default=[0,2])
+    parser.add_argument("-e","--edges", help='set max and min of noise', type=float, required=False, nargs=2, action='store',default=[0,2])
     parser.add_argument("-l","--lag", help='set the lag of the lattice', required=False, type=int, action='store',default=5)
     parser.add_argument("-v","--value", help='set the value of the lattice', required=False, type=int, action='store',default=1)
     parser.add_argument("-i","--iter", help='set the number of iterations',required=False, type=int, action='store',default=10)
@@ -273,8 +383,8 @@ if __name__ == '__main__':
     if args.test == 'lattice':
         # build the field
         np.random.seed(args.seed)
-        data = np.random.uniform(*args.edges,size=(dim,dim))  #: random signal
-        PARAM = args.lag                           #: lag of the lattice
+        data = np.random.uniform(*args.edges,size=(dim,dim))    #: random signal
+        PARAM = args.lag                                        #: lag of the lattice
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
@@ -295,7 +405,7 @@ if __name__ == '__main__':
                     d_dict['len'] = 50
                 values = (d_dict['down'],d_dict['top'],d_dict['len'])           
                 dists = np.linspace(*values)
-
+            tracemalloc.start()
             field = np.copy(data) - data.mean()
             start = time()
             corr = np.array([new_corr(field,d,logger) for d in dists] )
@@ -312,6 +422,50 @@ if __name__ == '__main__':
                 plt.show()
             snapshot = tracemalloc.take_snapshot()
             display_top(snapshot,logger=logger)
+            usage_end = ram_usage()
+
+    ## COMPARE TWO METHODS
+    elif args.test == 'compare':
+        # build the field
+        np.random.seed(args.seed)
+        data = np.random.uniform(*args.edges,size=(dim,dim))  #: random signal
+        PARAM = args.lag                           #: lag of the lattice
+        data[::PARAM,::PARAM] += args.value
+        # display the field
+        filpy.show_image(data,cmap='viridis')
+        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
+        field = np.copy(data) - data.mean()
+        tracemalloc.start()
+        start = time()
+        usage_start = ram_usage()
+        new_tpcf = np.array([new_corr(field,d,logger) for d in np.arange(dim)])
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        usage_end = ram_usage()
+        logger.info(f'Ram Usage {(usage_end -usage_start)/1024**3} Gb')
+        fig, ax = plt.subplots(1,1)
+        ax.plot(old_dist,old_tpcf,'--.',color='blue') 
+        ax.plot(np.arange(dim),new_tpcf,'--+',color='red' ) 
+        plt.show() 
+
+    ## TEST
+    elif args.test == 'test':
+        # build the field
+        np.random.seed(args.seed)
+        data = np.random.uniform(*args.edges,size=(dim,dim))    #: random signal
+        PARAM = args.lag                                        #: lag of the lattice
+        data[::PARAM,::PARAM] += args.value
+        # display the field
+        filpy.show_image(data,cmap='viridis')
+        old_dist, old_tpcf = compute_correlation(data,display_plot=False)
+        new_dist = np.arange(30)
+        new_tpcf = test(data,bins=new_dist,display_plot=False)
+        fig, ax = plt.subplots(1,1)
+        ax.plot(old_dist,old_tpcf,'--.',color='blue') 
+        ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
+        plt.show() 
 
 
     ## RANDOM SIGNAL
