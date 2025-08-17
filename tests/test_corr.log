@@ -3,36 +3,36 @@ INFO:__main__: Call the function `compute_correlation`
 INFO:__main__: `diagonal_dist` parameter set to True
 DEBUG:__main__: Copy the data and remove the mean
 DEBUG:__main__: Compute all positions in the grid
-DEBUG:__main__: pos : compilation time: 0.0002334117889404297 s
+DEBUG:__main__: pos : compilation time: 0.00021958351135253906 s
 INFO:__main__: Compute where
 DEBUG:__main__: Compute all distances in the grid
-DEBUG:__main__: prova : compilation time: 0.05175447463989258 s
-DEBUG:__main__: dist : compilation time: 0.05364394187927246 s
+DEBUG:__main__: prova : compilation time: 0.05017685890197754 s
+DEBUG:__main__: dist : compilation time: 0.05396246910095215 s
 INFO:__main__: Compute the array with the unique distances
 DEBUG:__main__: Compute each element
-DEBUG:__main__: prova1 : compilation time: 0.09718656539916992 s
+DEBUG:__main__: prova1 : compilation time: 0.10194683074951172 s
 DEBUG:__main__: prova1_shape = (1024,)
-DEBUG:__main__: elem : compilation time: 0.12153911590576172 s
+DEBUG:__main__: elem : compilation time: 0.12616395950317383 s
 DEBUG:__main__: all_elm_shape = (524800,)
 INFO:__main__: Compute the correlation
 INFO:__main__: corr : compilation time: 0.004 m
 INFO:__main__: corr size = 431
 DEBUG:__main__: Top 10 lines
-#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:156: 4.1211 MiB
+#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:223: 4.1211 MiB
     prova1 = np.array([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])],dtype='object')
 #2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_func.py:31: 4.1138 MiB
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
-#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:161: 4.0041 MiB
+#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:228: 4.0041 MiB
     all_elem = np.concatenate([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])])
-#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:142: 4.0040 MiB
+#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:209: 4.0040 MiB
     all_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
-#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:124: 0.0157 MiB
+#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:191: 0.0157 MiB
     all_pos = np.array([xx.flatten(),yy.flatten()])
-#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:119: 0.0079 MiB
+#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:186: 0.0079 MiB
     field = np.copy(field) - field.mean()
-#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:137: 0.0079 MiB
+#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:204: 0.0079 MiB
     prova = np.array([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])], dtype='object')
-#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:170: 0.0034 MiB
+#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:237: 0.0034 MiB
     correlations = np.array([np.sum(all_elem[all_dist == d]) for d in unq_dist])
 #9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:371: 0.0034 MiB
     ret = (aux[mask],)
@@ -40,466 +40,138 @@ DEBUG:__main__: Top 10 lines
     next_f = f.f_back
 DEBUG:__main__: 3 other: 0.3 KiB
 DEBUG:__main__: Total allocated size: 16.2821 MiB
-INFO:__main__: Ram Usage 0.02193450927734375 Gb
+INFO:__main__: Ram Usage 0.021953582763671875 Gb
 INFO:__main__: END
+INFO:__main__: Computational time 0.012260774771372477 m
 INFO:__main__: Call the function `TEST`
 DEBUG:__main__: Copy the data and remove the mean
 DEBUG:__main__: Compute all positions in the grid
-DEBUG:__main__: pos : compilation time: 0.0002493858337402344 s
+DEBUG:__main__: pos : compilation time: 0.0002505779266357422 s
+INFO:__main__: Check integers
+DEBUG:__main__: Interger are present
+DEBUG:__main__: Compute pxs
+DEBUG:__main__: px : compilation time: 0.001924276351928711 s
+INFO:__main__: Compute the correlation
+DEBUG:__main__: corr : compilation time: 0.000 m
 INFO:__main__: Run the routine
-DEBUG:__main__: corr : compilation time: 0.12720274925231934 s
-DEBUG:__main__: corr : compilation time: 0.1266462802886963 s
-DEBUG:__main__: corr : compilation time: 0.12712955474853516 s
-DEBUG:__main__: corr : compilation time: 0.12835264205932617 s
-DEBUG:__main__: corr : compilation time: 0.12614202499389648 s
-DEBUG:__main__: corr : compilation time: 0.12663054466247559 s
-DEBUG:__main__: corr : compilation time: 0.12620902061462402 s
-DEBUG:__main__: corr : compilation time: 0.1264948844909668 s
-DEBUG:__main__: corr : compilation time: 0.12858843803405762 s
-DEBUG:__main__: corr : compilation time: 0.1266491413116455 s
-DEBUG:__main__: corr : compilation time: 0.12657403945922852 s
-DEBUG:__main__: corr : compilation time: 0.12650632858276367 s
-DEBUG:__main__: corr : compilation time: 0.1289806365966797 s
-DEBUG:__main__: corr : compilation time: 0.1268019676208496 s
-DEBUG:__main__: corr : compilation time: 0.12703752517700195 s
-DEBUG:__main__: corr : compilation time: 0.14512228965759277 s
-DEBUG:__main__: corr : compilation time: 0.13512396812438965 s
-DEBUG:__main__: corr : compilation time: 0.1271524429321289 s
-DEBUG:__main__: corr : compilation time: 0.12925958633422852 s
-DEBUG:__main__: corr : compilation time: 0.1269843578338623 s
-DEBUG:__main__: corr : compilation time: 0.1425638198852539 s
-DEBUG:__main__: corr : compilation time: 0.14487433433532715 s
-DEBUG:__main__: corr : compilation time: 0.1410529613494873 s
-DEBUG:__main__: corr : compilation time: 0.1265108585357666 s
-DEBUG:__main__: corr : compilation time: 0.1257619857788086 s
-DEBUG:__main__: corr : compilation time: 0.1255486011505127 s
-DEBUG:__main__: corr : compilation time: 0.12601208686828613 s
-DEBUG:__main__: corr : compilation time: 0.13599205017089844 s
-DEBUG:__main__: corr : compilation time: 0.13653063774108887 s
-DEBUG:__main__: corr : compilation time: 0.14573240280151367 s
-DEBUG:__main__: corr : compilation time: 0.13605833053588867 s
-DEBUG:__main__: corr : compilation time: 0.13190698623657227 s
-DEBUG:__main__: corr : compilation time: 0.15806198120117188 s
-DEBUG:__main__: corr : compilation time: 0.15508294105529785 s
-DEBUG:__main__: corr : compilation time: 0.12933874130249023 s
-DEBUG:__main__: corr : compilation time: 0.13787436485290527 s
-DEBUG:__main__: corr : compilation time: 0.13353323936462402 s
-DEBUG:__main__: corr : compilation time: 0.13692569732666016 s
-DEBUG:__main__: corr : compilation time: 0.13026666641235352 s
-DEBUG:__main__: corr : compilation time: 0.12697291374206543 s
-DEBUG:__main__: corr : compilation time: 0.12826943397521973 s
-DEBUG:__main__: corr : compilation time: 0.1289687156677246 s
-DEBUG:__main__: corr : compilation time: 0.1315150260925293 s
-DEBUG:__main__: corr : compilation time: 0.13201355934143066 s
-DEBUG:__main__: corr : compilation time: 0.13145112991333008 s
-DEBUG:__main__: corr : compilation time: 0.13132309913635254 s
-DEBUG:__main__: corr : compilation time: 0.13416504859924316 s
-DEBUG:__main__: corr : compilation time: 0.11883902549743652 s
-DEBUG:__main__: corr : compilation time: 0.11487317085266113 s
-DEBUG:__main__: corr : compilation time: 0.10985255241394043 s
-DEBUG:__main__: corr : compilation time: 0.10301399230957031 s
-DEBUG:__main__: corr : compilation time: 0.09813380241394043 s
-DEBUG:__main__: corr : compilation time: 0.09397196769714355 s
-DEBUG:__main__: corr : compilation time: 0.09752082824707031 s
-DEBUG:__main__: corr : compilation time: 0.09238910675048828 s
-DEBUG:__main__: corr : compilation time: 0.08736157417297363 s
-DEBUG:__main__: corr : compilation time: 0.08771252632141113 s
-DEBUG:__main__: corr : compilation time: 0.07977151870727539 s
-DEBUG:__main__: corr : compilation time: 0.07791280746459961 s
-DEBUG:__main__: corr : compilation time: 0.07122635841369629 s
-DEBUG:__main__: corr : compilation time: 0.07256889343261719 s
-DEBUG:__main__: corr : compilation time: 0.0672767162322998 s
-DEBUG:__main__: corr : compilation time: 0.06621050834655762 s
-DEBUG:__main__: corr : compilation time: 0.06475424766540527 s
-DEBUG:__main__: corr : compilation time: 0.06334519386291504 s
-DEBUG:__main__: corr : compilation time: 0.063079833984375 s
-DEBUG:__main__: corr : compilation time: 0.06276345252990723 s
-DEBUG:__main__: corr : compilation time: 0.0646982192993164 s
-DEBUG:__main__: corr : compilation time: 0.06441855430603027 s
-DEBUG:__main__: corr : compilation time: 0.06459808349609375 s
-DEBUG:__main__: corr : compilation time: 0.06501102447509766 s
-DEBUG:__main__: corr : compilation time: 0.06756877899169922 s
-DEBUG:__main__: corr : compilation time: 0.06439709663391113 s
-DEBUG:__main__: corr : compilation time: 0.066802978515625 s
-DEBUG:__main__: corr : compilation time: 0.06428885459899902 s
-DEBUG:__main__: corr : compilation time: 0.0634467601776123 s
-DEBUG:__main__: corr : compilation time: 0.0636134147644043 s
-DEBUG:__main__: corr : compilation time: 0.06413722038269043 s
-DEBUG:__main__: corr : compilation time: 0.06371116638183594 s
-DEBUG:__main__: corr : compilation time: 0.06826949119567871 s
-DEBUG:__main__: corr : compilation time: 0.06789040565490723 s
-DEBUG:__main__: corr : compilation time: 0.06429815292358398 s
-DEBUG:__main__: corr : compilation time: 0.06366515159606934 s
-DEBUG:__main__: corr : compilation time: 0.06344389915466309 s
-DEBUG:__main__: corr : compilation time: 0.06532859802246094 s
-DEBUG:__main__: corr : compilation time: 0.06530952453613281 s
-DEBUG:__main__: corr : compilation time: 0.06667566299438477 s
-DEBUG:__main__: corr : compilation time: 0.06857919692993164 s
-DEBUG:__main__: corr : compilation time: 0.06554770469665527 s
-DEBUG:__main__: corr : compilation time: 0.06487178802490234 s
-DEBUG:__main__: corr : compilation time: 0.06476020812988281 s
-DEBUG:__main__: corr : compilation time: 0.0640268325805664 s
-DEBUG:__main__: corr : compilation time: 0.06315755844116211 s
-DEBUG:__main__: corr : compilation time: 0.06386899948120117 s
-DEBUG:__main__: corr : compilation time: 0.06395101547241211 s
-DEBUG:__main__: corr : compilation time: 0.06455326080322266 s
-DEBUG:__main__: corr : compilation time: 0.06418776512145996 s
-DEBUG:__main__: corr : compilation time: 0.06474018096923828 s
-DEBUG:__main__: corr : compilation time: 0.06449079513549805 s
-DEBUG:__main__: corr : compilation time: 0.06531834602355957 s
-DEBUG:__main__: corr : compilation time: 0.06504559516906738 s
-DEBUG:__main__: corr : compilation time: 0.06626486778259277 s
-DEBUG:__main__: corr : compilation time: 0.0669705867767334 s
-DEBUG:__main__: corr : compilation time: 0.06428265571594238 s
-DEBUG:__main__: corr : compilation time: 0.06362056732177734 s
-DEBUG:__main__: corr : compilation time: 0.06443166732788086 s
-DEBUG:__main__: corr : compilation time: 0.06325435638427734 s
-DEBUG:__main__: corr : compilation time: 0.06556582450866699 s
-DEBUG:__main__: corr : compilation time: 0.06376886367797852 s
-DEBUG:__main__: corr : compilation time: 0.06579852104187012 s
-DEBUG:__main__: corr : compilation time: 0.06501412391662598 s
-DEBUG:__main__: corr : compilation time: 0.06553912162780762 s
-DEBUG:__main__: corr : compilation time: 0.06430363655090332 s
-DEBUG:__main__: corr : compilation time: 0.06385254859924316 s
-DEBUG:__main__: corr : compilation time: 0.06328344345092773 s
-DEBUG:__main__: corr : compilation time: 0.06415891647338867 s
-DEBUG:__main__: corr : compilation time: 0.06471967697143555 s
-DEBUG:__main__: corr : compilation time: 0.06336402893066406 s
-DEBUG:__main__: corr : compilation time: 0.06345701217651367 s
-DEBUG:__main__: corr : compilation time: 0.06518173217773438 s
-DEBUG:__main__: corr : compilation time: 0.0644376277923584 s
-DEBUG:__main__: corr : compilation time: 0.06979727745056152 s
-DEBUG:__main__: corr : compilation time: 0.06566476821899414 s
-DEBUG:__main__: corr : compilation time: 0.06437110900878906 s
-DEBUG:__main__: corr : compilation time: 0.06371736526489258 s
-DEBUG:__main__: corr : compilation time: 0.06643104553222656 s
-DEBUG:__main__: corr : compilation time: 0.06353616714477539 s
-DEBUG:__main__: corr : compilation time: 0.06512928009033203 s
-DEBUG:__main__: corr : compilation time: 0.06400156021118164 s
-DEBUG:__main__: corr : compilation time: 0.06420135498046875 s
-DEBUG:__main__: corr : compilation time: 0.06427550315856934 s
-DEBUG:__main__: corr : compilation time: 0.06530547142028809 s
-DEBUG:__main__: corr : compilation time: 0.06451869010925293 s
-DEBUG:__main__: corr : compilation time: 0.06533479690551758 s
-DEBUG:__main__: corr : compilation time: 0.0627744197845459 s
-DEBUG:__main__: corr : compilation time: 0.06578898429870605 s
-DEBUG:__main__: corr : compilation time: 0.0641179084777832 s
-DEBUG:__main__: corr : compilation time: 0.06522607803344727 s
-DEBUG:__main__: corr : compilation time: 0.06413626670837402 s
-DEBUG:__main__: corr : compilation time: 0.06546759605407715 s
-DEBUG:__main__: corr : compilation time: 0.06405758857727051 s
-DEBUG:__main__: corr : compilation time: 0.06476402282714844 s
-DEBUG:__main__: corr : compilation time: 0.06277918815612793 s
-DEBUG:__main__: corr : compilation time: 0.06376123428344727 s
-DEBUG:__main__: corr : compilation time: 0.06476426124572754 s
-DEBUG:__main__: corr : compilation time: 0.06477069854736328 s
-DEBUG:__main__: corr : compilation time: 0.06374239921569824 s
-DEBUG:__main__: corr : compilation time: 0.0632162094116211 s
-DEBUG:__main__: corr : compilation time: 0.06329584121704102 s
-DEBUG:__main__: corr : compilation time: 0.06347274780273438 s
-DEBUG:__main__: corr : compilation time: 0.06322121620178223 s
-DEBUG:__main__: corr : compilation time: 0.0623927116394043 s
-DEBUG:__main__: corr : compilation time: 0.06272149085998535 s
-DEBUG:__main__: corr : compilation time: 0.06436276435852051 s
-DEBUG:__main__: corr : compilation time: 0.06299042701721191 s
-DEBUG:__main__: corr : compilation time: 0.06404876708984375 s
-DEBUG:__main__: corr : compilation time: 0.06438803672790527 s
-DEBUG:__main__: corr : compilation time: 0.0645136833190918 s
-DEBUG:__main__: corr : compilation time: 0.06390786170959473 s
-DEBUG:__main__: corr : compilation time: 0.06257224082946777 s
-DEBUG:__main__: corr : compilation time: 0.06353449821472168 s
-DEBUG:__main__: corr : compilation time: 0.06329107284545898 s
-DEBUG:__main__: corr : compilation time: 0.06426095962524414 s
-DEBUG:__main__: corr : compilation time: 0.06392908096313477 s
-DEBUG:__main__: corr : compilation time: 0.06439542770385742 s
-DEBUG:__main__: corr : compilation time: 0.06372857093811035 s
-DEBUG:__main__: corr : compilation time: 0.06413578987121582 s
-DEBUG:__main__: corr : compilation time: 0.06456542015075684 s
-DEBUG:__main__: corr : compilation time: 0.06323075294494629 s
-DEBUG:__main__: corr : compilation time: 0.06546354293823242 s
-DEBUG:__main__: corr : compilation time: 0.06285405158996582 s
-DEBUG:__main__: corr : compilation time: 0.06347084045410156 s
-DEBUG:__main__: corr : compilation time: 0.06432747840881348 s
-DEBUG:__main__: corr : compilation time: 0.06389474868774414 s
-DEBUG:__main__: corr : compilation time: 0.06341934204101562 s
-DEBUG:__main__: corr : compilation time: 0.06404471397399902 s
-DEBUG:__main__: corr : compilation time: 0.06353211402893066 s
-DEBUG:__main__: corr : compilation time: 0.06435608863830566 s
-DEBUG:__main__: corr : compilation time: 0.06441402435302734 s
-DEBUG:__main__: corr : compilation time: 0.06426620483398438 s
-DEBUG:__main__: corr : compilation time: 0.06478166580200195 s
-DEBUG:__main__: corr : compilation time: 0.06475567817687988 s
-DEBUG:__main__: corr : compilation time: 0.0640408992767334 s
-DEBUG:__main__: corr : compilation time: 0.0657813549041748 s
-DEBUG:__main__: corr : compilation time: 0.06372332572937012 s
-DEBUG:__main__: corr : compilation time: 0.06512904167175293 s
-DEBUG:__main__: corr : compilation time: 0.06484031677246094 s
-DEBUG:__main__: corr : compilation time: 0.06519222259521484 s
-DEBUG:__main__: corr : compilation time: 0.06484341621398926 s
-DEBUG:__main__: corr : compilation time: 0.06426048278808594 s
-DEBUG:__main__: corr : compilation time: 0.06512618064880371 s
-DEBUG:__main__: corr : compilation time: 0.06495356559753418 s
-DEBUG:__main__: corr : compilation time: 0.0634164810180664 s
-DEBUG:__main__: corr : compilation time: 0.06659722328186035 s
-DEBUG:__main__: corr : compilation time: 0.06585574150085449 s
-DEBUG:__main__: corr : compilation time: 0.07242393493652344 s
-DEBUG:__main__: corr : compilation time: 0.06833672523498535 s
-DEBUG:__main__: corr : compilation time: 0.06684255599975586 s
-DEBUG:__main__: corr : compilation time: 0.06644868850708008 s
-DEBUG:__main__: corr : compilation time: 0.0655372142791748 s
-DEBUG:__main__: corr : compilation time: 0.06391429901123047 s
-DEBUG:__main__: corr : compilation time: 0.06636762619018555 s
-DEBUG:__main__: corr : compilation time: 0.06355929374694824 s
-DEBUG:__main__: corr : compilation time: 0.06610417366027832 s
-DEBUG:__main__: corr : compilation time: 0.06339120864868164 s
-DEBUG:__main__: corr : compilation time: 0.06555771827697754 s
-DEBUG:__main__: corr : compilation time: 0.06360387802124023 s
-DEBUG:__main__: corr : compilation time: 0.06498336791992188 s
-DEBUG:__main__: corr : compilation time: 0.06380248069763184 s
-DEBUG:__main__: corr : compilation time: 0.06615138053894043 s
-DEBUG:__main__: corr : compilation time: 0.06363701820373535 s
-DEBUG:__main__: corr : compilation time: 0.06398868560791016 s
-DEBUG:__main__: corr : compilation time: 0.06312274932861328 s
-DEBUG:__main__: corr : compilation time: 0.06626391410827637 s
-DEBUG:__main__: corr : compilation time: 0.070709228515625 s
-DEBUG:__main__: corr : compilation time: 0.06756782531738281 s
-DEBUG:__main__: corr : compilation time: 0.06363749504089355 s
-DEBUG:__main__: corr : compilation time: 0.06735396385192871 s
-DEBUG:__main__: corr : compilation time: 0.06675410270690918 s
-DEBUG:__main__: corr : compilation time: 0.06319952011108398 s
-DEBUG:__main__: corr : compilation time: 0.0633544921875 s
-DEBUG:__main__: corr : compilation time: 0.06437230110168457 s
-DEBUG:__main__: corr : compilation time: 0.06348800659179688 s
-DEBUG:__main__: corr : compilation time: 0.06511068344116211 s
-DEBUG:__main__: corr : compilation time: 0.0643301010131836 s
-DEBUG:__main__: corr : compilation time: 0.06476807594299316 s
-DEBUG:__main__: corr : compilation time: 0.06464672088623047 s
-DEBUG:__main__: corr : compilation time: 0.06441164016723633 s
-DEBUG:__main__: corr : compilation time: 0.06486225128173828 s
-DEBUG:__main__: corr : compilation time: 0.07812666893005371 s
-DEBUG:__main__: corr : compilation time: 0.06433701515197754 s
-DEBUG:__main__: corr : compilation time: 0.06487584114074707 s
-DEBUG:__main__: corr : compilation time: 0.06632590293884277 s
-DEBUG:__main__: corr : compilation time: 0.0651102066040039 s
-DEBUG:__main__: corr : compilation time: 0.06604456901550293 s
-DEBUG:__main__: corr : compilation time: 0.06605243682861328 s
-DEBUG:__main__: corr : compilation time: 0.06592416763305664 s
-DEBUG:__main__: corr : compilation time: 0.06496000289916992 s
-DEBUG:__main__: corr : compilation time: 0.06569099426269531 s
-DEBUG:__main__: corr : compilation time: 0.06782937049865723 s
-DEBUG:__main__: corr : compilation time: 0.06646990776062012 s
-DEBUG:__main__: corr : compilation time: 0.06632709503173828 s
-DEBUG:__main__: corr : compilation time: 0.06617116928100586 s
-DEBUG:__main__: corr : compilation time: 0.0640568733215332 s
-DEBUG:__main__: corr : compilation time: 0.06409478187561035 s
-DEBUG:__main__: corr : compilation time: 0.06523823738098145 s
-DEBUG:__main__: corr : compilation time: 0.06490755081176758 s
-DEBUG:__main__: corr : compilation time: 0.06310868263244629 s
-DEBUG:__main__: corr : compilation time: 0.06554603576660156 s
-DEBUG:__main__: corr : compilation time: 0.06399869918823242 s
-DEBUG:__main__: corr : compilation time: 0.06481385231018066 s
-DEBUG:__main__: corr : compilation time: 0.06435942649841309 s
-DEBUG:__main__: corr : compilation time: 0.06546926498413086 s
-DEBUG:__main__: corr : compilation time: 0.06400299072265625 s
-DEBUG:__main__: corr : compilation time: 0.06471395492553711 s
-DEBUG:__main__: corr : compilation time: 0.06537246704101562 s
-DEBUG:__main__: corr : compilation time: 0.06529760360717773 s
-DEBUG:__main__: corr : compilation time: 0.06451034545898438 s
-DEBUG:__main__: corr : compilation time: 0.0658864974975586 s
-DEBUG:__main__: corr : compilation time: 0.06342363357543945 s
-DEBUG:__main__: corr : compilation time: 0.06497335433959961 s
-DEBUG:__main__: corr : compilation time: 0.0632777214050293 s
-DEBUG:__main__: corr : compilation time: 0.0642857551574707 s
-DEBUG:__main__: corr : compilation time: 0.06332564353942871 s
-DEBUG:__main__: corr : compilation time: 0.06594133377075195 s
-DEBUG:__main__: corr : compilation time: 0.06327438354492188 s
-DEBUG:__main__: corr : compilation time: 0.06532526016235352 s
-DEBUG:__main__: corr : compilation time: 0.06402778625488281 s
-DEBUG:__main__: corr : compilation time: 0.06504178047180176 s
-DEBUG:__main__: corr : compilation time: 0.06442523002624512 s
-DEBUG:__main__: corr : compilation time: 0.06519317626953125 s
-DEBUG:__main__: corr : compilation time: 0.06357669830322266 s
-DEBUG:__main__: corr : compilation time: 0.06549334526062012 s
-DEBUG:__main__: corr : compilation time: 0.0632162094116211 s
-DEBUG:__main__: corr : compilation time: 0.0651707649230957 s
-DEBUG:__main__: corr : compilation time: 0.06432700157165527 s
-DEBUG:__main__: corr : compilation time: 0.06499624252319336 s
-DEBUG:__main__: corr : compilation time: 0.06425046920776367 s
-DEBUG:__main__: corr : compilation time: 0.06496238708496094 s
-DEBUG:__main__: corr : compilation time: 0.06337308883666992 s
-DEBUG:__main__: corr : compilation time: 0.0645296573638916 s
-DEBUG:__main__: corr : compilation time: 0.06552410125732422 s
-DEBUG:__main__: corr : compilation time: 0.06502676010131836 s
-DEBUG:__main__: corr : compilation time: 0.06504631042480469 s
-DEBUG:__main__: corr : compilation time: 0.0652456283569336 s
-DEBUG:__main__: corr : compilation time: 0.06464123725891113 s
-DEBUG:__main__: corr : compilation time: 0.06566810607910156 s
-DEBUG:__main__: corr : compilation time: 0.06357407569885254 s
-DEBUG:__main__: corr : compilation time: 0.0659799575805664 s
-DEBUG:__main__: corr : compilation time: 0.06336522102355957 s
-DEBUG:__main__: corr : compilation time: 0.06400036811828613 s
-DEBUG:__main__: corr : compilation time: 0.06308412551879883 s
-DEBUG:__main__: corr : compilation time: 0.06415104866027832 s
-DEBUG:__main__: corr : compilation time: 0.06365585327148438 s
-DEBUG:__main__: corr : compilation time: 0.06468701362609863 s
-DEBUG:__main__: corr : compilation time: 0.06539130210876465 s
-DEBUG:__main__: corr : compilation time: 0.0641026496887207 s
-DEBUG:__main__: corr : compilation time: 0.06351089477539062 s
-DEBUG:__main__: corr : compilation time: 0.06450653076171875 s
-DEBUG:__main__: corr : compilation time: 0.06298255920410156 s
-DEBUG:__main__: corr : compilation time: 0.06439661979675293 s
-DEBUG:__main__: corr : compilation time: 0.06377005577087402 s
-DEBUG:__main__: corr : compilation time: 0.06364631652832031 s
-DEBUG:__main__: corr : compilation time: 0.06340479850769043 s
-DEBUG:__main__: corr : compilation time: 0.06316089630126953 s
-DEBUG:__main__: corr : compilation time: 0.06322407722473145 s
-DEBUG:__main__: corr : compilation time: 0.06420779228210449 s
-DEBUG:__main__: corr : compilation time: 0.06295132637023926 s
-DEBUG:__main__: corr : compilation time: 0.06403303146362305 s
-DEBUG:__main__: corr : compilation time: 0.06328415870666504 s
-DEBUG:__main__: corr : compilation time: 0.06464910507202148 s
-DEBUG:__main__: corr : compilation time: 0.06337285041809082 s
-DEBUG:__main__: corr : compilation time: 0.06432390213012695 s
-DEBUG:__main__: corr : compilation time: 0.06352472305297852 s
-DEBUG:__main__: corr : compilation time: 0.0643167495727539 s
-DEBUG:__main__: corr : compilation time: 0.0629117488861084 s
-DEBUG:__main__: corr : compilation time: 0.06428074836730957 s
-DEBUG:__main__: corr : compilation time: 0.06334066390991211 s
-DEBUG:__main__: corr : compilation time: 0.06479167938232422 s
-DEBUG:__main__: corr : compilation time: 0.0646352767944336 s
-DEBUG:__main__: corr : compilation time: 0.06547021865844727 s
-DEBUG:__main__: corr : compilation time: 0.06332111358642578 s
-DEBUG:__main__: corr : compilation time: 0.06433820724487305 s
-DEBUG:__main__: corr : compilation time: 0.062406301498413086 s
-DEBUG:__main__: corr : compilation time: 0.06514143943786621 s
-DEBUG:__main__: corr : compilation time: 0.0628206729888916 s
-DEBUG:__main__: corr : compilation time: 0.06534171104431152 s
-DEBUG:__main__: corr : compilation time: 0.06515097618103027 s
-DEBUG:__main__: corr : compilation time: 0.06369209289550781 s
-DEBUG:__main__: corr : compilation time: 0.06434154510498047 s
-DEBUG:__main__: corr : compilation time: 0.06492900848388672 s
-DEBUG:__main__: corr : compilation time: 0.06587362289428711 s
-DEBUG:__main__: corr : compilation time: 0.06652712821960449 s
-DEBUG:__main__: corr : compilation time: 0.06638789176940918 s
-DEBUG:__main__: corr : compilation time: 0.07919907569885254 s
-DEBUG:__main__: corr : compilation time: 0.06378626823425293 s
-DEBUG:__main__: corr : compilation time: 0.06386590003967285 s
-DEBUG:__main__: corr : compilation time: 0.06493186950683594 s
-DEBUG:__main__: corr : compilation time: 0.0629425048828125 s
-DEBUG:__main__: corr : compilation time: 0.06409335136413574 s
-DEBUG:__main__: corr : compilation time: 0.062774658203125 s
-DEBUG:__main__: corr : compilation time: 0.06423664093017578 s
-DEBUG:__main__: corr : compilation time: 0.06308746337890625 s
-DEBUG:__main__: corr : compilation time: 0.06775140762329102 s
-DEBUG:__main__: corr : compilation time: 0.06479740142822266 s
-DEBUG:__main__: corr : compilation time: 0.0654296875 s
-DEBUG:__main__: corr : compilation time: 0.06439542770385742 s
-DEBUG:__main__: corr : compilation time: 0.06498861312866211 s
-DEBUG:__main__: corr : compilation time: 0.06493854522705078 s
-DEBUG:__main__: corr : compilation time: 0.06387448310852051 s
-DEBUG:__main__: corr : compilation time: 0.06643271446228027 s
-DEBUG:__main__: corr : compilation time: 0.06498432159423828 s
-DEBUG:__main__: corr : compilation time: 0.0639500617980957 s
-DEBUG:__main__: corr : compilation time: 0.06387186050415039 s
-DEBUG:__main__: corr : compilation time: 0.06417727470397949 s
-DEBUG:__main__: corr : compilation time: 0.06306171417236328 s
-DEBUG:__main__: corr : compilation time: 0.06419038772583008 s
-DEBUG:__main__: corr : compilation time: 0.06354784965515137 s
-DEBUG:__main__: corr : compilation time: 0.06292080879211426 s
-DEBUG:__main__: corr : compilation time: 0.06321048736572266 s
-DEBUG:__main__: corr : compilation time: 0.06291556358337402 s
-DEBUG:__main__: corr : compilation time: 0.06289005279541016 s
-DEBUG:__main__: corr : compilation time: 0.06268835067749023 s
-DEBUG:__main__: corr : compilation time: 0.06307697296142578 s
-DEBUG:__main__: corr : compilation time: 0.06294441223144531 s
-DEBUG:__main__: corr : compilation time: 0.07064414024353027 s
-DEBUG:__main__: corr : compilation time: 0.07188916206359863 s
-DEBUG:__main__: corr : compilation time: 0.06792306900024414 s
-DEBUG:__main__: corr : compilation time: 0.07036280632019043 s
-DEBUG:__main__: corr : compilation time: 0.06636500358581543 s
-DEBUG:__main__: corr : compilation time: 0.06435179710388184 s
-DEBUG:__main__: corr : compilation time: 0.06467819213867188 s
-DEBUG:__main__: corr : compilation time: 0.06415987014770508 s
-DEBUG:__main__: corr : compilation time: 0.06401371955871582 s
-DEBUG:__main__: corr : compilation time: 0.06369209289550781 s
-DEBUG:__main__: corr : compilation time: 0.06378364562988281 s
-DEBUG:__main__: corr : compilation time: 0.06276822090148926 s
-DEBUG:__main__: corr : compilation time: 0.06614470481872559 s
-DEBUG:__main__: corr : compilation time: 0.06488895416259766 s
-DEBUG:__main__: corr : compilation time: 0.06524229049682617 s
-DEBUG:__main__: corr : compilation time: 0.06299686431884766 s
-DEBUG:__main__: corr : compilation time: 0.06315779685974121 s
-DEBUG:__main__: corr : compilation time: 0.06491231918334961 s
-DEBUG:__main__: corr : compilation time: 0.06666851043701172 s
-DEBUG:__main__: corr : compilation time: 0.06310677528381348 s
-DEBUG:__main__: corr : compilation time: 0.06315445899963379 s
-DEBUG:__main__: corr : compilation time: 0.0623624324798584 s
-DEBUG:__main__: corr : compilation time: 0.06859374046325684 s
-DEBUG:__main__: corr : compilation time: 0.06566905975341797 s
-DEBUG:__main__: corr : compilation time: 0.06337141990661621 s
-DEBUG:__main__: corr : compilation time: 0.0626375675201416 s
-DEBUG:__main__: corr : compilation time: 0.06344985961914062 s
-DEBUG:__main__: corr : compilation time: 0.06228303909301758 s
-DEBUG:__main__: corr : compilation time: 0.06334352493286133 s
-DEBUG:__main__: corr : compilation time: 0.06305265426635742 s
-DEBUG:__main__: corr : compilation time: 0.0683283805847168 s
-DEBUG:__main__: corr : compilation time: 0.06676387786865234 s
-DEBUG:__main__: corr : compilation time: 0.06613874435424805 s
-DEBUG:__main__: corr : compilation time: 0.06303691864013672 s
-DEBUG:__main__: corr : compilation time: 0.06324219703674316 s
-DEBUG:__main__: corr : compilation time: 0.06295466423034668 s
-DEBUG:__main__: corr : compilation time: 0.06818318367004395 s
-DEBUG:__main__: corr : compilation time: 0.06510758399963379 s
-DEBUG:__main__: corr : compilation time: 0.08291244506835938 s
-DEBUG:__main__: corr : compilation time: 0.06328868865966797 s
-DEBUG:__main__: corr : compilation time: 0.0628349781036377 s
-DEBUG:__main__: corr : compilation time: 0.06323456764221191 s
-DEBUG:__main__: corr : compilation time: 0.06240534782409668 s
-DEBUG:__main__: corr : compilation time: 0.06360483169555664 s
-DEBUG:__main__: corr : compilation time: 0.06255173683166504 s
-DEBUG:__main__: corr : compilation time: 0.06795549392700195 s
-DEBUG:__main__: corr : compilation time: 0.0660548210144043 s
-DEBUG:__main__: corr : compilation time: 0.06457853317260742 s
-DEBUG:__main__: corr : compilation time: 0.07615280151367188 s
-DEBUG:__main__: corr : compilation time: 0.07527685165405273 s
-DEBUG:__main__: corr : compilation time: 0.07056546211242676 s
-DEBUG:__main__: corr : compilation time: 0.06483054161071777 s
-DEBUG:__main__: corr : compilation time: 0.06428003311157227 s
-DEBUG:__main__: corr : compilation time: 0.06267881393432617 s
-DEBUG:__main__: corr : compilation time: 0.06554770469665527 s
-DEBUG:__main__: corr : compilation time: 0.06356382369995117 s
-DEBUG:__main__: corr : compilation time: 0.06760215759277344 s
-DEBUG:__main__: corr : compilation time: 0.06328392028808594 s
-DEBUG:__main__: corr : compilation time: 0.06876945495605469 s
-DEBUG:__main__: corr : compilation time: 0.06466102600097656 s
-DEBUG:__main__: corr : compilation time: 0.06702756881713867 s
-DEBUG:__main__: corr : compilation time: 0.06282234191894531 s
-DEBUG:__main__: corr : compilation time: 0.06437563896179199 s
-DEBUG:__main__: corr : compilation time: 0.07216548919677734 s
-DEBUG:__main__: corr : compilation time: 0.06391406059265137 s
-INFO:__main__: corr : compilation time: 0.525225845972697 m
-DEBUG:__main__: Top 10 lines
-#1: /usr/lib/python3.13/linecache.py:172: 0.3145 MiB
-    lines = fp.readlines()
-#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:39: 0.0157 MiB
-    all_pos = np.array([xx.flatten(),yy.flatten()])
-#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:34: 0.0079 MiB
-    field = np.copy(field) - field.mean()
-#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:5711: 0.0068 MiB
-    return concatenate((arr, values), axis=axis)
-#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:170: 0.0034 MiB
-    correlations = np.array([np.sum(all_elem[all_dist == d]) for d in unq_dist])
-#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:371: 0.0034 MiB
-    ret = (aux[mask],)
-#7: /usr/lib/python3.13/re/_parser.py:547: 0.0014 MiB
-    subpatternappend((LITERAL, _ord(this)))
-#8: /usr/lib/python3.13/re/_compiler.py:764: 0.0009 MiB
-    return _sre.compile(
-#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_func.py:31: 0.0005 MiB
-    return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
-#10: /usr/lib/python3.13/tracemalloc.py:193: 0.0005 MiB
-    self._frames = tuple(reversed(frames))
-DEBUG:__main__: 28 other: 3.2 KiB
-DEBUG:__main__: Total allocated size: 0.3580 MiB
-INFO:__main__: Ram Usage 0.0001220703125 Gb
-INFO:__main__: END
+DEBUG:__main__: Run Irrational
+DEBUG:__main__: Compute pxs
+DEBUG:__main__: px : compilation time: 0.026892662048339844 s
+INFO:__main__: Compute the correlation
+DEBUG:__main__: Positions :
+[array([1]) array([2, 1]) array([2]) array([3]) array([3, 2])
+ array([4, 1]) array([3]) array([4]) array([5]) array([5])
+ array([], dtype=int64) array([5, 3]) array([], dtype=int64)
+ array([], dtype=int64) array([5, 4]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([7, 2])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([8, 2]) array([], dtype=int64) array([], dtype=int64) array([7, 5])
+ array([8]) array([9]) array([9, 7, 6, 2]) array([], dtype=int64)
+ array([9, 3]) array([9]) array([7]) array([10,  1]) array([10])
+ array([9]) array([10]) array([8]) array([10]) array([9]) array([11])
+ array([11, 10]) array([], dtype=int64) array([11,  9,  7,  3])
+ array([10,  6]) array([11,  4]) array([12,  9,  8,  1]) array([11,  5])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([11,  6]) array([], dtype=int64) array([9]) array([10,  8])
+ array([], dtype=int64) array([13,  2]) array([13,  3])
+ array([], dtype=int64) array([10,  9]) array([], dtype=int64)
+ array([], dtype=int64) array([13,  5]) array([], dtype=int64)
+ array([], dtype=int64) array([11,  9]) array([14, 13,  6,  3])
+ array([], dtype=int64) array([14,  4]) array([13,  7])
+ array([], dtype=int64) array([15,  1]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([15, 13,  9,  5]) array([16])
+ array([], dtype=int64) array([], dtype=int64) array([16, 12, 11,  3])
+ array([], dtype=int64) array([16,  4]) array([15,  7]) array([14,  9])
+ array([16]) array([], dtype=int64) array([17]) array([], dtype=int64)
+ array([17,  2]) array([14, 10]) array([17,  3]) array([17])
+ array([], dtype=int64) array([], dtype=int64) array([17])
+ array([], dtype=int64) array([16]) array([18, 17, 15, 10,  6,  1])
+ array([18]) array([18,  3]) array([16,  9]) array([17, 13,  7])
+ array([18, 14, 12,  4]) array([15, 11]) array([18]) array([17,  8])
+ array([], dtype=int64) array([18,  6]) array([19]) array([19])
+ array([15, 12]) array([19, 17]) array([18]) array([19, 16, 11,  4])
+ array([19]) array([18]) array([17]) array([14]) array([15, 13])
+ array([19,  6]) array([20]) array([20,  2]) array([18]) array([20,  3])
+ array([19, 17, 11,  7]) array([20]) array([], dtype=int64) array([18])
+ array([20, 19, 16]) array([17]) array([20]) array([21, 19])
+ array([21, 18]) array([20,  7]) array([21]) array([16]) array([21])
+ array([17]) array([19, 10]) array([20]) array([21]) array([18])
+ array([21,  6]) array([20, 16, 15,  9]) array([19, 11]) array([22, 17])
+ array([22]) array([21]) array([22, 18]) array([22, 20]) array([21, 19])
+ array([22,  5]) array([], dtype=int64) array([17, 15])
+ array([22, 18, 14,  6]) array([], dtype=int64) array([21,  9])
+ array([23, 19, 13,  1]) array([23, 22,  7,  2]) array([23,  3])
+ array([], dtype=int64) array([20, 12]) array([23, 17, 16,  4])
+ array([22,  8]) array([], dtype=int64) array([23,  5]) array([19, 14])
+ array([], dtype=int64) array([23, 22,  9,  6]) array([20, 13])
+ array([24,  1]) array([], dtype=int64) array([24, 18, 16,  2])
+ array([22, 10]) array([], dtype=int64) array([19, 15])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([24,  5]) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([18, 17]) array([], dtype=int64)
+ array([25,  1]) array([22, 12]) array([], dtype=int64) array([25,  3])
+ array([21, 14]) array([], dtype=int64) array([], dtype=int64) array([18])
+ array([25, 23, 19, 17, 11,  5]) array([22, 13]) array([20, 16])
+ array([24,  9]) array([25,  6]) array([21, 15]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([26, 19, 18,  3]) array([], dtype=int64) array([26,  4])
+ array([24, 21, 16, 11]) array([23, 13]) array([26,  5])
+ array([], dtype=int64) array([], dtype=int64) array([26,  6])
+ array([], dtype=int64) array([19]) array([20, 18])
+ array([26, 25, 23, 14, 10,  7]) array([27, 21, 17,  1]) array([27,  2])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([25, 11]) array([], dtype=int64) array([26,  9])
+ array([], dtype=int64) array([27, 21, 18,  6]) array([25, 12])
+ array([], dtype=int64) array([22, 17]) array([26, 10]) array([27,  7])
+ array([28, 23, 16,  1]) array([], dtype=int64) array([28, 27,  8,  3])
+ array([], dtype=int64) array([26, 11]) array([], dtype=int64)
+ array([24, 15]) array([21, 19]) array([22, 18]) array([28,  5])
+ array([27,  9]) array([], dtype=int64) array([28, 26, 12,  6])
+ array([], dtype=int64) array([27, 10]) array([], dtype=int64)
+ array([28,  7]) array([29,  1]) array([], dtype=int64) array([28,  8])
+ array([29, 27, 25, 15, 11,  3]) array([23, 18]) array([29,  4])
+ array([], dtype=int64) array([29,  5]) array([26, 14])
+ array([], dtype=int64) array([29,  6]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([27, 13]) array([30, 26, 15,  1]) array([30,  2])
+ array([29, 28, 11,  8]) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64)
+ array([30, 27, 22, 21, 14,  5]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([30, 25, 18,  7])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([31, 26, 17,  2]) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([30,  9]) array([], dtype=int64)
+ array([], dtype=int64) array([31,  6]) array([30, 26, 18, 10])
+ array([], dtype=int64) array([], dtype=int64) array([23, 22])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([32, 31, 25, 20,  8,  1]) array([], dtype=int64)
+ array([], dtype=int64) array([31,  9]) array([], dtype=int64)
+ array([27, 18]) array([23]) array([32, 24, 22,  6])
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([], dtype=int64) array([], dtype=int64) array([], dtype=int64)
+ array([33, 27, 19,  1]) array([30, 14]) array([], dtype=int64)
+ array([33, 32, 31, 24, 23, 12,  9,  4]) array([28, 18]) array([25, 22])
+ array([26, 21]) array([33]) array([], dtype=int64) array([], dtype=int64)
+ array([32, 28, 19, 11]) array([], dtype=int64) array([], dtype=int64)
+ array([34]) array([34]) array([34, 29, 18,  3]) array([33])
+ array([28, 20]) array([], dtype=int64) array([33]) array([], dtype=int64)
+ array([], dtype=int64) array([34]) array([27, 22]) array([], dtype=int64)
+ array([], dtype=int64) array([35]) array([35, 31, 25, 17,  5])
+ array([], dtype=int64) array([33, 27, 23, 13]) array([35, 30, 19,  6])
+ array([], dtype=int64) array([], dtype=int64) array([33, 31, 18, 14])
+ array([36, 34, 30, 20, 12,  2]) array([], dtype=int64) array([36])
+ array([], dtype=int64) array([31, 19]) array([35, 34]) array([30, 21])
+ array([34, 26, 14]) array([], dtype=int64) array([36, 28, 24,  8])
+ array([], dtype=int64) array([37, 29, 23,  1]) array([30, 22])
+ array([31, 21]) array([37]) array([28, 25]) array([36]) array([30, 23])
+ array([38, 34]) array([], dtype=int64) array([38]) array([], dtype=int64)
+ array([30, 24]) array([37, 31, 23, 11]) array([37]) array([34])
+ array([39, 38]) array([39, 31, 24,  4]) array([28]) array([39])
+ array([30, 26]) array([35, 31, 25, 19]) array([40, 37, 35])
+ array([], dtype=int64) array([31, 26]) array([41]) array([], dtype=int64)
+ array([41, 39, 31, 27, 13,  3]) array([], dtype=int64) array([41])
+ array([42]) array([41]) array([], dtype=int64) array([31])]

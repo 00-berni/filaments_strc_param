@@ -27,30 +27,67 @@ def single_dist(field: np.ndarray, dist: float, all_pos: np.ndarray, debug: bool
     return corr
 
 def integer_correlation(field: np.ndarray, distances: np.ndarray) -> np.ndarray:
+    distances = distances.astype(int)
     xdim, ydim = field.shape
     x = np.arange(xdim)
     y = np.arange(ydim)
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
     start = time()
-    pxs = np.array([np.sqrt(d**2-np.arange(1,d)**2) for d in distances])
-    pxs = pxs[np.mod(pxs,1) == 0]
+    pxs = np.array([np.sqrt(d**2-np.arange(1,d)**2) for d in distances], dtype='object')
+    pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
     end = time()
-    logger.debug(f'px : compilation time: {(end-start)/60:.3f} m')
+    logger.debug(f'px : compilation time: {(end-start)} s')
     logger.info('Compute the correlation')
     start = time()
-    correlations = np.array([np.sum([ 
-                                     np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
-                                     np.sum(field[:,y[:-d]] * field[:,y[:-d]+d]) +
-                                     np.sum([field[xx[:-i,:-j],yy[:-i,:-j]]*field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
-                                             field[xx[i:,:-j],yy[i:,:-j]]*field[xx[i:,:-j]-i,yy[i:,:-j]+j]
-                                             for i,j in zip(pxs,pxs[::-1])])
-                                    ]) for d in distances])
+    try:
+        correlations = np.array([np.sum([ 
+                                        np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
+                                        np.sum(field[:,y[:-d]] * field[:,y[:-d]+d]) +
+                                        np.sum([np.sum(
+                                                field[xx[:-i,:-j],yy[:-i,:-j]]*field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
+                                                field[xx[i:,:-j],yy[i:,:-j]]*field[xx[i:,:-j]-i,yy[i:,:-j]+j])
+                                                for i,j in zip(pxs[idx],pxs[idx][::-1]) if len(pxs[idx]) != 0 ] )
+                                        ]) for d, idx in zip(distances,range(len(distances)))])
+    except:
+        logger.debug(f'NO good pxs\n{pxs}')
+        logger.debug(f'Result -> {len(pxs[0]) != 0}')
+        logger.debug(f'Dist {distances}')
+        raise
     end = time()
     logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
     return correlations
 
-def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, display_plot: bool = True) -> None:
+def irrational_correlation(field: np.ndarray, distances: np.ndarray, precision: int = 15) -> np.ndarray:
+    logger.debug('Run Irrational')
+    xdim, ydim = field.shape
+    x = np.arange(xdim)
+    y = np.arange(ydim)
+    yy, xx = np.meshgrid(y,x)
+    logger.debug('Compute pxs')
+    start = time()
+    pxs = np.array([np.round(np.sqrt(d**2-np.arange(1,d)**2),decimals=precision) for d in distances], dtype='object')
+    pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
+    end = time()
+    logger.debug(f'px : compilation time: {(end-start)} s')
+    logger.info('Compute the correlation')
+    correlations = np.zeros(len(distances))
+    pos = np.array([len(p)!=0 for p in pxs])
+    if np.any(pos):
+        try:
+            correlations[pos] = np.array([np.sum([ 
+                                                np.sum([np.sum(
+                                                        field[xx[:-i,:-j],yy[:-i,:-j]] * field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
+                                                        field[xx[i:,:-j] ,yy[i:,:-j]]  * field[xx[i:,:-j]-i,yy[i:,:-j]+j])
+                                                        for i,j in zip(pxs[k],pxs[k][::-1]) ] )
+                                                ]) for k in pos])
+        except:
+            logger.debug(f'Positions :\n{pos}')
+            logger.debug(f'Positions :\n{pxs[pos]}')
+            raise
+    return correlations
+
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 15, display_plot: bool = True) -> None:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `TEST`')
@@ -78,12 +115,12 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         if np.any(int_pos):
             logger.debug('Interger are present')
             corr[int_pos] = integer_correlation(field,bins[int_pos])
-        else:
+        if np.any(~int_pos):
             logger.info('Run the routine')
             start = time()
-            corr = np.array([single_dist(field=field,dist=d,all_pos=all_pos,debug=True) for d in bins])
-            end = time()
-            logger.info(f'corr : compilation time: {(end-start)/60} m')
+            corr[~int_pos] = irrational_correlation(field=field,distances=bins[~int_pos],precision=precision)
+        end = time()
+        logger.info(f'corr : compilation time: {(end-start)/60} m')
         if not no_zero:
             corr = np.append([(field**2).sum()],corr)
             bins = np.append([0],bins)
@@ -454,14 +491,20 @@ if __name__ == '__main__':
     elif args.test == 'test':
         # build the field
         np.random.seed(args.seed)
-        data = np.random.uniform(*args.edges,size=(dim,dim))    #: random signal
+        data = np.random.uniform(*args.edges,size=(dim,dim))*0    #: random signal
         PARAM = args.lag                                        #: lag of the lattice
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
-        old_dist, old_tpcf = compute_correlation(data,display_plot=False)
-        new_dist = np.arange(30)
+        start = time()
+        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+        new_dist = old_dist
+        start = time()
         new_tpcf = test(data,bins=new_dist,display_plot=False)
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
         fig, ax = plt.subplots(1,1)
         ax.plot(old_dist,old_tpcf,'--.',color='blue') 
         ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
