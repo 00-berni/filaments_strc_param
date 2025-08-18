@@ -4,10 +4,12 @@ import tracemalloc
 import linecache
 import logging
 import psutil
+from numpy.typing import ArrayLike
 
 __all__ = ['filpy',
            'tracemalloc',
-           'logging', 
+           'logging',
+           'ArrayLike', 
            'display_top', 
            'log_path',
            'ram_usage'
