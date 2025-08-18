@@ -26,7 +26,8 @@ def single_dist(field: np.ndarray, dist: float, all_pos: np.ndarray, debug: bool
         logger.debug(f'corr : compilation time: {end-start} s')
     return corr
 
-def integer_correlation(field: np.ndarray, distances: np.ndarray) -> np.ndarray:
+def integer_correlation(field: np.ndarray, distances: ArrayLike, precision=14) -> np.ndarray:
+    distances = np.asarray(distances)
     distances = distances.astype(int)
     xdim, ydim = field.shape
     x = np.arange(xdim)
@@ -34,10 +35,23 @@ def integer_correlation(field: np.ndarray, distances: np.ndarray) -> np.ndarray:
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
     start = time()
-    pxs = np.array([np.sqrt(d**2-np.arange(1,d)**2) for d in distances], dtype='object')
+    pxs = np.array([np.round(np.sqrt(d**2-np.arange(1,d)**2),decimals=precision) for d in distances], dtype='object')
+    old_pxs = np.copy(pxs)
+    # logger.debug(f'NO good pxs\n{pxs}')
     pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
     end = time()
     logger.debug(f'px : compilation time: {(end-start)} s')
+    pos = np.array([len(p)!=0 for p in pxs])
+    s_log = ''
+    for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
+        if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
+            s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
+    if s_log == '':
+        logger.debug('APPROX OK')
+    else:
+        logger.debug('APPROX BAD')
+        logger.debug('All pos'+s_log)
+
     logger.info('Compute the correlation')
     start = time()
     try:
@@ -58,8 +72,10 @@ def integer_correlation(field: np.ndarray, distances: np.ndarray) -> np.ndarray:
     logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
     return correlations
 
-def irrational_correlation(field: np.ndarray, distances: np.ndarray, precision: int = 15) -> np.ndarray:
+def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: int = 14) -> np.ndarray:
+    distances = np.asarray(distances)
     logger.debug('Run Irrational')
+    logger.debug(f'Precision {precision}')
     xdim, ydim = field.shape
     x = np.arange(xdim)
     y = np.arange(ydim)
@@ -67,57 +83,75 @@ def irrational_correlation(field: np.ndarray, distances: np.ndarray, precision: 
     logger.debug('Compute pxs')
     start = time()
     pxs = np.array([np.round(np.sqrt(d**2-np.arange(1,d)**2),decimals=precision) for d in distances], dtype='object')
+    # logger.debug(f'PXS: {np.round(pxs[3][-1],decimals=14)}')
+    # logger.debug(f'PXS: {pxs[3][-1]}')
+    # s_log = ''
+    # for p, d in zip(pxs,distances):
+    #     s_log = s_log + f'\n[{d}] - pxs\n\t{p}'
+    # logger.debug('NO good pxs'+s_log)
+    old_pxs = np.copy(pxs)
     pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
+    # logger.debug(f'NO good pxs\n{pxs}')
     end = time()
     logger.debug(f'px : compilation time: {(end-start)} s')
     logger.info('Compute the correlation')
     correlations = np.zeros(len(distances))
     pos = np.array([len(p)!=0 for p in pxs])
+
+    s_log = ''
+    for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
+        if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
+            s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
+    if s_log == '':
+        logger.debug('APPROX OK')
+    else:
+        logger.debug('APPROX BAD')
+        logger.debug('All pos'+s_log)
+
     if np.any(pos):
         try:
-            correlations[pos] = np.array([np.sum([ 
-                                                np.sum([np.sum(
-                                                        field[xx[:-i,:-j],yy[:-i,:-j]] * field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
-                                                        field[xx[i:,:-j] ,yy[i:,:-j]]  * field[xx[i:,:-j]-i,yy[i:,:-j]+j])
-                                                        for i,j in zip(pxs[k],pxs[k][::-1]) ] )
-                                                ]) for k in pos])
+            correlations[pos] = np.array([np.sum([
+                                                   np.sum(
+                                                          field[xx[:-i,:-j],yy[:-i,:-j]] * field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
+                                                          field[xx[i:,:-j] ,yy[i:,:-j]]  * field[xx[i:,:-j]-i,yy[i:,:-j]+j])
+                                                          for i,j in zip(p,p[::-1]) 
+                                                   ]) 
+                                                   for p in pxs[pos]
+                                                ]) 
         except:
-            logger.debug(f'Positions :\n{pos}')
+            logger.debug(f'Dist : {distances}')
             logger.debug(f'Positions :\n{pxs[pos]}')
+            for i,j in zip(pxs[pos],pxs[pos][::-1]):
+                logger.debug(f'P: ({i},{j})')
             raise
     return correlations
 
-def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 15, display_plot: bool = True) -> None:
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 12, display_plot: bool = True) -> None:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `TEST`')
     logger.debug('Copy the data and remove the mean')
     field = np.copy(field) - field.mean()
     logger.debug('Compute all positions in the grid')
-    xdim, ydim = field.shape
-    start = time()
-    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
-    all_pos = np.array([xx.flatten(),yy.flatten()])
-    del xx,yy
-    end = time()
-    logger.debug(f'pos : compilation time: {end-start} s')
     if isinstance(bins,(float,int)):
         if bins == 0:
             corr = (field**2).sum()
+        elif bins.is_integer():
+            corr = integer_correlation(field,[bins],precision=precision)[0]
         else:
-            corr = single_dist(field=field,dist=bins,all_pos=all_pos)
+            corr = irrational_correlation(field,[bins],precision=precision)[0]
     else:
         bins = np.asarray(bins)
         bins = bins[bins != 0]
         corr = np.zeros(bins.size)
         int_pos = np.mod(bins,1) == 0
         logger.info('Check integers')
+        start = time()
         if np.any(int_pos):
             logger.debug('Interger are present')
-            corr[int_pos] = integer_correlation(field,bins[int_pos])
+            corr[int_pos] = integer_correlation(field,bins[int_pos],precision=precision)
         if np.any(~int_pos):
             logger.info('Run the routine')
-            start = time()
             corr[~int_pos] = irrational_correlation(field=field,distances=bins[~int_pos],precision=precision)
         end = time()
         logger.info(f'corr : compilation time: {(end-start)/60} m')
