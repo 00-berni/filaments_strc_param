@@ -35,7 +35,7 @@ def integer_correlation(field: np.ndarray, distances: ArrayLike, precision=14) -
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
     start = time()
-    pxs = np.array([np.round(np.sqrt(d**2-np.arange(1,d)**2),decimals=precision) for d in distances], dtype='object')
+    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
     old_pxs = np.copy(pxs)
     # logger.debug(f'NO good pxs\n{pxs}')
     pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
@@ -82,12 +82,12 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
     start = time()
-    pxs = np.array([np.round(np.sqrt(d**2-np.arange(1,d)**2),decimals=precision) for d in distances], dtype='object')
+    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
     # logger.debug(f'PXS: {np.round(pxs[3][-1],decimals=14)}')
     # logger.debug(f'PXS: {pxs[3][-1]}')
-    # s_log = ''
-    # for p, d in zip(pxs,distances):
-    #     s_log = s_log + f'\n[{d}] - pxs\n\t{p}'
+    s_log = ''
+    for p, d in zip(pxs,distances):
+        s_log = s_log + f'\n[{d}] - {d**2} - pxs\n\t{p} ---> {p[-1]}'
     # logger.debug('NO good pxs'+s_log)
     old_pxs = np.copy(pxs)
     pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
@@ -113,11 +113,12 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
             correlations[pos] = np.array([np.sum([
                                                    np.sum(
                                                           field[xx[:-i,:-j],yy[:-i,:-j]] * field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
-                                                          field[xx[i:,:-j] ,yy[i:,:-j]]  * field[xx[i:,:-j]-i,yy[i:,:-j]+j])
-                                                          for i,j in zip(p,p[::-1]) 
-                                                   ]) 
-                                                   for p in pxs[pos]
-                                                ]) 
+                                                          field[xx[i:,:-j] ,yy[i:,:-j]]  * field[xx[i:,:-j]-i,yy[i:,:-j]+j]
+                                                          )
+                                                  for i,j in zip(p,p[::-1]) 
+                                                 ]) 
+                                          for p in pxs[pos]
+                                         ]) 
         except:
             logger.debug(f'Dist : {distances}')
             logger.debug(f'Positions :\n{pxs[pos]}')
@@ -126,7 +127,7 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
             raise
     return correlations
 
-def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 12, display_plot: bool = True) -> None:
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 10, display_plot: bool = True) -> None:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `TEST`')
@@ -170,8 +171,10 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         div = int(field.shape[0]//PARAM)
         if field.shape[0]%PARAM != 0: div += 1 
         for i in range(div):
-            d = i*PARAM
-            plt.axvline(d,color='red',linestyle='dotted')
+            for j in range(i,div):
+                d = distance((0,0),(i,j))*PARAM
+                plt.axvline(d,color='red',linestyle='dotted')
+                plt.annotate(f'({i},{j})',(d,corr.max()),(d+0.02,corr.max()))
         plt.show()
     return corr
 
@@ -530,19 +533,26 @@ if __name__ == '__main__':
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
+        # start = time()
+        # old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
+        # end = time()
+        # logger.info(f'Computational time {(end-start)/60} m')
+        # new_dist = old_dist
+        new_dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in range(dim)]))
         start = time()
-        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
+        new_tpcf = test(data,bins=new_dist,display_plot=args.plot)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
-        new_dist = old_dist
-        start = time()
-        new_tpcf = test(data,bins=new_dist,display_plot=False)
-        end = time()
-        logger.info(f'Computational time {(end-start)/60} m')
-        fig, ax = plt.subplots(1,1)
-        ax.plot(old_dist,old_tpcf,'--.',color='blue') 
-        ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
-        plt.show() 
+        # diff = ~np.isclose(new_tpcf-old_tpcf,0)
+        # if np.any(diff):
+        #     logger.info('Problems')
+        #     logger.debug(f'The problem\n{[*old_dist[diff]]}\n{[i for i in old_tpcf[diff] - new_tpcf[diff]]}')
+        # else:
+        #     logger.info('Ok!')
+        # fig, ax = plt.subplots(1,1)
+        # ax.plot(old_dist,old_tpcf,'--.',color='blue') 
+        # ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
+        # plt.show() 
 
 
     ## RANDOM SIGNAL

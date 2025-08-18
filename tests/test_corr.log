@@ -1,106 +1,45 @@
-INFO:__main__: size = (100,100)
-INFO:__main__: Call the function `compute_correlation`
-INFO:__main__: `diagonal_dist` parameter set to True
-DEBUG:__main__: Copy the data and remove the mean
-DEBUG:__main__: Compute all positions in the grid
-DEBUG:__main__: pos : compilation time: 0.0006666183471679688 s
-INFO:__main__: Compute where
-DEBUG:__main__: Compute all distances in the grid
-DEBUG:__main__: prova : compilation time: 1.093297004699707 s
-DEBUG:__main__: dist : compilation time: 1.35260009765625 s
-INFO:__main__: Compute the array with the unique distances
-DEBUG:__main__: Compute each element
-DEBUG:__main__: prova1 : compilation time: 1.2736022472381592 s
-DEBUG:__main__: prova1_shape = (10000,)
-DEBUG:__main__: elem : compilation time: 1.9227781295776367 s
-DEBUG:__main__: all_elm_shape = (50005000,)
-INFO:__main__: Compute the correlation
-INFO:__main__: corr : compilation time: 2.107 m
-INFO:__main__: corr size = 3664
-DEBUG:__main__: Top 10 lines
-#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:258: 382.6523 MiB
-    prova1 = np.array([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])],dtype='object')
-#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_func.py:33: 382.5765 MiB
-    return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
-#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:263: 381.5081 MiB
-    all_elem = np.concatenate([field[*all_pos[:,N]] * field[*all_pos[:,N:]] for N in range(all_pos.shape[1])])
-#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:244: 381.5080 MiB
-    all_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
-#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:226: 0.1527 MiB
-    all_pos = np.array([xx.flatten(),yy.flatten()])
-#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:221: 0.0764 MiB
-    field = np.copy(field) - field.mean()
-#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:239: 0.0764 MiB
-    prova = np.array([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])], dtype='object')
-#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:272: 0.0280 MiB
-    correlations = np.array([np.sum(all_elem[all_dist == d]) for d in unq_dist])
-#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:371: 0.0280 MiB
-    ret = (aux[mask],)
-#10: /usr/lib/python3.13/logging/__init__.py:1602: 0.0005 MiB
-    next_f = f.f_back
-DEBUG:__main__: 3 other: 0.3 KiB
-DEBUG:__main__: Total allocated size: 1528.6072 MiB
-INFO:__main__: Ram Usage 1.8811264038085938 Gb
-INFO:__main__: END
-INFO:__main__: Computational time 2.2293432354927063 m
+INFO:__main__: size = (230,230)
 INFO:__main__: Call the function `TEST`
 DEBUG:__main__: Copy the data and remove the mean
 DEBUG:__main__: Compute all positions in the grid
 INFO:__main__: Check integers
 DEBUG:__main__: Interger are present
 DEBUG:__main__: Compute pxs
-DEBUG:__main__: px : compilation time: 0.004178285598754883 s
+DEBUG:__main__: px : compilation time: 0.019929885864257812 s
 DEBUG:__main__: APPROX OK
 INFO:__main__: Compute the correlation
-DEBUG:__main__: corr : compilation time: 0.001 m
+DEBUG:__main__: corr : compilation time: 0.010 m
 INFO:__main__: Run the routine
 DEBUG:__main__: Run Irrational
-DEBUG:__main__: Precision 12
+DEBUG:__main__: Precision 10
 DEBUG:__main__: Compute pxs
-DEBUG:__main__: px : compilation time: 0.12342548370361328 s
+DEBUG:__main__: px : compilation time: 48.441980838775635 s
 INFO:__main__: Compute the correlation
-DEBUG:__main__: APPROX BAD
-DEBUG:__main__: All pos
-94.00531899844816:	[132.93607486]	[94] ->
-	0.999999999999 - 0.999999999999
-99.00505037623081:	[106.40488711 114.20157617 100.40916293 114.20157617 106.40488711]	[99 91 71 69 39] ->
-	1.000000000001 - 1.000000000001
-105.00476179678711:	[110.67971811 140.00714267 110.67971811]	[105  99  35] ->
-	1.000000000001 - 1.000000000001
-117.00427342623003:	[122.7110427  131.76494223 131.5218613  131.76494223 122.7110427 ]	[117 111  93  71  37] ->
-	0.999999999999 - 0.999999999999
-119.00420160649792:	[142.8355698  125.86500705 142.8355698 ]	[119  89  79] ->
-	1.000000000001 - 1.000000000001
-123.00406497347964:	[133.93281898 124.77980606 131.18688959 140.00714267 131.18688959
- 124.77980606 133.93281898]	[123 111 109  99  73  57  53] ->
-	1.000000000001 - 1.000000000001
-133.00375934536586:	[134.97407158 152.97712247 140.4635184  137.17871555 140.4635184
- 152.97712247 134.97407158]	[133 131 107  97  91  79  23] ->
-	0.999999999998 - 0.999999999998
-INFO:__main__: corr : compilation time: 0.055826846758524576 m
+DEBUG:__main__: APPROX OK
+INFO:__main__: corr : compilation time: 1.3036598642667134 m
 DEBUG:__main__: Top 10 lines
-#1: /usr/lib/python3.13/linecache.py:172: 0.3249 MiB
-    lines = fp.readlines()
-#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:134: 0.0764 MiB
-    field = np.copy(field) - field.mean()
-#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:5711: 0.0561 MiB
+#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:966: 0.4037 MiB
+    return array(a, order=order, subok=subok, copy=True)
+#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:5711: 0.2720 MiB
     return concatenate((arr, values), axis=axis)
-#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:272: 0.0280 MiB
-    correlations = np.array([np.sum(all_elem[all_dist == d]) for d in unq_dist])
-#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:371: 0.0280 MiB
-    ret = (aux[mask],)
-#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:147: 0.0036 MiB
+#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1042: 0.0261 MiB
+    int_part, frac_part = zip(*(s.split('.') for s in strs))
+#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:148: 0.0171 MiB
     int_pos = np.mod(bins,1) == 0
-#7: /usr/lib/python3.13/re/_parser.py:547: 0.0014 MiB
-    subpatternappend((LITERAL, _ord(this)))
-#8: /usr/lib/python3.13/re/_compiler.py:764: 0.0009 MiB
-    return _sre.compile(
-#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:104: 0.0006 MiB
-    s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
-#10: /usr/lib/python3.13/tracemalloc.py:193: 0.0005 MiB
-    self._frames = tuple(reversed(frames))
-DEBUG:__main__: 49 other: 7.0 KiB
-DEBUG:__main__: Total allocated size: 0.5273 MiB
-INFO:__main__: Ram Usage 0.0 Gb
+#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:90: 0.0122 MiB
+    s_log = s_log + f'\n[{d}] - {d**2} - pxs\n\t{p} ---> {p[-1]}'
+#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:57: 0.0052 MiB
+    return bound(*args, **kwds)
+#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:47: 0.0010 MiB
+    if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
+#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:38: 0.0005 MiB
+    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
+#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2449: 0.0005 MiB
+    | (x == y))
+#10: /usr/lib/python3.13/logging/__init__.py:1602: 0.0003 MiB
+    next_f = f.f_back
+DEBUG:__main__: 31 other: 2.9 KiB
+DEBUG:__main__: Total allocated size: 0.7414 MiB
+INFO:__main__: Ram Usage 0.04018402099609375 Gb
 INFO:__main__: END
-INFO:__main__: Computational time 0.05645090341567993 m
+INFO:__main__: Computational time 1.6470000346501668 m
