@@ -16,15 +16,46 @@ logger.setLevel('DEBUG')
 ## DATA
 FILE_NAME = filpy.FileVar(__file__,path=True)   #: path of the file
 
-def single_dist(field: np.ndarray, dist: float, all_pos: np.ndarray, debug: bool = True) -> float:
-    positions = lambda index : all_pos[:,index:][:,np.argwhere(distance(all_pos[:,index],all_pos[:,index:]) == dist)]    
-    if debug:
-        start = time()
-    corr = np.sum([np.sum(field[*all_pos[:,N]] * field[*positions(N)])  for N in range(all_pos.shape[1]-1)])
-    if debug:
-        end = time()
-        logger.debug(f'corr : compilation time: {end-start} s')
-    return corr
+
+def compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
+    start = time()
+    logger.info('Run `compute_pxs`')
+    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
+    # tmp_pxs = pxs[pos]
+    tmp_dst = distances
+    tmp_pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
+    rtol = 10**(-precision)
+    check_pos = np.array([ ~np.all(np.isclose(d-np.sqrt(p**2+p[::-1]**2),np.zeros(len(p)),rtol=rtol)) for p,d in zip(tmp_pxs,tmp_dst)],dtype=bool)
+    s_deb = ''
+    for p,d in zip(tmp_pxs,tmp_dst):
+        s_deb = s_deb + f'\n\t[{d}] - {d-np.sqrt(p**2+p[::-1]**2)}\n{p}'
+    logger.debug(f'PXS'+s_deb)
+    logger.debug(f'Precision -> {precision}')
+    logger.debug(f'CHECK POS\n{check_pos}')
+    logger.info('Check distances')
+    while np.any(check_pos):
+        logger.debug('Start routine')
+        logger.debug(f'CHECK LEN : {len(check_pos[check_pos])}')
+        logger.debug(f'CHECK SHAPE : {check_pos.shape}')
+        logger.debug(f'\n\tCHECK POS\n{check_pos}')
+        precision -= 1
+        if precision < 0:
+            raise ValueError('Precision cannot be negative')
+        tmp_pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in tmp_dst], dtype='object')
+        logger.debug(f'TMP -> {tmp_pxs[check_pos].shape}')
+        logger.debug(f'TMP\n{tmp_pxs[check_pos]}')
+        prova = np.array([p[np.mod(p,1) == 0].astype(int) for p in tmp_pxs],dtype='object')
+        logger.debug(f'PROVA {prova.shape}\n{prova}')
+        tmp_pxs = prova
+        rtol = 10**(-precision)
+        check_pos[check_pos] = np.array([ ~np.all(np.isclose(d-np.sqrt(p**2+p[::-1]**2),np.zeros(len(p)),rtol=rtol)) for p,d in zip(tmp_pxs[check_pos],tmp_dst[check_pos])],dtype=bool)
+    logger.debug('Check end')
+    logger.debug(f'CHECK POS\n{check_pos}')
+    logger.info(f'Precision -> {precision}')
+    pxs = tmp_pxs
+    end = time()
+    logger.debug(f'px : compilation time: {(end-start)/60} m')
+    return pxs        
 
 def integer_correlation(field: np.ndarray, distances: ArrayLike, precision=14) -> np.ndarray:
     distances = np.asarray(distances)
@@ -34,24 +65,24 @@ def integer_correlation(field: np.ndarray, distances: ArrayLike, precision=14) -
     y = np.arange(ydim)
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
-    start = time()
-    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
-    old_pxs = np.copy(pxs)
-    # logger.debug(f'NO good pxs\n{pxs}')
-    pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
-    end = time()
-    logger.debug(f'px : compilation time: {(end-start)} s')
-    pos = np.array([len(p)!=0 for p in pxs])
-    s_log = ''
-    for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
-        if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
-            s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
-    if s_log == '':
-        logger.debug('APPROX OK')
-    else:
-        logger.debug('APPROX BAD')
-        logger.debug('All pos'+s_log)
-
+    # start = time()
+    # pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
+    # old_pxs = np.copy(pxs)
+    # # logger.debug(f'NO good pxs\n{pxs}')
+    # pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
+    # end = time()
+    # logger.debug(f'px : compilation time: {(end-start)} s')
+    # pos = np.array([len(p)!=0 for p in pxs])
+    # s_log = ''
+    # for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
+    #     if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
+    #         s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
+    # if s_log == '':
+    #     logger.debug('APPROX OK')
+    # else:
+    #     logger.debug('APPROX BAD')
+    #     logger.debug('All pos'+s_log)
+    pxs = compute_pxs(distances=distances,precision=precision)
     logger.info('Compute the correlation')
     start = time()
     try:
@@ -81,32 +112,33 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
     y = np.arange(ydim)
     yy, xx = np.meshgrid(y,x)
     logger.debug('Compute pxs')
-    start = time()
-    pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
-    # logger.debug(f'PXS: {np.round(pxs[3][-1],decimals=14)}')
-    # logger.debug(f'PXS: {pxs[3][-1]}')
-    s_log = ''
-    for p, d in zip(pxs,distances):
-        s_log = s_log + f'\n[{d}] - {d**2} - pxs\n\t{p} ---> {p[-1]}'
-    # logger.debug('NO good pxs'+s_log)
-    old_pxs = np.copy(pxs)
-    pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
-    # logger.debug(f'NO good pxs\n{pxs}')
-    end = time()
-    logger.debug(f'px : compilation time: {(end-start)} s')
+    # start = time()
+    # pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
+    # # logger.debug(f'PXS: {np.round(pxs[3][-1],decimals=14)}')
+    # # logger.debug(f'PXS: {pxs[3][-1]}')
+    # s_log = ''
+    # for p, d in zip(pxs,distances):
+    #     s_log = s_log + f'\n[{d}] - {d**2} - pxs\n\t{p} ---> {p[-1]}'
+    # # logger.debug('NO good pxs'+s_log)
+    # old_pxs = np.copy(pxs)
+    # pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in pxs],dtype='object')
+    # # logger.debug(f'NO good pxs\n{pxs}')
+    # end = time()
+    # logger.debug(f'px : compilation time: {(end-start)} s')
+    pxs = compute_pxs(distances=distances,precision=precision)
     logger.info('Compute the correlation')
     correlations = np.zeros(len(distances))
     pos = np.array([len(p)!=0 for p in pxs])
 
-    s_log = ''
-    for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
-        if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
-            s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
-    if s_log == '':
-        logger.debug('APPROX OK')
-    else:
-        logger.debug('APPROX BAD')
-        logger.debug('All pos'+s_log)
+    # s_log = ''
+    # for op, p, d in zip(old_pxs[pos],pxs[pos],distances[pos]):
+    #     if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
+    #         s_log = s_log + f'\n{d}:\t{np.sqrt(p**2+p[::-1]**2)}\t{p} ->\n\t{op[-1]} - {np.round(op[-1],decimals=13)}'
+    # if s_log == '':
+    #     logger.debug('APPROX OK')
+    # else:
+    #     logger.debug('APPROX BAD')
+    #     logger.debug('All pos'+s_log)
 
     if np.any(pos):
         try:
@@ -127,16 +159,19 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
             raise
     return correlations
 
-def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 10, display_plot: bool = True) -> None:
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 13, display_plot: bool = True) -> None:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `TEST`')
     logger.debug('Copy the data and remove the mean')
     field = np.copy(field) - field.mean()
     logger.debug('Compute all positions in the grid')
+    xdim, ydim = field.shape
     if isinstance(bins,(float,int)):
         if bins == 0:
             corr = (field**2).sum()
+        elif bins**2 > xdim**2+ydim**2:
+            corr = 0
         elif bins.is_integer():
             corr = integer_correlation(field,[bins],precision=precision)[0]
         else:
@@ -178,42 +213,6 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         plt.show()
     return corr
 
-def factorization(n):
-    """Source: https://stackoverflow.com/questions/32871539/can-this-integer-factorization-in-python-be-improved
-
-    Parameters
-    ----------
-    n : _type_
-        _description_
-
-    Returns
-    -------
-    _type_
-        _description_
-    """
-    factors = []
-
-    def get_factor(n):
-        x_fixed = 2            
-        cycle_size = 2
-        x = 2
-        factor = 1
-        while factor == 1:
-            for _ in range(cycle_size):
-                if factor > 1: break
-                x = (x * x + 1) % n
-                factor = math.gcd(x - x_fixed, n)
-
-            cycle_size *= 2
-            x_fixed = x
-        return factor
-
-    while n > 1:
-        next = get_factor(n)
-        factors.append(next)
-        n //= next
-
-    return factors
 
 def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
     usage_start = ram_usage()
@@ -319,100 +318,6 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     return unq_dist, correlations
 
 
-def diagonal_values(field: np.ndarray, dist: float, n_px: tuple[int,int], logger: logging.Logger, precision: int = 15) -> float:
-    xdim, ydim = field.shape
-    x, y = n_px
-    logger.debug(f'Pos ({x},{y})')
-    # logger.debug('Compute (i,j)')
-    # start = time()
-    logger.debug(f'sq dist = {dist**2}')
-    edges = (np.ceil(dist)-1, np.floor(dist))
-    i = np.arange(-min(x,edges[0]),min(xdim-x, edges[1]))
-    i = i[i!=0]
-    j = np.round(np.sqrt(dist**2 - i**2),decimals=precision)
-    logger.debug(f'initial elements\n{i}\t{j}')
-    pos = np.logical_and(np.mod(j,1) == 0, j <= ydim-1 - y)
-    # logger.debug(f'i cond {np.mod(j,1) == 0}')
-    # logger.debug(f'ii cond {j <= ydim-1 - y}')
-    # logger.debug(f'pos\n{pos}')
-    # end = time()
-    # logger.debug(f'i,j : computational time {end-start} s')
-    if np.any(pos):        
-        i = i[pos].astype(int) 
-        j = j[pos].astype(int)
-        logger.debug(f'Post elements\n{i}\t{j}')
-        corr_xy = np.sum(field[x,y]*field[x+i,y+j])
-    else:
-        corr_xy = 0
-    return corr_xy
-
-
-    
-def new_corr(field: np.ndarray, dist: float, logger: logging.Logger,precision: int = 15) -> float:
-    """Compute correlation for a certain lag
-
-    Parameters
-    ----------
-    field : np.ndarray
-        data from which mean was subtracted
-    dist : float
-        lag between pixels
-    logger : logging.Logger
-        logger
-    precision : int, optional
-        set the precision of each real number computation, by default 15
-
-    Returns
-    -------
-    corr : float
-        computed tpcf
-    """
-    logger.debug(f'Run new_corr function for dist {dist}')
-    xdim, ydim = field.shape    #: size of the field
-    if (xdim**2+ydim**2) < dist: 
-        warnings.warn('Out')
-        corr = 0
-    elif dist == 0:
-        corr = (field**2).sum()
-    elif dist.is_integer():
-        dist = int(dist)
-        logger.debug('Compute the array with the unique distances')
-        logger.debug('Compute the correlation')
-        start = time()
-        corr = 0
-        if dist < min(xdim,ydim):
-            logger.debug('Interger computation')
-            logger.debug(f'{xdim-dist} - {ydim-dist}')
-            corr += np.sum([ 
-                        np.sum(field[nx,:] * field[nx+dist,:]) + 
-                        np.sum(field[:,ny] * field[:,ny+dist]) 
-                        for nx,ny in zip(range(xdim-dist),range(ydim-dist))])                
-        if dist > 3:
-            elems, counts = np.unique(factorization(dist), return_counts=True)
-            square_cond = np.logical_and(elems%4 == 3, counts%2 != 0)
-            if not np.all(square_cond):
-                logger.debug('Perfect squares')
-                x = np.arange(xdim)
-                y = np.arange(ydim)
-                logger.debug('Compute all the positions')
-                x, y = np.meshgrid(x,y)
-                logger.debug('Start the routine to compute correlation')
-                corr += np.sum([ diagonal_values(field,dist,(i,j),logger,precision=precision) for i,j in zip(x.flatten(),y.flatten())])
-        end = time()
-        logger.debug(f'corr : compilation time: {(end-start)/60:.3f} m')
-    else:
-        xdim, ydim = field.shape
-        x = np.arange(xdim)
-        y = np.arange(ydim)
-        logger.debug('Compute all the positions')
-        x, y = np.meshgrid(x,y)
-        logger.debug('Start the routine to compute correlation')
-        # start = time()
-        corr = np.sum([ diagonal_values(field,dist,(i,j),logger,precision=precision) for i,j in zip(x.flatten(),y.flatten())])
-        # end = time()
-        # logger.info(f'Computational time {(end-start)/60} m')
-    logger.debug('END')
-    return corr
 
 ## PIPELINE
 if __name__ == '__main__':
@@ -482,7 +387,7 @@ if __name__ == '__main__':
             tracemalloc.start()
             field = np.copy(data) - data.mean()
             start = time()
-            corr = np.array([new_corr(field,d,logger) for d in dists] )
+            corr = test(data,dists)
             end = time()
             logger.info(f'Computational time {(end-start)/60} m')
             if args.plot:
@@ -507,21 +412,24 @@ if __name__ == '__main__':
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
-        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
-        field = np.copy(data) - data.mean()
-        tracemalloc.start()
         start = time()
-        usage_start = ram_usage()
-        new_tpcf = np.array([new_corr(field,d,logger) for d in np.arange(dim)])
+        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
-        snapshot = tracemalloc.take_snapshot()
-        display_top(snapshot,logger=logger)
-        usage_end = ram_usage()
-        logger.info(f'Ram Usage {(usage_end -usage_start)/1024**3} Gb')
+        new_dist = old_dist
+        start = time()
+        new_tpcf = test(data,bins=new_dist,display_plot=False)
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+        diff = ~np.isclose(new_tpcf-old_tpcf,0,rtol=1e-10)
+        if np.any(diff):
+            logger.info('Problems')
+            logger.debug(f'The problem\n{[*old_dist[diff]]}\n{[i for i in old_tpcf[diff] - new_tpcf[diff]]}')
+        else:
+            logger.info('Ok!')
         fig, ax = plt.subplots(1,1)
         ax.plot(old_dist,old_tpcf,'--.',color='blue') 
-        ax.plot(np.arange(dim),new_tpcf,'--+',color='red' ) 
+        ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
         plt.show() 
 
     ## TEST
@@ -578,7 +486,7 @@ if __name__ == '__main__':
             for i in range(ITER):
                 logger.info(f'ITERATION n. {i:02d}')
                 start = time()
-                tmp_c = np.array([new_corr(np.random.uniform(-1,1,size=(dim,dim)),dist=d,logger=logger) for d in u_d])
+                tmp_c = test(np.random.uniform(-1,1,size=(dim,dim)),u_d,display_plot=False)
                 corr += tmp_c
                 if i != 0:
                     logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')

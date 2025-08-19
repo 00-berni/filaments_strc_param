@@ -1,45 +1,169 @@
-INFO:__main__: size = (230,230)
+INFO:__main__: size = (10,10)
 INFO:__main__: Call the function `TEST`
 DEBUG:__main__: Copy the data and remove the mean
 DEBUG:__main__: Compute all positions in the grid
 INFO:__main__: Check integers
 DEBUG:__main__: Interger are present
 DEBUG:__main__: Compute pxs
-DEBUG:__main__: px : compilation time: 0.019929885864257812 s
-DEBUG:__main__: APPROX OK
+INFO:__main__: Run `compute_pxs`
+DEBUG:__main__: PXS
+	[1] - []
+[]
+	[2] - []
+[]
+	[3] - []
+[]
+	[4] - []
+[]
+	[5] - [0. 0.]
+[4 3]
+	[6] - []
+[]
+	[7] - []
+[]
+	[8] - []
+[]
+	[9] - []
+[]
+	[10] - [0. 0.]
+[8 6]
+DEBUG:__main__: Precision -> 13
+DEBUG:__main__: CHECK POS
+[False False False False False False False False False False]
+INFO:__main__: Check distances
+DEBUG:__main__: Check end
+DEBUG:__main__: CHECK POS
+[False False False False False False False False False False]
+INFO:__main__: Precision -> 13
+DEBUG:__main__: px : compilation time: 5.223353703816732e-05 m
 INFO:__main__: Compute the correlation
-DEBUG:__main__: corr : compilation time: 0.010 m
+DEBUG:__main__: corr : compilation time: 0.000 m
 INFO:__main__: Run the routine
 DEBUG:__main__: Run Irrational
-DEBUG:__main__: Precision 10
+DEBUG:__main__: Precision 13
 DEBUG:__main__: Compute pxs
-DEBUG:__main__: px : compilation time: 48.441980838775635 s
+INFO:__main__: Run `compute_pxs`
+DEBUG:__main__: PXS
+	[1.4142135623730951] - [0.]
+[1]
+	[2.23606797749979] - [0. 0.]
+[2 1]
+	[2.8284271247461903] - [0.]
+[2]
+	[3.1622776601683795] - [0. 0.]
+[3 1]
+	[3.605551275463989] - [0. 0.]
+[3 2]
+	[4.123105625617661] - [0. 0.]
+[4 1]
+	[4.242640687119285] - [0.]
+[3]
+	[4.47213595499958] - [0. 0.]
+[4 2]
+	[5.0990195135927845] - [0. 0.]
+[5 1]
+	[5.385164807134504] - [0. 0.]
+[5 2]
+	[5.656854249492381] - [0.]
+[4]
+	[5.830951894845301] - [0. 0.]
+[5 3]
+	[6.082762530298219] - [0. 0.]
+[6 1]
+	[6.324555320336759] - [0. 0.]
+[6 2]
+	[6.4031242374328485] - [0. 0.]
+[5 4]
+	[6.708203932499369] - [0. 0.]
+[6 3]
+	[7.0710678118654755] - [0. 0. 0.]
+[7 5 1]
+	[7.211102550927978] - [0. 0.]
+[6 4]
+	[7.280109889280518] - [0. 0.]
+[7 2]
+	[7.615773105863909] - [0. 0.]
+[7 3]
+	[7.810249675906654] - [0. 0.]
+[6 5]
+	[8.06225774829855] - [0. 0. 0. 0.]
+[8 7 4 1]
+	[8.246211251235321] - [0. 0.]
+[8 2]
+	[8.48528137423857] - [0.]
+[6]
+	[8.54400374531753] - [0. 0.]
+[8 3]
+	[8.602325267042627] - [0. 0.]
+[7 5]
+	[8.94427190999916] - [0. 0.]
+[8 4]
+	[9.055385138137417] - [0. 0.]
+[9 1]
+	[9.219544457292887] - [0. 0. 0. 0.]
+[9 7 6 2]
+	[9.433981132056603] - [0. 0.]
+[8 5]
+	[9.486832980505138] - [0. 0.]
+[9 3]
+	[9.848857801796104] - [0. 0.]
+[9 4]
+	[9.899494936611665] - [0.]
+[7]
+	[10.295630140987] - [0. 0.]
+[9 5]
+	[10.63014581273465] - [0. 0.]
+[8 7]
+	[10.816653826391969] - [0. 0.]
+[9 6]
+	[11.313708498984761] - [0.]
+[8]
+	[11.40175425099138] - [0. 0. 0. 0.]
+[11  9  7  3]
+	[12.041594578792296] - [0. 0. 0. 0.]
+[12  9  8  1]
+	[12.727922061357855] - [0.]
+[9]
+DEBUG:__main__: Precision -> 13
+DEBUG:__main__: CHECK POS
+[False False False False False False False False False False False False
+ False False False False False False False False False False False False
+ False False False False False False False False False False False False
+ False False False False]
+INFO:__main__: Check distances
+DEBUG:__main__: Check end
+DEBUG:__main__: CHECK POS
+[False False False False False False False False False False False False
+ False False False False False False False False False False False False
+ False False False False False False False False False False False False
+ False False False False]
+INFO:__main__: Precision -> 13
+DEBUG:__main__: px : compilation time: 0.0002492268880208333 m
 INFO:__main__: Compute the correlation
-DEBUG:__main__: APPROX OK
-INFO:__main__: corr : compilation time: 1.3036598642667134 m
+INFO:__main__: corr : compilation time: 0.000546268622080485 m
 DEBUG:__main__: Top 10 lines
-#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:966: 0.4037 MiB
-    return array(a, order=order, subok=subok, copy=True)
-#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:5711: 0.2720 MiB
-    return concatenate((arr, values), axis=axis)
-#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1042: 0.0261 MiB
-    int_part, frac_part = zip(*(s.split('.') for s in strs))
-#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:148: 0.0171 MiB
-    int_pos = np.mod(bins,1) == 0
-#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:90: 0.0122 MiB
-    s_log = s_log + f'\n[{d}] - {d**2} - pxs\n\t{p} ---> {p[-1]}'
-#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:57: 0.0052 MiB
+#1: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:31: 0.0021 MiB
+    s_deb = s_deb + f'\n\t[{d}] - {d-np.sqrt(p**2+p[::-1]**2)}\n{p}'
+#2: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:59: 0.0019 MiB
+    options = {k: v for k, v in list(locals().items()) if v is not None}
+#3: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:28: 0.0010 MiB
+    check_pos = np.array([ ~np.all(np.isclose(d-np.sqrt(p**2+p[::-1]**2),np.zeros(len(p)),rtol=rtol)) for p,d in zip(tmp_pxs,tmp_dst)],dtype=bool)
+#4: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:57: 0.0010 MiB
     return bound(*args, **kwds)
-#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:47: 0.0010 MiB
-    if not np.all(np.isclose([d]*len(p),np.sqrt(p**2+p[::-1]**2),rtol=1e-8)):
-#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:38: 0.0005 MiB
+#5: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:5711: 0.0010 MiB
+    return concatenate((arr, values), axis=axis)
+#6: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:167: 0.0009 MiB
+    field = np.copy(field) - field.mean()
+#7: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1042: 0.0007 MiB
+    int_part, frac_part = zip(*(s.split('.') for s in strs))
+#8: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:23: 0.0007 MiB
     pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
-#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2449: 0.0005 MiB
-    | (x == y))
-#10: /usr/lib/python3.13/logging/__init__.py:1602: 0.0003 MiB
-    next_f = f.f_back
-DEBUG:__main__: 31 other: 2.9 KiB
-DEBUG:__main__: Total allocated size: 0.7414 MiB
-INFO:__main__: Ram Usage 0.04018402099609375 Gb
+#9: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:86: 0.0005 MiB
+    return ufunc.reduce(obj, axis, dtype, out, **passkwargs)
+#10: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/tests/test_corr.py:183: 0.0004 MiB
+    int_pos = np.mod(bins,1) == 0
+DEBUG:__main__: 22 other: 2.3 KiB
+DEBUG:__main__: Total allocated size: 0.0123 MiB
+INFO:__main__: Ram Usage 0.0020751953125 Gb
 INFO:__main__: END
-INFO:__main__: Computational time 1.6470000346501668 m
+INFO:__main__: Computational time 0.0007497866948445638 m
