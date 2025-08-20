@@ -324,7 +324,7 @@ if __name__ == '__main__':
     # set parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all','DEBUG', 'INFO'],default=None)
-    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test'],default='lattice')
+    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test','pattern'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
     parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
     parser.add_argument("-d","--dim", help='field size',type=int, action='store',default=32)
@@ -501,98 +501,30 @@ if __name__ == '__main__':
         plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
         plt.show()
 
-## FFT
-# logger.info('FFT PIPELINE')
-# logger.debug('Copy the data and remove the mean')
-# field = np.copy(data) - data.mean()
+    elif args.test == 'pattern':
+        dim = args.dim
+        data = np.zeros((dim,dim))        
+        np.random.seed(args.seed)
+        data += np.random.uniform(*args.edges,size=(dim,dim))   
+        pattern = [0,1,2,2,1,0,-1,-2,-2,-1]
+        p_len = len(pattern)
+        x = np.arange(dim)
+        pattern = np.array(pattern*(dim//p_len) + pattern[:dim%p_len],dtype=int)
+        for i in range(dim//11):
+            for j in range(2,7):
+                y = pattern +j + 11*i
+                data[x,y] = 1
+            # y = pattern +6 + 11*i
+            # data[x,y] = 1
+        filpy.show_image(data) 
 
-# logger.debug('Compute the fft2')
-# field_fft = fft2(field)
-# logger.debug('Compute the product')
-# tmp = field_fft * np.conjugate(field_fft)
-# logger.debug('Compute the ifft2')
-# tmp_img = np.abs(ifft2(np.abs(tmp)))
-# logger.debug('Delete the tmp variable')
-# del tmp
+        dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in x]))
+        corr = test(data,dist,display_plot=False)
 
-# logger.info('Rearrange the field')
-# MID = dim // 2
-# logger.debug(f'MID value = {MID}')
-# logger.debug(f'Image shape = {tmp_img.shape}{MID}')
-# corr_img = np.copy(tmp_img)
-# corr_img[None:MID  , None:MID ] = tmp_img[MID :None , MID :None]
-# corr_img[MID :None , MID :None] = tmp_img[None:MID  , None:MID ]
-# corr_img[None:MID  , MID :None] = tmp_img[MID :None , None:MID ]
-# corr_img[MID :None , None:MID ] = tmp_img[None:MID  , MID :None]
-# filpy.show_image(tmp_img)
-# filpy.show_image(corr_img)
-
-# logger.debug('Compute all distances in the grid')
-# start = time()
-# distances = np.array([ [distance((i,j),(MID,MID)) for i in range(dim)] for j in range(dim)])
-# end = time()
-# logger.debug(f'dist : compilation time: {end-start} s')
-# logger.info('Compute the array with the unique distances')
-# unq_dist = np.unique(distances)
-
-# logger.info('Compute the correlation')
-# start = time()
-# correlations = np.array([np.sum(corr_img[distances == d]) for d in unq_dist])
-# end = time()
-# logger.info(f'corr : compilation time: {end-start} s')
-
-# filpy.quickplot((np.arange(corr_img.shape[1])-MID,corr_img[MID]),fmt='.--')
-# filpy.quickplot((unq_dist,correlations),fmt='.--')
-# div = int(field.shape[0]//PARAM)+1
-# for i in range(div):
-#     for j in range(i,div):
-#         d = distance((0,0),(i,j))*PARAM
-#         # if d > np.max(unq_dist):
-#         #     break
-#         plt.axvline(d,color='red',linestyle='dotted')
-#         plt.annotate(f'({i},{j})',(d,correlations.max()),(d+0.02,correlations.max()))
-# plt.show()
-
-# # #
+        filpy.quickplot((dist,corr),fmt='--.')
+        # filpy.quickplot((x,corr),fmt='--.')
 
 
-# all_pos = [ (i,j) for i in range(data.shape[0]) for j in range(data.shape[1])]
-# all_pos = np.asarray(all_pos).T
 
-# start = time()
-# res_dist = np.concatenate([distance(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
-# # res_dist = np.array([list(distance(all_pos[:,N],all_pos[:,N:])) for N in range(all_pos.shape[1])],dtype='object').sum()
-# end = time()
-# print('Compilation time:', end-start,'s')
-# print(type(res_dist),len(res_dist))
-# # del res_dist
-# # start = time()
-# # res_corr = [calc_corr_ij(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])]
-# # end = time()
-# start1 = time()
-# res_corr = np.concatenate([calc_corr_ij(all_pos[:,N],all_pos[:,N:]) for N in range(all_pos.shape[1])])
-# end1 = time()
-# # print('Compilation time:', end-start,'s')
-# print('Compilation time:', end1-start1,'s')
-
-
-# # exit()
-# # distances = np.ravel([r[0] for r in res])
-# # correlations = np.ravel([r[1] for r in res])
-# print('dist')
-# unq_dist = np.unique(res_dist)
-# print('dist end')
-# correlations1 = np.array([np.sum(res_corr[res_dist == d]) for d in unq_dist])
-# print('Compilation time:', end1-start1,'s')
-
-# correlations1 /= correlations1.max()
-
-# filpy.quickplot((unq_dist,correlations1-correlations),fmt='.--')
-
-# plt.show()
-
-
-# corr = correlate2d(data,data)
-# lags = correlation_lags(len(data),len(data))
-
-# filpy.show_image(corr,cmap='viridis',show=True)
+        plt.show()
+        
