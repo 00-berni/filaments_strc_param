@@ -6,7 +6,11 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from typing import Sequence, Any
 
-
+__all__ = [
+            'quickplot',
+            'plot_image',
+            'show_image'
+          ]
 
 def quickplot(data: Sequence[ndarray] | ndarray, numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
     """Display a plot quickly.
