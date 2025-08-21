@@ -156,6 +156,38 @@ def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
 def compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
+    """Compute pixel coordinates for each distance value
+
+    Parameters
+    ----------
+    distances : np.ndarray
+        set of distances
+    precision : int, optional
+        the accuracy at which coordinates are computed, by default 15
+
+    Returns
+    -------
+    pxs : np.ndarray
+        pixel coordinates for each distance
+
+    Raises
+    ------
+    ValueError
+        _description_
+
+    Notes
+    -----
+    The method computes the pixel coordinates for each distance by taking `(d**2 - arange(1,d)**2)**1/2`
+    `for d in distances` and then selecting the descrete values only. However, it fails: the Python accuracy
+    is around the 16th digit, so it aprroximates the square root
+    >>> a = numpy.sqrt(2)
+    >>> a**2
+    float64(2.0000000000000004)
+
+    So to avoid mistakes, the method round `d**2` at the digit `10**(-precision)` and check whether the
+    distance obtained from coordinates so estimated is compatible with the corresponding original one 
+    (with a certain uncertainty). If it is not, the method will reduce the precision and check again. 
+    """
     # compute the corresponding coordinates for each distance
     pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in distances], dtype='object')
     tmp_dst = distances.copy()
