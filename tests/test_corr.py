@@ -180,17 +180,23 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         bins = np.asarray(bins)
         bins = bins[bins != 0]
         corr = np.zeros(bins.size)
-        int_pos = np.mod(bins,1) == 0
+        pos = bins**2 <= xdim**2 + ydim**2 
+        tmp_bins = bins[pos]
+        tmp_corr = corr[pos]
+        int_pos = np.mod(tmp_bins,1) == 0
         logger.info('Check integers')
         start = time()
         if np.any(int_pos):
             logger.debug('Interger are present')
-            corr[int_pos] = integer_correlation(field,bins[int_pos],precision=precision)
+            tmp_corr[int_pos] = integer_correlation(field,tmp_bins[int_pos],precision=precision)
         if np.any(~int_pos):
             logger.info('Run the routine')
-            corr[~int_pos] = irrational_correlation(field=field,distances=bins[~int_pos],precision=precision)
+            tmp_corr[~int_pos] = irrational_correlation(field=field,distances=tmp_bins[~int_pos],precision=precision)
         end = time()
         logger.info(f'corr : compilation time: {(end-start)/60} m')
+        bins[pos] = tmp_bins
+        corr[pos] = tmp_corr 
+        if not np.all(pos): logger.debug(f'{len(pos[~pos])} distances greater than the size of the frame')          
         if not no_zero:
             corr = np.append([(field**2).sum()],corr)
             bins = np.append([0],bins)
@@ -446,7 +452,8 @@ if __name__ == '__main__':
         # end = time()
         # logger.info(f'Computational time {(end-start)/60} m')
         # new_dist = old_dist
-        new_dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in range(dim)]))
+        lim = dim
+        new_dist = np.unique(np.concatenate([np.sqrt(np.arange(i,lim)**2+i**2) for i in range(lim)]))
         start = time()
         new_tpcf = test(data,bins=new_dist,display_plot=args.plot)
         end = time()
@@ -519,9 +526,14 @@ if __name__ == '__main__':
         filpy.show_image(data) 
 
         dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in x]))
+        # corr = test(data,dist,display_plot=False)
         corr = test(data,dist,display_plot=False)
 
-        filpy.quickplot((dist,corr),fmt='--.')
+        # o_dist, o_corr = compute_correlation(data,display_plot=False) 
+
+        plt.figure()
+        plt.plot(dist,corr,'--.',color='blue')
+        # plt.plot(o_dist,o_corr,'--x',color='red')
         # filpy.quickplot((x,corr),fmt='--.')
 
 
