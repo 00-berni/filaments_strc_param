@@ -336,10 +336,12 @@ if __name__ == '__main__':
     parser.add_argument("-d","--dim", help='field size',type=int, action='store',default=32)
     parser.add_argument("-s","--seed", help='set seed', type=int, action='store',default=10)
     parser.add_argument("-e","--edges", help='set max and min of noise', type=float, required=False, nargs=2, action='store',default=[0,2])
+    parser.add_argument("-w","--width", help='set the width of the pattern', required=False, type=int, action='store',default=3)
     parser.add_argument("-l","--lag", help='set the lag of the lattice', required=False, type=int, action='store',default=5)
     parser.add_argument("-v","--value", help='set the value of the lattice', required=False, type=int, action='store',default=1)
     parser.add_argument("-i","--iter", help='set the number of iterations',required=False, type=int, action='store',default=10)
     parser.add_argument("-p","--plot",help='plot data or not',action='store_false')
+    parser.add_argument("--ticks",help='display pixel edges',action='store_true')
     parser.add_argument("--method",help='the function type',action='store',type=str, choices=['old','new'], default='new')
     parser.add_argument("--dist",help='distances',action="store",type=str,default="{'dist': [0,5,10]}")
 
@@ -509,34 +511,59 @@ if __name__ == '__main__':
         plt.show()
 
     elif args.test == 'pattern':
+
+        def make_pattern(data: np.ndarray, pattern: str = 'lattice',**kwargs) -> np.ndarray:
+            new_data = np.copy(data)
+            xdim, ydim = new_data.shape
+            if pattern == 'lattice':
+                wd = kwargs['width']
+                sp = kwargs['spacing']
+                lag = sp+wd
+                xpos = np.arange(xdim//lag+1)*lag
+                ypos = np.arange(ydim//lag+1)*lag
+                xpos = np.concatenate([xpos + i for i in range(wd)])
+                ypos = np.concatenate([ypos + i for i in range(wd)])
+                xpos = xpos[xpos<xdim]
+                ypos = ypos[ypos<ydim]
+                new_data[xpos,:] = 1
+                new_data[:,ypos] = 1
+            return new_data
+
+
         dim = args.dim
         data = np.zeros((dim,dim))        
         np.random.seed(args.seed)
-        data += np.random.uniform(*args.edges,size=(dim,dim))   
-        pattern = [0,1,2,2,1,0,-1,-2,-2,-1]
-        p_len = len(pattern)
-        x = np.arange(dim)
-        pattern = np.array(pattern*(dim//p_len) + pattern[:dim%p_len],dtype=int)
-        for i in range(dim//11):
-            for j in range(2,7):
-                y = pattern +j + 11*i
-                data[x,y] = 1
-            # y = pattern +6 + 11*i
-            # data[x,y] = 1
-        filpy.show_image(data) 
-
-        dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in x]))
-        # corr = test(data,dist,display_plot=False)
+        width = args.width
+        spacing = args.lag
+        data = make_pattern(data,'lattice',width=width,spacing=spacing)
+        fig, ax = filpy.show_image(data,colorbar=False)
+        if args.ticks:
+            axp = fig.gca()
+            axp.set_xticks(np.arange(0,dim,1))
+            axp.set_yticks(np.arange(0,dim,1))
+            axp.set_xticks(np.arange(-0.5,dim,1),minor=True)
+            axp.set_yticks(np.arange(-0.5,dim,1),minor=True)
+            axp.grid(which='minor',color='r', linestyle='-', linewidth=2) 
+        if args.no_diag:
+            dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in range(data.shape[0])]))
+        else:
+            dist = np.arange(data.shape[0])
         corr = test(data,dist,display_plot=False)
 
-        # o_dist, o_corr = compute_correlation(data,display_plot=False) 
 
         plt.figure()
         plt.plot(dist,corr,'--.',color='blue')
-        # plt.plot(o_dist,o_corr,'--x',color='red')
-        # filpy.quickplot((x,corr),fmt='--.')
+        plt.axhline(0,color='black',linestyle='dotted',alpha=0.5)
+        lag = spacing + width
+        for i in np.arange(1,dim//lag):
+            sub_term = min(width,spacing)
+            ac_pos = i*lag - sub_term
+            if ac_pos <= dist.max():
+                plt.axvline(ac_pos,color='orange',linestyle='dashed')            
+            c_pos = ac_pos + sub_term
+            if c_pos <= dist.max():
+                plt.axvline(c_pos,color='green',linestyle='dashed')
 
-
-
+        plt.grid(color='grey',alpha=0.6,linestyle='dotted')
         plt.show()
         
