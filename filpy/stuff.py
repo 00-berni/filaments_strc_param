@@ -155,7 +155,7 @@ def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -
     """
     return np.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
 
-def compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
+def __compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
     """Compute pixel coordinates for each distance value
 
     Parameters
@@ -210,7 +210,7 @@ def compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
     pxs = tmp_pxs
     return pxs        
 
-def corr_discrete_dist(field: np.ndarray, distances: ArrayLike, precision: int = 14) -> np.ndarray:
+def __corr_discrete_dist(field: np.ndarray, distances: ArrayLike, precision: int = 14) -> np.ndarray:
     """Compute the tpcf for integer distances
 
     Parameters
@@ -235,7 +235,7 @@ def corr_discrete_dist(field: np.ndarray, distances: ArrayLike, precision: int =
     x = np.arange(xdim)         #: pixel positions along x axis
     y = np.arange(ydim)         #: pixel positions along y axis
     yy, xx = np.meshgrid(y,x)
-    pxs = compute_pxs(distances=distances,precision=precision)
+    pxs = __compute_pxs(distances=distances,precision=precision)
     # compute correlations array
     correlations = np.array([np.sum([ 
                                      np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
@@ -251,7 +251,7 @@ def corr_discrete_dist(field: np.ndarray, distances: ArrayLike, precision: int =
                             ])
     return correlations
 
-def corr_float_dist(field: np.ndarray, distances: ArrayLike, precision: int = 14) -> np.ndarray:
+def __corr_float_dist(field: np.ndarray, distances: ArrayLike, precision: int = 14) -> np.ndarray:
     """Compute the tpcf for not-integer distances
 
     Parameters
@@ -276,7 +276,7 @@ def corr_float_dist(field: np.ndarray, distances: ArrayLike, precision: int = 14
     # compute the coordinates of each pixel in the frame
     xdim, ydim = field.shape    #: sizes of the frame
     yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
-    pxs = compute_pxs(distances=distances,precision=precision)
+    pxs = __compute_pxs(distances=distances,precision=precision)
     pos = np.array([len(p)!=0 for p in pxs])
     if np.any(pos):
         # compute the correlations
@@ -343,9 +343,9 @@ def compute_tpcf(field: np.ndarray, bins: int | float | np.ndarray, no_zero: boo
         elif bins**2 > xdim**2+ydim**2:
             corr = 0
         elif bins.is_integer():
-            corr = corr_discrete_dist(field,[bins],precision=precision)[0]
+            corr = __corr_discrete_dist(field,[bins],precision=precision)[0]
         else:
-            corr = corr_float_dist(field,[bins],precision=precision)[0]
+            corr = __corr_float_dist(field,[bins],precision=precision)[0]
     else:                                   #: condition for arrays
         # convert to numpy array type
         bins = np.asarray(bins)
@@ -360,9 +360,9 @@ def compute_tpcf(field: np.ndarray, bins: int | float | np.ndarray, no_zero: boo
         # compute the positions of integer values
         int_pos = np.mod(tmp_bins,1) == 0
         if np.any(int_pos):                 #: compute correlation for discrete distances
-            tmp_corr[int_pos] = corr_discrete_dist(field,tmp_bins[int_pos],precision=precision)
+            tmp_corr[int_pos] = __corr_discrete_dist(field,tmp_bins[int_pos],precision=precision)
         if np.any(~int_pos):                #: compute correlation for float distances
-            tmp_corr[~int_pos] = corr_float_dist(field=field,distances=tmp_bins[~int_pos],precision=precision)
+            tmp_corr[~int_pos] = __corr_float_dist(field=field,distances=tmp_bins[~int_pos],precision=precision)
         # store the values in the main arrays
         bins[pos] = tmp_bins
         corr[pos] = tmp_corr 
