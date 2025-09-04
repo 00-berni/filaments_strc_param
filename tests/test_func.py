@@ -6,13 +6,16 @@ import logging
 import psutil
 from numpy.typing import ArrayLike
 
+TEST_DIR = filpy.PROJECT_DIR + 'tests' 
+
 __all__ = ['filpy',
            'tracemalloc',
            'logging',
            'ArrayLike', 
            'display_top', 
            'log_path',
-           'ram_usage'
+           'ram_usage',
+           'TEST_DIR'
            ]
 
 def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -> float | np.ndarray:
