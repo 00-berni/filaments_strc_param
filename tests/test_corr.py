@@ -5,8 +5,6 @@ from time import time
 import argparse
 from .test_func import *
 from .test_func import distance
-import math
-import warnings
 
 # build the logger
 logger_name = __name__ 
@@ -200,6 +198,7 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         if not no_zero:
             corr = np.append([(field**2).sum()],corr)
             bins = np.append([0],bins)
+            corr /= corr[0]
         # logger.debug(f'Positions:\n{pos}')
     snapshot = tracemalloc.take_snapshot()
     display_top(snapshot,logger=logger)
