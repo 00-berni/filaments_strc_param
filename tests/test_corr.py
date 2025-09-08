@@ -84,14 +84,17 @@ def integer_correlation(field: np.ndarray, distances: ArrayLike, precision=14) -
     logger.info('Compute the correlation')
     start = time()
     try:
-        correlations = np.array([np.sum([ 
-                                        np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
-                                        np.sum(field[:,y[:-d]] * field[:,y[:-d]+d]) +
-                                        np.sum([np.sum(
+        correlations = np.array([
+                                 np.sum(field[x[:-d],:] * field[x[:-d]+d,:]) +    
+                                 np.sum(field[:,y[:-d]] * field[:,y[:-d]+d]) +
+                                 np.sum([np.sum(
                                                 field[xx[:-i,:-j],yy[:-i,:-j]]*field[xx[:-i,:-j]+i,yy[:-i,:-j]+j] + 
-                                                field[xx[i:,:-j],yy[i:,:-j]]*field[xx[i:,:-j]-i,yy[i:,:-j]+j])
-                                                for i,j in zip(pxs[idx],pxs[idx][::-1]) if len(pxs[idx]) != 0 ] )
-                                        ]) for d, idx in zip(distances,range(len(distances)))])
+                                                field[xx[i:,:-j],yy[i:,:-j]]*field[xx[i:,:-j]-i,yy[i:,:-j]+j]
+                                                )
+                                         for i,j in zip(pxs[idx],pxs[idx][::-1]) if len(pxs[idx]) != 0 
+                                        ])
+                                 for d, idx in zip(distances,range(len(distances)))
+                                ])
     except:
         logger.debug(f'NO good pxs\n{pxs}')
         logger.debug(f'Result -> {len(pxs[0]) != 0}')
@@ -459,6 +462,13 @@ if __name__ == '__main__':
         new_tpcf = test(data,bins=new_dist,display_plot=args.plot)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
+        
+        start = time()
+        strc_fun = filpy.compute_sf(data,bins=new_dist,order=10,display_plot=args.plot)
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+
+
         # diff = ~np.isclose(new_tpcf-old_tpcf,0)
         # if np.any(diff):
         #     logger.info('Problems')
