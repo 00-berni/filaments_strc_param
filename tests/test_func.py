@@ -1,4 +1,5 @@
 from .. import filpy
+from typing import Literal
 import numpy as np
 import tracemalloc
 import linecache
@@ -11,6 +12,7 @@ TEST_DIR = filpy.PROJECT_DIR + 'tests'
 __all__ = ['filpy',
            'tracemalloc',
            'logging',
+           'Literal',
            'ArrayLike', 
            'display_top', 
            'log_path',
