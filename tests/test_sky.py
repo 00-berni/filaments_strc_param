@@ -11,6 +11,13 @@ logger_name = __name__
 logger = logging.getLogger(logger_name)
 logger.setLevel('DEBUG')
 
+
+
+
+
+
+
+
 PIC_DIR = filpy.PROJECT_DIR -1 + 'pictures'
 FILE_NAME = filpy.FileVar(__file__,path=True)   #: path of the file
 
