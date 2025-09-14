@@ -201,7 +201,7 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
         if not no_zero:
             corr = np.append([(field**2).sum()],corr)
             bins = np.append([0],bins)
-            corr /= corr[0]
+            # corr /= corr[0]
         # logger.debug(f'Positions:\n{pos}')
     snapshot = tracemalloc.take_snapshot()
     display_top(snapshot,logger=logger)
@@ -326,6 +326,50 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     return unq_dist, correlations
 
 
+def __from_rth_to_xy(radius: ArrayLike, theta: ArrayLike) -> tuple[ArrayLike, ArrayLike]:
+    x = np.round(radius*np.cos(theta),0).astype(int)
+    y = np.round(radius*np.sin(theta),0).astype(int)
+    return x,y
+
+def __compute_pos(data_pos: tuple[np.ndarray,np.ndarray], coord: tuple[float,float], mode: Literal['polar','cartesian'] = 'polar') -> tuple[tuple[np.ndarray,np.ndarray],tuple[np.ndarray,np.ndarray]]:
+    if mode == 'polar':
+        coord = __from_rth_to_xy(*coord)
+    i,j = coord
+    xx,yy = data_pos
+    xdim = np.max(xx)+1
+    ydim = np.max(yy)+1
+    xpos = np.logical_and(xx+i >=0, xx+i<xdim)
+    ypos = np.logical_and(yy+j >=0, yy+j<ydim)
+    pos = np.logical_and(xpos,ypos)
+    return pos
+
+def tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesian'] = 'polar') -> ArrayLike:
+    usage_start = ram_usage()
+    tracemalloc.start()
+    logger.info('Call the function `TPCF`')
+    logger.debug('Copy the data and remove the mean')
+    field = np.copy(field) - field.mean()
+    if mode == 'polar':
+        distances = __from_rth_to_xy(*distances)
+    x, y = distances
+    no_zero = (x!=0) + (y!=0)
+    x = x[no_zero]
+    y = y[no_zero]
+    logger.debug(f'LEN POS : {no_zero.shape}')
+    logger.debug(f'LEN X : {x.shape}')
+    correlations = np.zeros(x.size)
+    logger.debug(f'LEN CORR : {correlations.shape}')
+    xdim, ydim = field.shape
+    yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
+    operation = lambda pos, shift : np.sum(field[xx[pos],yy[pos]] * field[xx[pos]+shift[0],yy[pos]+shift[1]])
+    correlations = np.array([ operation(__compute_pos((xx,yy),(i,j),mode='cartesian'),(i,j)) for i,j in zip(x,y)]) 
+    correlations = np.append([np.sum(field**2)],correlations)
+    snapshot2 = tracemalloc.take_snapshot()
+    display_top(snapshot2,logger=logger)
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end - usage_start)/1024**3} Gb')
+    logger.info('END')
+    return correlations
 
 ## PIPELINE
 if __name__ == '__main__':
@@ -437,9 +481,33 @@ if __name__ == '__main__':
             logger.debug(f'The problem\n{[*old_dist[diff]]}\n{[i for i in old_tpcf[diff] - new_tpcf[diff]]}')
         else:
             logger.info('Ok!')
+        start = time()
+        xdim,ydim = data.shape
+        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
+        xx -= xdim-1
+        yy -= ydim-1
+        # logger.info(f'{xx}\n{yy}')
+        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(yy,xx).flatten()
+        pos = np.where(new_dist2 == 0.)[0][0]
+        logger.info(f'{pos}')
+        new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+        directions[:pos+1] = np.append(0,directions[:pos])
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
         fig, ax = plt.subplots(1,1)
         ax.plot(old_dist,old_tpcf,'--.',color='blue') 
         ax.plot(new_dist,new_tpcf,'--+',color='red' ) 
+        ax.plot(new_dist2,new_tpcf2,'x',color='green' ) 
+        ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
+        fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+        img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic')
+        fig2.colorbar(img,ax=ax2)
+        fig3, ax3 = plt.subplots(1,1)
+        pos = (xx.flatten()!=0)+(yy.flatten()!=0)
+        img = ax3.scatter(xx.flatten()[pos],yy.flatten()[pos],c=new_tpcf2[1:],cmap='seismic')
+        fig3.colorbar(img,ax=ax3)
         plt.show() 
 
     ## TEST
@@ -467,6 +535,46 @@ if __name__ == '__main__':
         strc_fun = filpy.compute_sf(data,bins=new_dist,order=10,display_plot=args.plot)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
+        start = time()
+        xdim,ydim = data.shape
+        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
+        xx -= xdim-1
+        yy -= ydim-1
+        # logger.info(f'{xx}\n{yy}')
+        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        start_ram = ram_usage()
+        tracemalloc.start()
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(yy,xx).flatten()
+        pos = np.where(new_dist2 == 0.)[0][0]
+        logger.info(f'{pos}')
+        new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+        directions[:pos+1] = np.append(0,directions[:pos])
+
+        dist2 = np.unique(new_dist2)
+        corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        end_ram = ram_usage()
+        logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+        if not args.plot:
+            fig, ax = plt.subplots(1,1)
+            ax.plot(new_dist,new_tpcf,'--.',color='red' ) 
+            ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
+            ax.plot(dist2,corr2,'+',color='blue' ) 
+            ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
+            fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+            img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+            fig2.colorbar(img,ax=ax2)
+            ax2.set_thetamin(45)
+            ax2.set_thetamax(135)
+            # fig3, ax3 = plt.subplots(1,1)
+            # pos = (xx.flatten()!=0)+(yy.flatten()!=0)
+            # img = ax3.scatter(xx.flatten()[pos],yy.flatten()[pos],c=new_tpcf2[1:],cmap='seismic')
+            # fig3.colorbar(img,ax=ax3)
+            plt.show() 
 
 
         # diff = ~np.isclose(new_tpcf-old_tpcf,0)
@@ -576,3 +684,4 @@ if __name__ == '__main__':
         plt.grid(color='grey',alpha=0.6,linestyle='dotted')
         plt.show()
         
+        sf = filpy.compute_sf(data,dist,3)
