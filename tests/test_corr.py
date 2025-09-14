@@ -371,6 +371,33 @@ def tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartes
     logger.info('END')
     return correlations
 
+def sf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesian'] = 'polar',order: int = 1) -> ArrayLike:
+    usage_start = ram_usage()
+    tracemalloc.start()
+    logger.info('Call the function `TPCF`')
+    logger.debug('Copy the data and remove the mean')
+    if mode == 'polar':
+        distances = __from_rth_to_xy(*distances)
+    x, y = distances
+    no_zero = (x!=0) + (y!=0)
+    x = x[no_zero]
+    y = y[no_zero]
+    logger.debug(f'LEN POS : {no_zero.shape}')
+    logger.debug(f'LEN X : {x.shape}')
+    structure = np.zeros(x.size)
+    logger.debug(f'LEN CORR : {structure.shape}')
+    xdim, ydim = field.shape
+    yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
+    operation = lambda pos, shift : np.sum(np.abs(field[xx[pos],yy[pos]] - field[xx[pos]+shift[0],yy[pos]+shift[1]])**order)
+    structure = np.array([ operation(__compute_pos((xx,yy),(i,j),mode='cartesian'),(i,j)) for i,j in zip(x,y)]) 
+    structure = np.append([0],structure)
+    snapshot2 = tracemalloc.take_snapshot()
+    display_top(snapshot2,logger=logger)
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end - usage_start)/1024**3} Gb')
+    logger.info('END')
+    return structure
+
 ## PIPELINE
 if __name__ == '__main__':
     # set parser
@@ -531,10 +558,10 @@ if __name__ == '__main__':
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
         
-        start = time()
-        strc_fun = filpy.compute_sf(data,bins=new_dist,order=10,display_plot=args.plot)
-        end = time()
-        logger.info(f'Computational time {(end-start)/60} m')
+#        start = time()
+#        strc_fun = filpy.compute_sf(data,bins=new_dist,order=10,display_plot=args.plot)
+#        end = time()
+#        logger.info(f'Computational time {(end-start)/60} m')
         start = time()
         xdim,ydim = data.shape
         yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
@@ -559,7 +586,7 @@ if __name__ == '__main__':
         display_top(snapshot,logger=logger)
         end_ram = ram_usage()
         logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
-        if not args.plot:
+        if args.plot:
             fig, ax = plt.subplots(1,1)
             ax.plot(new_dist,new_tpcf,'--.',color='red' ) 
             ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
@@ -641,15 +668,15 @@ if __name__ == '__main__':
                 xpos = np.concatenate([xpos + i for i in range(wd)])
                 ypos = np.concatenate([ypos + i for i in range(wd)])
                 xpos = xpos[xpos<xdim]
-                ypos = ypos[ypos<ydim]
-                new_data[xpos,:] = 1
-                new_data[:,ypos] = 1
+                # ypos = ypos[ypos<ydim]
+                new_data[xpos,:] += 1
+                # new_data[:,ypos] = 1
             return new_data
 
 
         dim = args.dim
-        data = np.zeros((dim,dim))        
         np.random.seed(args.seed)
+        data = np.zeros((dim,dim)) + np.random.random((dim,dim))*2       
         width = args.width
         spacing = args.lag
         data = make_pattern(data,'lattice',width=width,spacing=spacing)
@@ -668,6 +695,58 @@ if __name__ == '__main__':
         corr = test(data,dist,display_plot=False)
 
 
+        start = time()
+        xdim,ydim = data.shape
+        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
+        xx -= xdim-1
+        yy -= ydim-1
+        # logger.info(f'{xx}\n{yy}')
+        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        start_ram = ram_usage()
+        tracemalloc.start()
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(yy,xx).flatten()
+        pos = np.where(new_dist2 == 0.)[0][0]
+        logger.info(f'{pos}')
+        new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+        directions[:pos+1] = np.append(0,directions[:pos])
+
+        stfunc = sf(data,(xx,yy), mode='cartesian',order=2)
+
+
+        dist2 = np.unique(new_dist2)
+        corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+        end = time()
+        logger.info(f'Computational time {(end-start)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        end_ram = ram_usage()
+        logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+        if args.plot:
+            fig0, ax0 = plt.subplots(1,1)
+            ax0.plot(new_dist2,stfunc,'--+',color='orange',alpha=0.2) 
+            fig, ax = plt.subplots(1,1)
+            ax.plot(dist,corr,'--.',color='red' ) 
+            ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
+            ax.plot(dist2,corr2,'+',color='blue' ) 
+            ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
+            fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+            img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+            fig2.colorbar(img,ax=ax2)
+            ax2.set_theta_zero_location("N")
+            fig4, ax4 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+            img = ax4.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
+            fig4.colorbar(img,ax=ax4)
+            ax4.set_theta_zero_location("N")
+            # ax2.set_thetamin(45)
+            # ax2.set_thetamax(135)
+            # fig3, ax3 = plt.subplots(1,1)
+            # pos = (xx.flatten()!=0)+(yy.flatten()!=0)
+            # img = ax3.scatter(xx.flatten()[pos],yy.flatten()[pos],c=new_tpcf2[1:],cmap='seismic')
+            # fig3.colorbar(img,ax=ax3)
+            plt.show() 
+
+
         plt.figure()
         plt.plot(dist,corr,'--.',color='blue')
         plt.axhline(0,color='black',linestyle='dotted',alpha=0.5)
@@ -684,4 +763,4 @@ if __name__ == '__main__':
         plt.grid(color='grey',alpha=0.6,linestyle='dotted')
         plt.show()
         
-        sf = filpy.compute_sf(data,dist,3)
+        # sf = filpy.compute_sf(data,dist,3)
