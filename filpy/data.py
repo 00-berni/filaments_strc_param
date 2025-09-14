@@ -136,7 +136,7 @@ class FileVar():
 
     def copy(self) -> 'FileVar':
         """Copy the variable"""
-        new_file = FileVar(filename=self.FILE,dirpath=self.PATH,path=False)
+        new_file = FileVar(filename=self.FILE,dirpath=self.DIR,path=False)
         return new_file
 
     def __getitem__(self,item: int) -> str:
