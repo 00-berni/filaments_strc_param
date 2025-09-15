@@ -402,12 +402,30 @@ def sf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesia
 
 ## PIPELINE
 if __name__ == '__main__':
+    def make_pattern(data: np.ndarray, pattern: str = 'lattice',**kwargs) -> np.ndarray:
+        new_data = np.copy(data)
+        xdim, ydim = new_data.shape
+        if pattern == 'lattice':
+            wd = kwargs['width']
+            sp = kwargs['spacing']
+            lag = sp+wd
+            xpos = np.arange(xdim//lag+1)*lag
+            ypos = np.arange(ydim//lag+1)*lag
+            xpos = np.concatenate([xpos + i for i in range(wd)])
+            ypos = np.concatenate([ypos + i for i in range(wd)])
+            xpos = xpos[xpos<xdim]
+            # ypos = ypos[ypos<ydim]
+            new_data[xpos,:] += 1
+            # new_data[:,ypos] = 1
+        return new_data
+
     # set parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all','DEBUG', 'INFO'],default=None)
-    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test','pattern'],default='lattice')
+    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test','pattern','time'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
     parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
+    parser.add_argument("-o","--order", help='field size',type=int, action='store',default=1)
     parser.add_argument("-d","--dim", help='field size',type=int, action='store',default=32)
     parser.add_argument("-s","--seed", help='set seed', type=int, action='store',default=10)
     parser.add_argument("-e","--edges", help='set max and min of noise', type=float, required=False, nargs=2, action='store',default=[0,2])
@@ -658,24 +676,6 @@ if __name__ == '__main__':
 
     elif args.test == 'pattern':
 
-        def make_pattern(data: np.ndarray, pattern: str = 'lattice',**kwargs) -> np.ndarray:
-            new_data = np.copy(data)
-            xdim, ydim = new_data.shape
-            if pattern == 'lattice':
-                wd = kwargs['width']
-                sp = kwargs['spacing']
-                lag = sp+wd
-                xpos = np.arange(xdim//lag+1)*lag
-                ypos = np.arange(ydim//lag+1)*lag
-                xpos = np.concatenate([xpos + i for i in range(wd)])
-                ypos = np.concatenate([ypos + i for i in range(wd)])
-                xpos = xpos[xpos<xdim]
-                # ypos = ypos[ypos<ydim]
-                new_data[xpos,:] += 1
-                # new_data[:,ypos] = 1
-            return new_data
-
-
         dim = args.dim
         np.random.seed(args.seed)
         data = np.zeros((dim,dim)) + np.random.random((dim,dim))*2       
@@ -713,7 +713,7 @@ if __name__ == '__main__':
         new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
         directions[:pos+1] = np.append(0,directions[:pos])
 
-        stfunc = sf(data,(xx,yy), mode='cartesian',order=2)
+        stfunc = sf(data,(xx,yy), mode='cartesian',order=args.order)
 
 
         dist2 = np.unique(new_dist2)
@@ -766,3 +766,40 @@ if __name__ == '__main__':
         plt.show()
         
         # sf = filpy.compute_sf(data,dist,3)
+
+
+    elif args.test == 'time':
+        dim = args.dim
+        np.random.seed(args.seed)
+        data = np.zeros((dim,dim)) + np.random.random((dim,dim))*2       
+        width = args.width
+        spacing = args.lag
+        data = make_pattern(data,'lattice',width=width,spacing=spacing)
+        
+        start_time = time()
+        tracemalloc.start()
+        xdim,ydim = data.shape
+        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
+        xx -= xdim-1
+        yy -= ydim-1
+        # logger.info(f'{xx}\n{yy}')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        start_ram = ram_usage()
+        tracemalloc.start()
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(xx,yy).flatten()
+        pos = np.where(new_dist2 == 0.)[0][0]
+        logger.info(f'{pos}')
+        new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+        directions[:pos+1] = np.append(0,directions[:pos])
+
+        dist2 = np.unique(new_dist2)
+        corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+        end_time = time()
+        logger.info(f'Computational time {(end_time-start_time)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        end_ram = ram_usage()
+        logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
