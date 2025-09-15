@@ -362,7 +362,9 @@ def tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartes
     xdim, ydim = field.shape
     yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
     operation = lambda pos, shift : np.sum(field[xx[pos],yy[pos]] * field[xx[pos]+shift[0],yy[pos]+shift[1]])
+    start_time = time()
     correlations = np.array([ operation(__compute_pos((xx,yy),(i,j),mode='cartesian'),(i,j)) for i,j in zip(x,y)]) 
+    logger.info(f'time correlation: {(time()-start_time)/60} m')
     correlations = np.append([np.sum(field**2)],correlations)
     snapshot2 = tracemalloc.take_snapshot()
     display_top(snapshot2,logger=logger)
@@ -374,7 +376,7 @@ def tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartes
 def sf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesian'] = 'polar',order: int = 1) -> ArrayLike:
     usage_start = ram_usage()
     tracemalloc.start()
-    logger.info('Call the function `TPCF`')
+    logger.info('Call the function `SF`')
     logger.debug('Copy the data and remove the mean')
     if mode == 'polar':
         distances = __from_rth_to_xy(*distances)
@@ -705,7 +707,7 @@ if __name__ == '__main__':
         start_ram = ram_usage()
         tracemalloc.start()
         new_dist2 = np.sqrt(xx**2+yy**2).flatten()
-        directions = np.arctan2(yy,xx).flatten()
+        directions = np.arctan2(xx,yy).flatten()
         pos = np.where(new_dist2 == 0.)[0][0]
         logger.info(f'{pos}')
         new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
@@ -733,11 +735,11 @@ if __name__ == '__main__':
             fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
             img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
             fig2.colorbar(img,ax=ax2)
-            ax2.set_theta_zero_location("N")
+            # ax2.set_theta_zero_location("N")
             fig4, ax4 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
             img = ax4.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
             fig4.colorbar(img,ax=ax4)
-            ax4.set_theta_zero_location("N")
+            # ax4.set_theta_zero_location("N")
             # ax2.set_thetamin(45)
             # ax2.set_thetamax(135)
             # fig3, ax3 = plt.subplots(1,1)
