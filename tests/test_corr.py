@@ -160,7 +160,7 @@ def irrational_correlation(field: np.ndarray, distances: ArrayLike, precision: i
             raise
     return correlations
 
-def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 13, display_plot: bool = True) -> None:
+def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zero: bool = False, precision: int = 13, param: int = 5, display_plot: bool = True) -> None:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `TEST`')
@@ -211,18 +211,18 @@ def test(field: np.ndarray, bins: int | float | np.ndarray | None = None, no_zer
     if display_plot and not isinstance(bins,(float,int)):
         filpy.quickplot((bins,corr),fmt='--.')
         plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
-        div = int(field.shape[0]//PARAM)
-        if field.shape[0]%PARAM != 0: div += 1 
+        div = int(field.shape[0]//param)
+        if field.shape[0]%param != 0: div += 1 
         for i in range(div):
             for j in range(i,div):
-                d = distance((0,0),(i,j))*PARAM
+                d = distance((0,0),(i,j))*param
                 plt.axvline(d,color='red',linestyle='dotted')
                 plt.annotate(f'({i},{j})',(d,corr.max()),(d+0.02,corr.max()))
         plt.show()
     return corr
 
 
-def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
+def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, param: int = 5, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
     usage_start = ram_usage()
     tracemalloc.start()
     logger.info('Call the function `compute_correlation`')
@@ -307,17 +307,17 @@ def compute_correlation(field: np.ndarray, diagonal_dist: bool = True, display_p
     if display_plot:
         filpy.quickplot((unq_dist,correlations),fmt='.-')
         plt.axhline(0,linestyle='dashed',color='black',alpha=0.5)
-        div = int(field.shape[0]//PARAM)
-        if field.shape[0]%PARAM != 0: div += 1 
+        div = int(field.shape[0]//param)
+        if field.shape[0]%param != 0: div += 1 
         if diagonal_dist:
             for i in range(div):
                 for j in range(i,div):
-                    d = distance((0,0),(i,j))*PARAM
+                    d = distance((0,0),(i,j))*param
                     plt.axvline(d,color='red',linestyle='dotted')
                     plt.annotate(f'({i},{j})',(d,correlations.max()),(d+0.02,correlations.max()))
         else:
             for i in range(div):
-                d = i*PARAM
+                d = i*param
                 plt.axvline(d,color='red',linestyle='dotted')
         plt.show()
     usage_end = ram_usage()
@@ -353,15 +353,16 @@ def tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartes
         distances = __from_rth_to_xy(*distances)
     x, y = distances
     no_zero = (x!=0) + (y!=0)
-    x = x[no_zero]
-    y = y[no_zero]
+    x = x[no_zero].astype(int)
+    y = y[no_zero].astype(int)
     logger.debug(f'LEN POS : {no_zero.shape}')
     logger.debug(f'LEN X : {x.shape}')
+    logger.debug(f'TYPE X : {x.dtype}')
     correlations = np.zeros(x.size)
     logger.debug(f'LEN CORR : {correlations.shape}')
     xdim, ydim = field.shape
     yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
-    operation = lambda pos, shift : np.sum(field[xx[pos],yy[pos]] * field[xx[pos]+shift[0],yy[pos]+shift[1]])
+    operation = lambda pos, shift : np.sum(field[xx[pos],yy[pos]] * field[xx[pos]+shift[0],yy[pos]+shift[1]]) if np.any(pos) else 0
     start_time = time()
     correlations = np.array([ operation(__compute_pos((xx,yy),(i,j),mode='cartesian'),(i,j)) for i,j in zip(x,y)]) 
     logger.info(f'time correlation: {(time()-start_time)/60} m')
@@ -400,6 +401,76 @@ def sf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesia
     logger.info('END')
     return structure
 
+
+def another_tpcf(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesian'] = 'polar') -> ArrayLike:
+    usage_start = ram_usage()
+    tracemalloc.start()
+    logger.info('Call the function `TPCF`')
+    logger.debug('Copy the data and remove the mean')
+    field = np.copy(field) - field.mean()
+    if mode == 'polar':
+        distances = __from_rth_to_xy(*distances)
+    x, y = distances
+    no_zero = (x!=0) + (y!=0)
+    x = x[no_zero].astype(int)
+    y = y[no_zero].astype(int)
+    logger.debug(f'LEN POS : {no_zero.shape}')
+    logger.debug(f'LEN X : {x.shape}')
+    logger.debug(f'TYPE X : {x.dtype}')
+    correlations = np.zeros(x.size)
+    logger.debug(f'LEN CORR : {correlations.shape}')
+    xdim, ydim = field.shape
+    yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
+    start_time = time()
+    for k in range(x.size):
+        i,j = x[k],y[k]
+        pos = __compute_pos((xx,yy),(i,j),mode='cartesian')
+        correlations[k] = np.sum(field[xx[pos],yy[pos]] * field[xx[pos]+i,yy[pos]+j]) 
+    logger.info(f'time correlation: {(time()-start_time)/60} m')
+    correlations = np.append([np.sum(field**2)],correlations)
+    snapshot2 = tracemalloc.take_snapshot()
+    display_top(snapshot2,logger=logger)
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end - usage_start)/1024**3} Gb')
+    logger.info('END')
+    return correlations
+
+def __mapping(data_pos: tuple[np.ndarray,np.ndarray], couples: list[tuple[int,int]]) -> np.ndarray:
+    xx, yy = data_pos
+    xdim = xx.max()+1
+    ydim = yy.max()+1
+    pos = np.array([ (xx+i>=0)*(xx+i<xdim)*(yy+j>=0)*(yy+j<ydim) for (i,j) in couples ], dtype='object')
+    return pos
+
+def another_tpcf2(field: np.ndarray, distances: np.ndarray, mode: Literal['polar','cartesian'] = 'polar') -> ArrayLike:
+    usage_start = ram_usage()
+    tracemalloc.start()
+    logger.info('Call the function `TPCF`')
+    logger.debug('Copy the data and remove the mean')
+    field = np.copy(field) - field.mean()
+    if mode == 'polar':
+        distances = __from_rth_to_xy(*distances)
+    x, y = distances
+    correlations = np.zeros((*x.shape,4))
+    logger.debug(f'LEN CORR : {correlations.shape}')
+    xdim, ydim = field.shape
+    yy, xx = np.meshgrid(np.arange(ydim),np.arange(xdim))
+    start_time = time()
+    for ki,kj in np.transpose(np.unravel_index(np.arange(x.size),x.shape)):
+        i,j = x[ki,kj],y[ki,kj]
+        couples = [(i,j),(i,-j),(-i,-j),(-i,j)]
+        pos = __mapping((xx,yy),couples)
+        correlations[ki,kj] = [np.sum(field[xx[p.astype(bool)],yy[p.astype(bool)]] * field[xx[p.astype(bool)]+ii,yy[p.astype(bool)]+jj]) for p, (ii,jj) in zip(pos,couples) ] 
+    logger.info(f'time correlation: {(time()-start_time)/60} m')
+    # correlations = np.append([np.sum(field**2)],correlations)
+    snapshot2 = tracemalloc.take_snapshot()
+    display_top(snapshot2,logger=logger)
+    usage_end = ram_usage()
+    logger.info(f'Ram Usage {(usage_end - usage_start)/1024**3} Gb')
+    logger.info('END')
+    return correlations
+
+
 ## PIPELINE
 if __name__ == '__main__':
     def make_pattern(data: np.ndarray, pattern: str = 'lattice',**kwargs) -> np.ndarray:
@@ -417,12 +488,25 @@ if __name__ == '__main__':
             # ypos = ypos[ypos<ydim]
             new_data[xpos,:] += 1
             # new_data[:,ypos] = 1
+        elif pattern == 'filament':
+            wd = kwargs['width']
+            sp = kwargs['spacing']
+            sequence = [0,1,2,3,3,3,2,2,1,1,0,-1,-2,-1]
+            patt = np.array(sequence*(ydim//len(sequence))+sequence[:ydim%len(sequence)])
+            pos  = np.arange(ydim)
+            
+            for i in range(wd):
+                xpos = sp*2+patt + i
+                idx = xpos<xdim
+                xpos = xpos[idx]
+                pos = pos[idx]
+                new_data[xpos,pos] += 1
         return new_data
 
     # set parser
     parser = argparse.ArgumentParser()
     parser.add_argument("--log",help='set log',nargs='*',type=str,action="store",choices=['file','bash','all','DEBUG', 'INFO'],default=None)
-    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test','pattern','time'],default='lattice')
+    parser.add_argument("test",help='selected test',type=str,choices=['lattice','random','compare','test','pattern','time','speed'],default='lattice')
     parser.add_argument("--no-diag", help='compute horizontal and vertical only', action='store_false')
     parser.add_argument("-m","--mode", help='mode of the log',type=str, action='store',default='w')
     parser.add_argument("-o","--order", help='field size',type=int, action='store',default=1)
@@ -460,19 +544,19 @@ if __name__ == '__main__':
 
     dim = args.dim    #: size of the field 
     logger.info(f'size = ({dim},{dim})')
+    PARAM = args.lag                                        #: lag of the lattice
     if args.test == 'lattice':
         # build the field
         np.random.seed(args.seed)
         data = np.random.uniform(*args.edges,size=(dim,dim))    #: random signal
-        PARAM = args.lag                                        #: lag of the lattice
         data[::PARAM,::PARAM] += args.value
         # display the field
         filpy.show_image(data,cmap='viridis')
         print(args.method)
         if args.method == 'old':
-            _ = compute_correlation(data,args.no_diag,args.plot)
+            _ = compute_correlation(data,args.no_diag,PARAM,args.plot)
         elif args.method == 'new':
-             
+            
             d_dict = eval(args.dist)
             if 'dist' in d_dict.keys():
                 dists = np.sort(d_dict['dist'])
@@ -488,7 +572,7 @@ if __name__ == '__main__':
             tracemalloc.start()
             field = np.copy(data) - data.mean()
             start = time()
-            corr = test(data,dists)
+            corr = test(data,dists,param=PARAM)
             end = time()
             logger.info(f'Computational time {(end-start)/60} m')
             if args.plot:
@@ -514,12 +598,12 @@ if __name__ == '__main__':
         # display the field
         filpy.show_image(data,cmap='viridis')
         start = time()
-        old_dist, old_tpcf = compute_correlation(data,args.no_diag,display_plot=False)
+        old_dist, old_tpcf = compute_correlation(data,args.no_diag,PARAM,display_plot=False)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
         new_dist = old_dist
         start = time()
-        new_tpcf = test(data,bins=new_dist,display_plot=False)
+        new_tpcf = test(data,bins=new_dist,param=PARAM,display_plot=False)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
         diff = ~np.isclose(new_tpcf-old_tpcf,0,rtol=1e-10)
@@ -530,9 +614,9 @@ if __name__ == '__main__':
             logger.info('Ok!')
         start = time()
         xdim,ydim = data.shape
-        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
-        xx -= xdim-1
-        yy -= ydim-1
+        yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))
+        
+        
         # logger.info(f'{xx}\n{yy}')
         new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
         new_dist2 = np.sqrt(xx**2+yy**2).flatten()
@@ -561,7 +645,7 @@ if __name__ == '__main__':
     elif args.test == 'test':
         # build the field
         np.random.seed(args.seed)
-        data = np.random.uniform(*args.edges,size=(dim,dim))*0    #: random signal
+        data = np.random.uniform(*args.edges,size=(dim,dim))*2    #: random signal
         PARAM = args.lag                                        #: lag of the lattice
         data[::PARAM,::PARAM] += args.value
         # display the field
@@ -574,7 +658,7 @@ if __name__ == '__main__':
         lim = dim
         new_dist = np.unique(np.concatenate([np.sqrt(np.arange(i,lim)**2+i**2) for i in range(lim)]))
         start = time()
-        new_tpcf = test(data,bins=new_dist,display_plot=args.plot)
+        new_tpcf = test(data,bins=new_dist,param=PARAM,display_plot=args.plot)
         end = time()
         logger.info(f'Computational time {(end-start)/60} m')
         
@@ -584,9 +668,9 @@ if __name__ == '__main__':
 #        logger.info(f'Computational time {(end-start)/60} m')
         start = time()
         xdim,ydim = data.shape
-        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
-        xx -= xdim-1
-        yy -= ydim-1
+        yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))
+        
+        
         # logger.info(f'{xx}\n{yy}')
         new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
         start_ram = ram_usage()
@@ -646,7 +730,7 @@ if __name__ == '__main__':
             for i in range(ITER):
                 logger.debug(f'ITERATION n. {i:00d}')
                 start = time()
-                u_d, tmp_c = compute_correlation(np.random.uniform(-1,1,size=(dim,dim)),False,display_plot=False)
+                u_d, tmp_c = compute_correlation(np.random.uniform(-1,1,size=(dim,dim)),False,PARAM,display_plot=False)
                 corr += tmp_c
                 if i != 0:
                     logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')
@@ -659,7 +743,7 @@ if __name__ == '__main__':
             for i in range(ITER):
                 logger.info(f'ITERATION n. {i:02d}')
                 start = time()
-                tmp_c = test(np.random.uniform(-1,1,size=(dim,dim)),u_d,display_plot=False)
+                tmp_c = test(np.random.uniform(-1,1,size=(dim,dim)),u_d,param=PARAM,display_plot=False)
                 corr += tmp_c
                 if i != 0:
                     logger.warning(f'CORR mean = {(corr[1:]/i).mean()}')
@@ -681,7 +765,8 @@ if __name__ == '__main__':
         data = np.zeros((dim,dim)) + np.random.random((dim,dim))*2       
         width = args.width
         spacing = args.lag
-        data = make_pattern(data,'lattice',width=width,spacing=spacing)
+        data = make_pattern(data,'filament',width=width,spacing=spacing)
+        # data = make_pattern(data,'lattice',width=width,spacing=spacing)
         fig, ax = filpy.show_image(data,colorbar=False)
         if args.ticks:
             axp = fig.gca()
@@ -694,16 +779,17 @@ if __name__ == '__main__':
             dist = np.unique(np.concatenate([np.sqrt(np.arange(i,dim)**2+i**2) for i in range(data.shape[0])]))
         else:
             dist = np.arange(data.shape[0])
-        corr = test(data,dist,display_plot=False)
+        corr = test(data,dist,param=PARAM,display_plot=False)
 
 
+        ## NEW
         start = time()
         xdim,ydim = data.shape
-        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
-        xx -= xdim-1
-        yy -= ydim-1
+        yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))
+        
+        
         # logger.info(f'{xx}\n{yy}')
-        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        new_tpcf2 = another_tpcf(data,(xx,yy), mode='cartesian')[1:]
         start_ram = ram_usage()
         tracemalloc.start()
         new_dist2 = np.sqrt(xx**2+yy**2).flatten()
@@ -712,7 +798,8 @@ if __name__ == '__main__':
         logger.info(f'{pos}')
         new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
         directions[:pos+1] = np.append(0,directions[:pos])
-
+        new_dist2=new_dist2[1:]
+        directions=directions[1:]
         stfunc = sf(data,(xx,yy), mode='cartesian',order=args.order)
 
 
@@ -724,46 +811,81 @@ if __name__ == '__main__':
         display_top(snapshot,logger=logger)
         end_ram = ram_usage()
         logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
-        if args.plot:
-            fig0, ax0 = plt.subplots(1,1)
-            ax0.plot(new_dist2,stfunc,'--+',color='orange',alpha=0.2) 
-            fig, ax = plt.subplots(1,1)
-            ax.plot(dist,corr,'--.',color='red' ) 
-            ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
-            ax.plot(dist2,corr2,'+',color='blue' ) 
-            ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
-            fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
-            img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
-            fig2.colorbar(img,ax=ax2)
-            # ax2.set_theta_zero_location("N")
-            fig4, ax4 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
-            img = ax4.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
-            fig4.colorbar(img,ax=ax4)
-            # ax4.set_theta_zero_location("N")
-            # ax2.set_thetamin(45)
-            # ax2.set_thetamax(135)
-            # fig3, ax3 = plt.subplots(1,1)
-            # pos = (xx.flatten()!=0)+(yy.flatten()!=0)
-            # img = ax3.scatter(xx.flatten()[pos],yy.flatten()[pos],c=new_tpcf2[1:],cmap='seismic')
-            # fig3.colorbar(img,ax=ax3)
-            plt.show() 
+
+        ## NEW 2
+        # logger.info('FOR LOOP')
+        # start_time = time()
+        # tracemalloc.start()
+        # xdim,ydim = data.shape
+        # yy,xx = np.meshgrid(np.arange(1,ydim),np.arange(1,xdim))     
+
+        # # logger.info(f'{xx}\n{yy}')
+        # snapshot = tracemalloc.take_snapshot()
+        # display_top(snapshot,logger=logger)
+        # start_ram = ram_usage()
+        # new_tpcf2 = another_tpcf2(data,(xx,yy), mode='cartesian')
+        # end_ram = ram_usage()
+        # start_ram = ram_usage()
+        # tracemalloc.start()
+        # new_dist2 = np.repeat(np.sqrt(xx**2+yy**2).flatten()[1:],4,axis=0)
+        # directions = np.array([np.arctan2(i*xx,j*yy).flatten()[1:] for (i,j) in [(1,1),(1,-1),(-1,-1),(-1,1)]])
+        # logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+        # end_time = time()
+        # logger.info(f'Computational time {(end_time-start_time)/60} m')
+        # if args.plot:
+        #     # fig0, ax0 = plt.subplots(1,1)
+        #     # ax0.plot(new_dist2,stfunc,'+',color='orange',alpha=0.2) 
+        #     # fig, ax = plt.subplots(1,1)
+        #     # ax.plot(dist,corr,'--.',color='red' ) 
+        #     # ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
+        #     # ax.plot(dist2,corr2,'+',color='blue' ) 
+        #     # ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
+        #     fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+        #     # img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+        #     img = ax2.scatter(directions.flatten(),new_dist2.flatten(),c=new_tpcf2.flatten(),cmap='seismic',marker='.')
+        #     fig2.colorbar(img,ax=ax2)
+        #     # ax2.set_theta_zero_location("N")
+        #     fig4, ax4 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+        #     img = ax4.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
+        #     fig4.colorbar(img,ax=ax4)
+        #     # ax4.set_theta_zero_location("N")
+        #     # ax2.set_thetamin(45)
+        #     # ax2.set_thetamax(135)
+        #     # fig3, ax3 = plt.subplots(1,1)
+        #     # pos = (xx.flatten()!=0)+(yy.flatten()!=0)
+        #     # img = ax3.scatter(xx.flatten()[pos],yy.flatten()[pos],c=new_tpcf2[1:],cmap='seismic')
+        #     # fig3.colorbar(img,ax=ax3)
+        #     # fig  = plt.figure()
+        #     # ax01 = fig.add_subplot(1,3,1)
+        #     # ax01.set_title('Data')
+        #     # img01 = ax01.imshow(data,cmap='gray',origin='lower')
+        #     # fig.colorbar(img01,ax=ax01,location='bottom')
+        #     # ax02 = fig.add_subplot(1,3,2,projection='polar')
+        #     # ax02.set_title('Two-Point Corr. Func.')
+        #     # img02 = ax02.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+        #     # fig.colorbar(img02,ax=ax02,location='bottom')
+        #     # ax03 = fig.add_subplot(1,3,3,projection='polar')
+        #     # ax03.set_title('Structure Func.')
+        #     # img03 = ax03.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
+        #     # fig.colorbar(img03,ax=ax03,location='bottom')
+        #     plt.show() 
 
 
-        plt.figure()
-        plt.plot(dist,corr,'--.',color='blue')
-        plt.axhline(0,color='black',linestyle='dotted',alpha=0.5)
-        lag = spacing + width
-        for i in np.arange(1,dim//lag):
-            sub_term = min(width,spacing)
-            ac_pos = i*lag - sub_term
-            if ac_pos <= dist.max():
-                plt.axvline(ac_pos,color='orange',linestyle='dashed')            
-            c_pos = ac_pos + sub_term
-            if c_pos <= dist.max():
-                plt.axvline(c_pos,color='green',linestyle='dashed')
+        # plt.figure()
+        # plt.plot(dist,corr,'--.',color='blue')
+        # plt.axhline(0,color='black',linestyle='dotted',alpha=0.5)
+        # lag = spacing + width
+        # for i in np.arange(1,dim//lag):
+        #     sub_term = min(width,spacing)
+        #     ac_pos = i*lag - sub_term
+        #     if ac_pos <= dist.max():
+        #         plt.axvline(ac_pos,color='orange',linestyle='dashed')            
+        #     c_pos = ac_pos + sub_term
+        #     if c_pos <= dist.max():
+        #         plt.axvline(c_pos,color='green',linestyle='dashed')
 
-        plt.grid(color='grey',alpha=0.6,linestyle='dotted')
-        plt.show()
+        # plt.grid(color='grey',alpha=0.6,linestyle='dotted')
+        # plt.show()
         
         # sf = filpy.compute_sf(data,dist,3)
 
@@ -779,9 +901,8 @@ if __name__ == '__main__':
         start_time = time()
         tracemalloc.start()
         xdim,ydim = data.shape
-        yy,xx = np.meshgrid(np.arange(ydim*2-1),np.arange(xdim*2-1))
-        xx -= xdim-1
-        yy -= ydim-1
+        yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))     
+
         # logger.info(f'{xx}\n{yy}')
         snapshot = tracemalloc.take_snapshot()
         display_top(snapshot,logger=logger)
@@ -803,3 +924,189 @@ if __name__ == '__main__':
         display_top(snapshot,logger=logger)
         end_ram = ram_usage()
         logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+        ## NEW
+        logger.info('FOR LOOP')
+        start_time = time()
+        tracemalloc.start()
+        xdim,ydim = data.shape
+        yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))     
+
+        # logger.info(f'{xx}\n{yy}')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        new_tpcf2 = another_tpcf(data,(xx,yy), mode='cartesian')
+        start_ram = ram_usage()
+        tracemalloc.start()
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(xx,yy).flatten()
+        pos = np.where(new_dist2 == 0.)[0][0]
+        logger.info(f'{pos}')
+        new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+        directions[:pos+1] = np.append(0,directions[:pos])
+
+        dist2 = np.unique(new_dist2)
+        corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+        end_time = time()
+        logger.info(f'Computational time {(end_time-start_time)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        end_ram = ram_usage()
+        logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+        logger.info('ONLY DIAGONAL')
+        start_time = time()
+        tracemalloc.start()
+        xx = np.delete(np.arange(-xdim+1,xdim),xdim-1)
+        yy = np.delete(np.arange(-ydim+1,ydim),ydim-1)
+        xx = np.append(xx,np.zeros(ydim*2-2))
+        yy = np.append(np.zeros(xdim*2-2),yy)
+        logger.debug(f'{xx}')
+        logger.debug(f'{yy}')
+        # logger.info(f'{xx}\n{yy}')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+        start_ram = ram_usage()
+        tracemalloc.start()
+        new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+        directions = np.arctan2(xx,yy).flatten()
+        new_dist2  = np.append(0,new_dist2)
+        directions = np.append(0,directions)
+
+        dist2 = np.unique(new_dist2)
+        corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+        end_time = time()
+        logger.info(f'Computational time {(end_time-start_time)/60} m')
+        snapshot = tracemalloc.take_snapshot()
+        display_top(snapshot,logger=logger)
+        end_ram = ram_usage()
+        logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+        if args.plot:
+            fig, ax = plt.subplots(1,1)
+            ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
+            ax.plot(dist2,corr2,'+',color='blue' ) 
+            ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
+            fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+            img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+            fig2.colorbar(img,ax=ax2)
+            plt.show() 
+
+    elif args.test == 'speed':
+        logger.info('!! SPEED TEST !!')
+        times1 = []
+        times2 = []
+        times3 = []
+        rams1 = []
+        rams2 = []
+        rams3 = []
+        dims = [10,50,80]#,120,200,300,500,600]
+        for dim in dims:
+            logger.info(f'dim .: {dim}')
+            np.random.seed(args.seed)
+            data = np.zeros((dim,dim)) + np.random.random((dim,dim))*2       
+            width = args.width
+            spacing = args.lag
+            data = make_pattern(data,'lattice',width=width,spacing=spacing)
+            
+            start_time = time()
+            tracemalloc.start()
+            xdim,ydim = data.shape
+            yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))     
+
+            # logger.info(f'{xx}\n{yy}')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            start_ram = ram_usage()
+            new_tpcf2 = tpcf(data,(xx,yy), mode='cartesian')
+            end_ram = ram_usage()
+            rams1 += [end_ram-start_ram]
+            start_ram = ram_usage()
+            tracemalloc.start()
+            new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+            directions = np.arctan2(xx,yy).flatten()
+            pos = np.where(new_dist2 == 0.)[0][0]
+            logger.info(f'{pos}')
+            new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+            directions[:pos+1] = np.append(0,directions[:pos])
+
+            dist2 = np.unique(new_dist2)
+            corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+            end_time = time()
+            times1 += [(end_time-start_time)/60]
+            logger.info(f'Computational time {(end_time-start_time)/60} m')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            end_ram = ram_usage()
+            logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+            ## NEW
+            logger.info('FOR LOOP')
+            start_time = time()
+            tracemalloc.start()
+            xdim,ydim = data.shape
+            yy,xx = np.meshgrid(np.arange(-ydim+1,ydim),np.arange(-xdim+1,xdim))     
+
+            # logger.info(f'{xx}\n{yy}')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            start_ram = ram_usage()
+            new_tpcf2 = another_tpcf(data,(xx,yy), mode='cartesian')
+            end_ram = ram_usage()
+            rams2 += [end_ram-start_ram]
+            start_ram = ram_usage()
+            tracemalloc.start()
+            new_dist2 = np.sqrt(xx**2+yy**2).flatten()
+            directions = np.arctan2(xx,yy).flatten()
+            pos = np.where(new_dist2 == 0.)[0][0]
+            logger.info(f'{pos}')
+            new_dist2[:pos+1]  = np.append(0,new_dist2[:pos])
+            directions[:pos+1] = np.append(0,directions[:pos])
+
+            dist2 = np.unique(new_dist2)
+            corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+            end_time = time()
+            times2 += [(end_time-start_time)/60]
+            logger.info(f'Computational time {(end_time-start_time)/60} m')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            end_ram = ram_usage()
+            logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+            ## NEW 2
+            logger.info('FOR LOOP')
+            start_time = time()
+            tracemalloc.start()
+            xdim,ydim = data.shape
+            yy,xx = np.meshgrid(np.arange(ydim),np.arange(xdim))     
+
+            # logger.info(f'{xx}\n{yy}')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            start_ram = ram_usage()
+            new_tpcf2 = another_tpcf2(data,(xx,yy), mode='cartesian')
+            end_ram = ram_usage()
+            rams3 += [end_ram-start_ram]
+            start_ram = ram_usage()
+            tracemalloc.start()
+            new_dist2 = np.repeat(np.sqrt(xx**2+yy**2).flatten()[1:],4,axis=0)
+            directions = np.array([np.arctan2(i*xx,j*yy).flatten()[1:] for (i,j) in [(1,1,1,-1,-1,-1,-1,1)]])
+
+            dist2 = np.unique(new_dist2)
+            corr2 = np.array([np.sum(new_tpcf2[new_dist2==d]) for d in dist2])
+            end_time = time()
+            times3 += [(end_time-start_time)/60]
+            logger.info(f'Computational time {(end_time-start_time)/60} m')
+            snapshot = tracemalloc.take_snapshot()
+            display_top(snapshot,logger=logger)
+            end_ram = ram_usage()
+            logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+        plt.figure()
+        plt.plot(dims,times1,'--.',color='blue')
+        plt.plot(dims,times2,'--x',color='orange')
+        plt.figure()
+        plt.plot(dims,rams1,'--.',color='blue')
+        plt.plot(dims,rams2,'--x',color='orange')
+        plt.show()
+
