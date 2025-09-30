@@ -900,3 +900,13 @@ def asym_sf(data: np.ndarray, order: int = 1, result: Literal['cum','div'] = 'di
     if result == 'cum':         #: 2D picture
         stfc = combine_results(stfc)
     return stfc
+
+def convolve_result(res_matrix: np.ndarray) -> tuple[np.ndarray,np.ndarray]:
+    flat_res = np.sum(res_matrix,axis=2)
+    ydim, xdim = flat_res.shape
+    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    dist = np.sqrt(xx**2+yy**2)
+    unq_dist = np.unique(dist)
+    pos = [ dist==d for d in unq_dist]
+    flat_res = np.asarray([np.sum(flat_res[yy[p],xx[p]]) for p in pos])
+    return unq_dist, flat_res
