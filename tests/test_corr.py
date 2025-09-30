@@ -800,7 +800,19 @@ if __name__ == '__main__':
         directions[:pos+1] = np.append(0,directions[:pos])
         new_dist2=new_dist2[1:]
         directions=directions[1:]
-        stfunc = sf(data,(xx,yy), mode='cartesian',order=args.order)
+
+        plt.figure()
+        ccorr = filpy.asym_tpcf(data,result='cum')
+        ydim, xdim = ccorr.shape
+        xdim = (xdim+1) // 2
+        ydim = (ydim+1) // 2
+        ccorr[ydim-1,xdim-1] = 0
+        plt.imshow(ccorr,origin='lower')
+
+        plt.figure()
+        plt.imshow(filpy.asym_sf(data,result='cum'))
+
+        # stfunc = sf(data,(xx,yy), mode='cartesian',order=args.order)
 
 
         dist2 = np.unique(new_dist2)
@@ -811,6 +823,7 @@ if __name__ == '__main__':
         display_top(snapshot,logger=logger)
         end_ram = ram_usage()
         logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
 
         ## NEW 2
         # logger.info('FOR LOOP')
@@ -840,11 +853,11 @@ if __name__ == '__main__':
         #     # ax.plot(new_dist2,new_tpcf2,'x',color='green',alpha=0.2) 
         #     # ax.plot(dist2,corr2,'+',color='blue' ) 
         #     # ax.axhline(0,linestyle='dotted',color='k',alpha=0.7)
-        #     fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
-        #     # img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
-        #     img = ax2.scatter(directions.flatten(),new_dist2.flatten(),c=new_tpcf2.flatten(),cmap='seismic',marker='.')
-        #     fig2.colorbar(img,ax=ax2)
-        #     # ax2.set_theta_zero_location("N")
+        fig2, ax2 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
+        img = ax2.scatter(directions[1:],new_dist2[1:],c=new_tpcf2[1:],cmap='seismic',marker='.')
+        # img = ax2.scatter(directions.flatten(),new_dist2.flatten(),c=new_tpcf2.flatten(),cmap='seismic',marker='.')
+        fig2.colorbar(img,ax=ax2)
+        # ax2.set_theta_zero_location("N")
         #     fig4, ax4 = plt.subplots(1,1,subplot_kw={'projection':'polar'})
         #     img = ax4.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
         #     fig4.colorbar(img,ax=ax4)
@@ -868,7 +881,7 @@ if __name__ == '__main__':
         #     # ax03.set_title('Structure Func.')
         #     # img03 = ax03.scatter(directions[1:],new_dist2[1:],c=stfunc[1:],cmap='seismic',marker='.')
         #     # fig.colorbar(img03,ax=ax03,location='bottom')
-        #     plt.show() 
+        plt.show() 
 
 
         # plt.figure()
