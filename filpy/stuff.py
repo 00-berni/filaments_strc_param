@@ -2,6 +2,7 @@ from typing import Literal
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 import time
+from multiprocessing import Pool, cpu_count
 from functools import wraps
 from .data import FileVar
 from .display import quickplot, plt
@@ -612,3 +613,290 @@ def tpcf_n_sf(field: np.ndarray, bins: int | float | np.ndarray, order: int = 2,
         plt.show()
     return corr, strc
 
+
+def __mapping(coord: tuple[int,int], positions: tuple[np.ndarray,np.ndarray]) -> tuple[tuple[np.ndarray,np.ndarray],tuple[np.ndarray,np.ndarray]]:
+    """Map the pixel at a certain lag and direction
+
+    Parameters
+    ----------
+    coord : tuple[int,int]
+        cartesian components of the direction vector
+    positions : tuple[np.ndarray,np.ndarray]
+        frame pixel positions
+
+    Returns
+    -------
+    x_pos : tuple[np.ndarray,np.ndarray]
+        the involved pixels and the corresponding ones at vector distance along x
+    y_pos : tuple[np.ndarray,np.ndarray]
+        the involved pixels and the corresponding ones at vector distance along y
+    """
+    # extract data
+    i,j = coord
+    xx, yy = positions
+    # condition for x
+    if i == 0:
+        xpos = slice(None,None) 
+    elif i > 0:
+        xpos = slice(None,-i)
+    else:
+        xpos = slice(-i,None)
+    # condition for y
+    if j == 0:
+        ypos = slice(None,None) 
+    elif j > 0:
+        ypos = slice(None,-j)
+    else:
+        ypos = slice(-j,None)
+    # store results
+    x = xx[ypos,xpos]
+    y = yy[ypos,xpos]
+    x_pos = (x,x+i)
+    y_pos = (y,y+j)
+    return x_pos, y_pos     
+
+
+def step_tpcf(step: int) -> list[np.ndarray]:
+    """Compute the single step of parallelization for TPCF
+
+    Parameters
+    ----------
+    step : int
+        the selected step
+
+    Returns
+    -------
+    corr_i : list[np.ndarray]
+        TPCF per each quadrant for a certain vector direction
+
+    Notes
+    -----
+
+    """
+    # define couples to identify the 4 quadrants
+    xsgn = (0,0,-1,-1)
+    ysgn = (0,-1,-1,0)
+    # compute the position in the vector distance space
+    ii,jj = np.unravel_index(step,G_xx.shape)
+    i = G_xx[ii,jj]
+    j = G_yy[ii,jj]
+    # find the involved pixels
+    x_pos, y_pos = __mapping((i,j),(G_xx,G_yy))
+    # compute the correlation
+    corr_i = [np.sum(G_tmp_data[y_pos[k],x_pos[t]]*G_tmp_data[y_pos[k+1],x_pos[t+1]]) for k,t in zip(ysgn,xsgn)]
+    return corr_i
+
+def step_sf(step: int) -> list[np.ndarray]:
+    """Compute the single step of parallelization for TPCF
+
+    Parameters
+    ----------
+    step : int
+        the selected step
+
+    Returns
+    -------
+    corr_i : list[np.ndarray]
+        SF per each quadrant for a certain vector direction
+
+    Notes
+    -----
+
+    """
+    # define couples to identify the 4 quadrants
+    xsgn = (0,0,-1,-1)
+    ysgn = (0,-1,-1,0)
+    # compute the position in the vector distance space
+    ii,jj = np.unravel_index(step,G_xx.shape)
+    i = G_xx[ii,jj]
+    j = G_yy[ii,jj]
+    # find the involved pixels
+    x_pos, y_pos = __mapping((i,j),(G_xx,G_yy))
+    # compute the structure function
+    stfc_i = [np.sum(np.abs(G_tmp_data[y_pos[k],x_pos[t]]-G_tmp_data[y_pos[k+1],x_pos[t+1]])**G_order) for k,t in zip(ysgn,xsgn)]
+    return stfc_i
+
+
+
+
+def parallel_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 1, processes: int = cpu_count()-1) -> np.ndarray:
+    """Compute the TPCF or the SF by parallelization
+
+    Parameters
+    ----------
+    data : np.ndarray
+        the frame
+    mode : Literal['tpcf','sf']
+        the required operation
+    order : int, optional
+        the order of the SF, by default 1
+    processes : int, optional
+        the number of the involved cores, by default cpu_count()-1
+
+    Returns
+    -------
+    results : np.ndarray
+        the TPCF or the SF per each quadrant
+
+    Notes
+    -----
+
+    """
+    global G_tmp_data           #: the copy of the reference frame
+    global G_xx, G_yy           #: the map of all possible pixel positions
+    # copy data to prevent losses of information
+    G_tmp_data = np.copy(data)
+    ydim, xdim = data.shape     #: size of the frame
+    # compute all possible positions
+    G_xx, G_yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    if mode == 'tpcf':          #: compute the TPCF
+        # remove the mean
+        G_tmp_data -= G_tmp_data.mean()
+        with Pool(processes=processes) as pool:
+            results = pool.map(step_tpcf, np.arange(G_xx.size))
+    elif mode == 'sf':          #: compute the SF
+        global G_order          #: the order of the SF
+        G_order = order
+        with Pool(processes=processes) as pool:
+            results = pool.map(step_sf, np.arange(G_xx.size))
+    results = np.asarray(results).reshape(ydim,xdim,4)
+    return results
+
+def sequence_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 1) -> np.ndarray:
+    """Compute the TPCF or the SF in sequence mode
+
+    Parameters
+    ----------
+    data : np.ndarray
+        the frame
+    mode : Literal['tpcf','sf']
+        the required operation
+    order : int, optional
+        the order of the SF, by default 1
+
+    Returns
+    -------
+    results : np.ndarray
+        the TPCF or the SF per each quadrant
+
+    Notes
+    -----
+
+    """
+    # copy data to prevent losses of information
+    tmp_data = np.copy(data)
+    ydim, xdim = tmp_data.shape     #: size of the frame
+    # compute all possible positions
+    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    # inizialize the results matrix
+    results = np.zeros((*xx.shape,4))
+    # define couples to identify the 4 quadrants
+    xsgn = (0,0,-1,-1)
+    ysgn = (0,-1,-1,0)
+    if mode == 'tpcf':              #: compute the TPCF
+        # remove the mean
+        tmp_data -= tmp_data.mean()
+        for m in range(xx.size):
+            # compute the position in the vector distance space
+            ii,jj = np.unravel_index(m,xx.shape)
+            i = xx[ii,jj]
+            j = yy[ii,jj]
+            # find the involved pixels
+            x_pos, y_pos = __mapping((i,j),(xx,yy))
+            # compute the correlation
+            results[ii,jj] = [np.sum(tmp_data[y_pos[k],x_pos[t]]*tmp_data[y_pos[k+1],x_pos[t+1]]) for k,t in zip(ysgn,xsgn)]
+    elif mode == 'sf':              #: compute the SF
+        for m in range(xx.size):
+            # compute the position in the vector distance space
+            ii,jj = np.unravel_index(m,xx.shape)
+            i = xx[ii,jj]
+            j = yy[ii,jj]
+            # find the involved pixels
+            x_pos, y_pos = __mapping((i,j),(xx,yy))
+            # compute the structure function
+            results[ii,jj] = [np.sum(np.abs(tmp_data[y_pos[k],x_pos[t]]-tmp_data[y_pos[k+1],x_pos[t+1]])**order) for k,t in zip(ysgn,xsgn)]
+    results = np.asarray(results)
+    return results
+
+
+def combine_results(res_data: np.ndarray) -> np.ndarray:
+    """Reshape the computed matrix for TPCF or SF to get a 2D picture
+
+    Parameters
+    ----------
+    res_data : np.ndarray
+        computed matrix
+
+    Returns
+    -------
+    com_res : np.ndarray
+        reshaped matrix
+    """
+    # store the size of the initial frame
+    ydim, xdim = res_data[:,:,0].shape
+    # initialize the new matrix
+    com_res = np.zeros((2*ydim-1,2*xdim-1))
+    # assign the values at the corresponding quadrant
+    com_res[ydim-1:,xdim-1:] = res_data[:,:,0]
+    com_res[:ydim-1,xdim:]   = res_data[::-1,:,1][:-1,1:]
+    com_res[:ydim,:xdim]     = res_data[::-1,::-1,2]
+    com_res[ydim:,:xdim-1]   = res_data[:,::-1,3][1:,:-1]
+    return com_res
+
+def asym_tpcf(data: np.ndarray, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
+    """Compute the 2D TPCF
+
+    Parameters
+    ----------
+    data : np.ndarray
+        frame matrix
+    result : Literal['cum', 'div'], optional
+        the format of the computed matrix, by default 'div'
+
+    Returns
+    -------
+    corr : np.ndarray
+        2D TPCF
+
+    Notes
+    -----
+
+    """
+    ydim, xdim = data.shape     #: size of the frame
+    if max(ydim,xdim) <= 50:    #: no parallelization
+        corr = sequence_compute(data,mode='tpcf')
+    else:                       #: require parallelization
+        corr = parallel_compute(data,mode='tpcf',**compute_kwargs)
+    
+    if result == 'cum':         #: 2D picture
+        corr = combine_results(corr)
+    return corr
+
+def asym_sf(data: np.ndarray, order: int = 1, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
+    """Compute the 2D SF
+
+    Parameters
+    ----------
+    data : np.ndarray
+        frame matrix
+    result : Literal['cum', 'div'], optional
+        the format of the computed matrix, by default 'div'
+
+    Returns
+    -------
+    corr : np.ndarray
+        2D SF
+
+    Notes
+    -----
+
+    """
+    ydim, xdim = data.shape     #: size of the frame
+    if max(ydim,xdim) <= 50:    #: no parallelization
+        stfc = sequence_compute(data,mode='sf',order=order)
+    else:                       #: require parallelization
+        stfc = parallel_compute(data,mode='sf',order=order,**compute_kwargs)
+    
+    if result == 'cum':         #: 2D picture
+        stfc = combine_results(stfc)
+    return stfc
