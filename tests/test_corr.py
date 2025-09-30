@@ -812,6 +812,7 @@ if __name__ == '__main__':
         plt.figure()
         plt.imshow(filpy.asym_sf(data,result='cum'))
 
+
         # stfunc = sf(data,(xx,yy), mode='cartesian',order=args.order)
 
 
@@ -823,6 +824,16 @@ if __name__ == '__main__':
         display_top(snapshot,logger=logger)
         end_ram = ram_usage()
         logger.info(f'Ram usage {(end_ram-start_ram)/1024**3} Gb')
+
+        plt.figure()
+        flat_corr = np.sum(filpy.asym_tpcf(data),axis=2)/4
+        ydim, xdim = flat_corr.shape
+        xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+        dd = np.sqrt(xx**2+yy**2)
+        plt.plot(dist,corr,'.--')
+        plt.plot(dist2,[np.sum(flat_corr[yy[dd==d],xx[dd==d]]) for d in dist2],'x')
+
+
 
 
         ## NEW 2
