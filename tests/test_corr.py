@@ -806,7 +806,7 @@ if __name__ == '__main__':
         ydim, xdim = ccorr.shape
         xdim = (xdim+1) // 2
         ydim = (ydim+1) // 2
-        ccorr[ydim-1,xdim-1] = 0
+        # ccorr[ydim-1,xdim-1] = 0
         plt.imshow(ccorr,origin='lower')
 
         plt.figure()
@@ -830,8 +830,20 @@ if __name__ == '__main__':
         ydim, xdim = flat_corr.shape
         xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
         dd = np.sqrt(xx**2+yy**2)
+        flat_corr = np.array([np.sum(flat_corr[yy[dd==d],xx[dd==d]])/yy[dd==d].size for d in dist2])
+        print(dist2[0],flat_corr[0])
+        pos = dist2 <= min(xdim,ydim)//2
+        plt.subplot(211)
         plt.plot(dist,corr,'.--')
-        plt.plot(dist2,[np.sum(flat_corr[yy[dd==d],xx[dd==d]]) for d in dist2],'x')
+        plt.subplot(212)
+        plt.plot(dist2[pos],flat_corr[pos],'.--')
+        plt.figure()
+        plt.subplot(211)
+        plt.plot(dist2[pos],flat_corr[pos],'x--')
+        plt.axhline(0,color='k')
+        plt.subplot(212)
+        plt.plot(dist2[~pos],flat_corr[~pos],'x--')
+        plt.axhline(0,color='k')
 
 
 
