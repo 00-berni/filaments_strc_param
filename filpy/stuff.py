@@ -614,46 +614,46 @@ def tpcf_n_sf(field: np.ndarray, bins: int | float | np.ndarray, order: int = 2,
     return corr, strc
 
 
-def __mapping(coord: tuple[int,int], positions: tuple[np.ndarray,np.ndarray]) -> tuple[tuple[np.ndarray,np.ndarray],tuple[np.ndarray,np.ndarray]]:
-    """Map the pixel at a certain lag and direction
+# def __mapping(coord: tuple[int,int], positions: tuple[np.ndarray,np.ndarray]) -> tuple[tuple[np.ndarray,np.ndarray],tuple[np.ndarray,np.ndarray]]:
+#     """Map the pixel at a certain lag and direction
 
-    Parameters
-    ----------
-    coord : tuple[int,int]
-        cartesian components of the direction vector
-    positions : tuple[np.ndarray,np.ndarray]
-        frame pixel positions
+#     Parameters
+#     ----------
+#     coord : tuple[int,int]
+#         cartesian components of the direction vector
+#     positions : tuple[np.ndarray,np.ndarray]
+#         frame pixel positions
 
-    Returns
-    -------
-    x_pos : tuple[np.ndarray,np.ndarray]
-        the involved pixels and the corresponding ones at vector distance along x
-    y_pos : tuple[np.ndarray,np.ndarray]
-        the involved pixels and the corresponding ones at vector distance along y
-    """
-    # extract data
-    i,j = coord
-    xx, yy = positions
-    # condition for x
-    if i == 0:
-        xpos = slice(None,None) 
-    elif i > 0:
-        xpos = slice(None,-i)
-    else:
-        xpos = slice(-i,None)
-    # condition for y
-    if j == 0:
-        ypos = slice(None,None) 
-    elif j > 0:
-        ypos = slice(None,-j)
-    else:
-        ypos = slice(-j,None)
-    # store results
-    x = xx[ypos,xpos]
-    y = yy[ypos,xpos]
-    x_pos = (x,x+i)
-    y_pos = (y,y+j)
-    return x_pos, y_pos     
+#     Returns
+#     -------
+#     x_pos : tuple[np.ndarray,np.ndarray]
+#         the involved pixels and the corresponding ones at vector distance along x
+#     y_pos : tuple[np.ndarray,np.ndarray]
+#         the involved pixels and the corresponding ones at vector distance along y
+#     """
+#     # extract data
+#     i,j = coord
+#     xx, yy = positions
+#     # condition for x
+#     if i == 0:
+#         xpos = slice(None,None) 
+#     elif i > 0:
+#         xpos = slice(None,-i)
+#     else:
+#         xpos = slice(-i,None)
+#     # condition for y
+#     if j == 0:
+#         ypos = slice(None,None) 
+#     elif j > 0:
+#         ypos = slice(None,-j)
+#     else:
+#         ypos = slice(-j,None)
+#     # store results
+#     x = xx[ypos,xpos]
+#     y = yy[ypos,xpos]
+#     x_pos = (x,x+i)
+#     y_pos = (y,y+j)
+#     return x_pos, y_pos     
 
 
 def step_tpcf(step: int) -> list[np.ndarray]:
@@ -674,17 +674,15 @@ def step_tpcf(step: int) -> list[np.ndarray]:
 
     """
     # define couples to identify the 4 quadrants
-    xsgn = (0,0,-1,-1)
-    ysgn = (0,-1,-1,0)
+    xsgn = (1,1,-1,-1)
+    ysgn = (1,-1,-1,1)
     # compute the position in the vector distance space
-    ii,jj = np.unravel_index(step,G_xx.shape)
-    i = G_xx[ii,jj]
-    j = G_yy[ii,jj]
-    # find the involved pixels
-    x_pos, y_pos = __mapping((i,j),(G_xx,G_yy))
+    j, i = step
     # compute the correlation
-    corr_i = [np.sum(G_tmp_data[y_pos[k],x_pos[t]]*G_tmp_data[y_pos[k+1],x_pos[t+1]]) for k,t in zip(ysgn,xsgn)]
-    return corr_i
+    if i**2+j**2 <= G_max_lag**2:
+        return [np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i]) for k,t in zip(xsgn,ysgn)]
+    else:
+        return [0,0,0,0]
 
 def step_sf(step: int) -> list[np.ndarray]:
     """Compute the single step of parallelization for TPCF
@@ -704,22 +702,20 @@ def step_sf(step: int) -> list[np.ndarray]:
 
     """
     # define couples to identify the 4 quadrants
-    xsgn = (0,0,-1,-1)
-    ysgn = (0,-1,-1,0)
+    xsgn = (1,1,-1,-1)
+    ysgn = (1,-1,-1,1)
     # compute the position in the vector distance space
-    ii,jj = np.unravel_index(step,G_xx.shape)
-    i = G_xx[ii,jj]
-    j = G_yy[ii,jj]
-    # find the involved pixels
-    x_pos, y_pos = __mapping((i,j),(G_xx,G_yy))
-    # compute the structure function
-    stfc_i = [np.sum(np.abs(G_tmp_data[y_pos[k],x_pos[t]]-G_tmp_data[y_pos[k+1],x_pos[t+1]])**G_order) for k,t in zip(ysgn,xsgn)]
-    return stfc_i
+    j, i = step
+    # compute the correlation
+    if i**2+j**2 <= G_max_lag**2:
+        return [np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order) for k,t in zip(xsgn,ysgn)]
+    else:
+        return [0,0,0,0]
 
 
 
 
-def parallel_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 1, processes: int = cpu_count()-1) -> np.ndarray:
+def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 1, processes: int = cpu_count()-1) -> np.ndarray:
     """Compute the TPCF or the SF by parallelization
 
     Parameters
@@ -743,26 +739,36 @@ def parallel_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 
 
     """
     global G_tmp_data           #: the copy of the reference frame
-    global G_xx, G_yy           #: the map of all possible pixel positions
+    global G_xx, G_yy           #: the map of all possible pixel positions of the mask
     # copy data to prevent losses of information
     G_tmp_data = np.copy(data)
     ydim, xdim = data.shape     #: size of the frame
+    # extract mask ends
+    (xo, xe), (yo, ye) = mask_ends
+    m_ydim = ye-yo 
+    m_xdim = xe-xo
+    global G_max_lag
+    G_max_lag = min(xo,yo,xdim-xe,ydim-ye,int(np.sqrt(m_xdim**2+m_ydim**2)))
+    res_dim = G_max_lag+1
     # compute all possible positions
-    G_xx, G_yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    G_xx, G_yy = np.meshgrid(np.arange(m_xdim),np.arange(m_ydim))
+    G_xx += xo
+    G_yy += yo
+    positions = np.asarray(np.meshgrid(np.arange(res_dim),np.arange(res_dim))).T.reshape(res_dim*res_dim,2)
     if mode == 'tpcf':          #: compute the TPCF
         # remove the mean
         G_tmp_data -= G_tmp_data.mean()
         with Pool(processes=processes) as pool:
-            results = pool.map(step_tpcf, np.arange(G_xx.size))
+            results = pool.map(step_tpcf, positions)
     elif mode == 'sf':          #: compute the SF
         global G_order          #: the order of the SF
         G_order = order
         with Pool(processes=processes) as pool:
-            results = pool.map(step_sf, np.arange(G_xx.size))
-    results = np.asarray(results).reshape(ydim,xdim,4)
+            results = pool.map(step_sf, positions)
+    results = np.asarray(results).reshape(res_dim,res_dim,4)
     return results
 
-def sequence_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 1) -> np.ndarray:
+def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 1) -> np.ndarray:
     """Compute the TPCF or the SF in sequence mode
 
     Parameters
@@ -786,35 +792,30 @@ def sequence_compute(data: np.ndarray, mode: Literal['tpcf','sf'], order: int = 
     # copy data to prevent losses of information
     tmp_data = np.copy(data)
     ydim, xdim = tmp_data.shape     #: size of the frame
+    (xo, xe), (yo, ye) = mask_ends
+    m_ydim = ye-yo 
+    m_xdim = xe-xo
+    max_lag = min(xo,yo,xdim-xe,ydim-ye,int(np.sqrt(m_xdim**2+m_ydim**2)))
+    res_dim = max_lag+1
     # compute all possible positions
-    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    xx, yy = np.meshgrid(np.arange(m_xdim),np.arange(m_ydim))
+    xx += xo
+    yy += yo
     # inizialize the results matrix
-    results = np.zeros((*xx.shape,4))
+    results = np.zeros((res_dim,res_dim,4))
     # define couples to identify the 4 quadrants
-    xsgn = (0,0,-1,-1)
-    ysgn = (0,-1,-1,0)
+    xsgn = (1,1,-1,-1)
+    ysgn = (1,-1,-1,1)
     if mode == 'tpcf':              #: compute the TPCF
         # remove the mean
         tmp_data -= tmp_data.mean()
-        for m in range(xx.size):
-            # compute the position in the vector distance space
-            ii,jj = np.unravel_index(m,xx.shape)
-            i = xx[ii,jj]
-            j = yy[ii,jj]
-            # find the involved pixels
-            x_pos, y_pos = __mapping((i,j),(xx,yy))
-            # compute the correlation
-            results[ii,jj] = [np.sum(tmp_data[y_pos[k],x_pos[t]]*tmp_data[y_pos[k+1],x_pos[t+1]]) for k,t in zip(ysgn,xsgn)]
+        for j in range(res_dim):
+            for i in range(res_dim):
+                results[j,i] = [np.sum(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i]) if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
     elif mode == 'sf':              #: compute the SF
-        for m in range(xx.size):
-            # compute the position in the vector distance space
-            ii,jj = np.unravel_index(m,xx.shape)
-            i = xx[ii,jj]
-            j = yy[ii,jj]
-            # find the involved pixels
-            x_pos, y_pos = __mapping((i,j),(xx,yy))
-            # compute the structure function
-            results[ii,jj] = [np.sum(np.abs(tmp_data[y_pos[k],x_pos[t]]-tmp_data[y_pos[k+1],x_pos[t+1]])**order) for k,t in zip(ysgn,xsgn)]
+        for j in range(res_dim):
+            for i in range(res_dim):
+                results[j,i] = [np.sum(np.abs(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])**order) if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
     results = np.asarray(results)
     return results
 
@@ -843,7 +844,7 @@ def combine_results(res_data: np.ndarray) -> np.ndarray:
     com_res[ydim:,:xdim-1]   = res_data[:,::-1,3][1:,:-1]
     return com_res
 
-def asym_tpcf(data: np.ndarray, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
+def asym_tpcf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], result: Literal['cum','div'] = 'div', zero_cover: bool = False, **compute_kwargs) -> np.ndarray: 
     """Compute the 2D TPCF
 
     Parameters
@@ -864,15 +865,17 @@ def asym_tpcf(data: np.ndarray, result: Literal['cum','div'] = 'div', **compute_
     """
     ydim, xdim = data.shape     #: size of the frame
     if max(ydim,xdim) <= 50:    #: no parallelization
-        corr = sequence_compute(data,mode='tpcf')
+        corr = sequence_compute(data,mask_ends=mask_ends,mode='tpcf')
     else:                       #: require parallelization
-        corr = parallel_compute(data,mode='tpcf',**compute_kwargs)
+        corr = parallel_compute(data,mask_ends=mask_ends,mode='tpcf',**compute_kwargs)
     
+    if zero_cover:
+        corr[0,0,:] = np.zeros(4)
     if result == 'cum':         #: 2D picture
         corr = combine_results(corr)
     return corr
 
-def asym_sf(data: np.ndarray, order: int = 1, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
+def asym_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
     """Compute the 2D SF
 
     Parameters
@@ -893,20 +896,68 @@ def asym_sf(data: np.ndarray, order: int = 1, result: Literal['cum','div'] = 'di
     """
     ydim, xdim = data.shape     #: size of the frame
     if max(ydim,xdim) <= 50:    #: no parallelization
-        stfc = sequence_compute(data,mode='sf',order=order)
+        stfc = sequence_compute(data,mask_ends=mask_ends,mode='sf',order=order)
     else:                       #: require parallelization
-        stfc = parallel_compute(data,mode='sf',order=order,**compute_kwargs)
+        stfc = parallel_compute(data,mask_ends=mask_ends,mode='sf',order=order,**compute_kwargs)
     
     if result == 'cum':         #: 2D picture
         stfc = combine_results(stfc)
     return stfc
 
-def convolve_result(res_matrix: np.ndarray) -> tuple[np.ndarray,np.ndarray]:
+def convolve_result(res_matrix: np.ndarray, mode: Literal['sum','mean'] = 'sum') -> tuple[np.ndarray,np.ndarray]:
     flat_res = np.sum(res_matrix,axis=2)
     ydim, xdim = flat_res.shape
     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
     dist = np.sqrt(xx**2+yy**2)
     unq_dist = np.unique(dist)
     pos = [ dist==d for d in unq_dist]
-    flat_res = np.asarray([np.sum(flat_res[yy[p],xx[p]]) for p in pos])
+    norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
+    flat_res = np.asarray([np.sum(flat_res[yy[p],xx[p]])/norm_val(p) for p in pos])
     return unq_dist, flat_res
+
+
+# def cart_delta(distances: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+#     # compute the corresponding coordinates for each distance
+#     delta = np.array([np.arange(0,d+1) for d in distances], dtype='object')
+#     dx_i = np.array([np.arange(0,d+1) for d in distances], dtype='object')
+#     dy_j = np.array([np.sqrt(np.round(d**2,decimals=precision)-i**2) for i,d in zip(dx_i,distances)], dtype='object')
+#     # select integer values only
+#     j_pos = np.array([np.mod(j,1) == 0 for j in dy_j],dtype='object')
+#     rtol = 10**(-precision)     #: the uncertainty for the check
+#     # check the values
+#     check_pos = np.array([ ~np.all(np.isclose(d-np.sqrt(j**2+j[::-1]**2),np.zeros(len(p)),rtol=rtol)) for i,j,d in zip(,tmp_j,distances)],dtype=bool)
+#     while np.any(check_pos):    #: adjust the accuracy
+#         precision -= 1
+#         if precision < 0:
+#             raise ValueError('Precision cannot be negative')
+#         # compute the values again with a lower accuracy
+#         tmp_pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in tmp_dst], dtype='object')
+#         tmp_pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in tmp_pxs],dtype='object')
+#         # set the uncertainty and update the check
+#         rtol = 10**(-precision)
+#         check_pos[check_pos] = np.array([ ~np.all(np.isclose(d-np.sqrt(p**2+p[::-1]**2),np.zeros(len(p)),rtol=rtol)) for p,d in zip(tmp_pxs[check_pos],tmp_dst[check_pos])],dtype=bool)
+#     # store the values
+#     pxs = tmp_pxs
+#     return pxs        
+
+
+
+# def iso_map(lag: float, positions: tuple[np.ndarray,np.ndarray], precision: int = 14):
+#     xx_i, yy_j = np.meshgrid(np.arange(0,lag+1),np.arange(0,lag+1))
+#     rtol = 10**-precision
+#     pos = np.isclose(xx_i**2+yy_j**2,lag**2,rtol=rtol)
+#     xx_i = xx_i[pos]
+#     yy_j = yy_j[pos] 
+#     del pos, rtol
+#     map = [ __mapping((i,j),positions=positions) for i,j in zip(xx_i,yy_j)]
+#     return map
+
+# def iso_tpcf(data: np.ndarray, distances: np.ndarray, precision: int = 14):
+#     tmp_data = np.copy(data) - np.mean(data)
+#     ydim, xdim = tmp_data.shape
+#     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+#     corr = np.zeros(distance.size)
+#     for i in range(distances.size):
+#         lag = distances[i]
+#         map = iso_map(lag,(xx,yy),precision=precision)
+#         corr[i] = np.sum([])
