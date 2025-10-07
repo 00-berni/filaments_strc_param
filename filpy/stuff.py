@@ -680,7 +680,7 @@ def step_tpcf(step: int) -> list[np.ndarray]:
     j, i = step
     # compute the correlation
     if i**2+j**2 <= G_max_lag**2:
-        return [np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i]) for k,t in zip(xsgn,ysgn)]
+        return [np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i])/G_xx.size for k,t in zip(xsgn,ysgn)]
     else:
         return [0,0,0,0]
 
@@ -708,14 +708,14 @@ def step_sf(step: int) -> list[np.ndarray]:
     j, i = step
     # compute the correlation
     if i**2+j**2 <= G_max_lag**2:
-        return [np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order) for k,t in zip(xsgn,ysgn)]
+        return [np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order)/G_xx.size for k,t in zip(xsgn,ysgn)]
     else:
         return [0,0,0,0]
 
 
 
 
-def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 1, processes: int = cpu_count()-1) -> np.ndarray:
+def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2, processes: int = cpu_count()-1) -> np.ndarray:
     """Compute the TPCF or the SF by parallelization
 
     Parameters
@@ -768,7 +768,7 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     results = np.asarray(results).reshape(res_dim,res_dim,4)
     return results
 
-def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 1) -> np.ndarray:
+def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2) -> np.ndarray:
     """Compute the TPCF or the SF in sequence mode
 
     Parameters
@@ -811,11 +811,11 @@ def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
         tmp_data -= tmp_data.mean()
         for j in range(res_dim):
             for i in range(res_dim):
-                results[j,i] = [np.sum(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i]) if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
+                results[j,i] = [np.sum(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])/xx.size if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
     elif mode == 'sf':              #: compute the SF
         for j in range(res_dim):
             for i in range(res_dim):
-                results[j,i] = [np.sum(np.abs(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])**order) if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
+                results[j,i] = [np.sum(np.abs(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])**order)/xx.size if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
     results = np.asarray(results)
     return results
 
