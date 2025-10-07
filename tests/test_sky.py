@@ -16,6 +16,8 @@ logger.setLevel('DEBUG')
 
 def plot_images(image: np.ndarray, mask: tuple | None = None,**kwargs):
     plt.figure()
+    if 'origin' not in kwargs.keys():
+        kwargs['origin'] = 'lower'
     plt.imshow(image,cmap='gray',**kwargs)
     if mask is not None:
         (xo,xe), (yo,ye) = mask
@@ -74,10 +76,60 @@ if __name__ == '__main__':
     plot_images(avg_data,mask=mask)
     plot_images(cut_data)
     
-    tot_corr = filpy.asym_tpcf(avg_data,mask_ends=mask,result='cum',zero_cover=True)
+    start = time()
+    corr = filpy.asym_tpcf(avg_data,mask_ends=mask,result='div',zero_cover=True)
+    tot_corr = filpy.combine_results(corr)
+    end = time()
+    print('CORR TIME:',(end-start)/60,'m')
 
-    plot_images(tot_corr)
-    
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    img = ax.imshow(tot_corr,origin='lower')
+    fig.colorbar(img,ax=ax)
+    max_lag = tot_corr.shape[0]//2
+    circle_num = 5
+    radii = np.arange(5,max_lag+(max_lag%circle_num),(max_lag+1)//circle_num)
+    centre = (max_lag,max_lag)
+    for r in radii:
+        circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
+        ax.add_patch(circle)
+        ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+
+
+    plt.figure()
+    plt.title('TPCF')
+    dists, iso_corr = filpy.convolve_result(corr)
+    cnts, bins = np.histogram(dists, 200, weights=iso_corr)
+    plt.stairs(cnts,bins)
+
+    mini_mask = ((max_lag,max_lag+xedges[1]-xedges[0]),(max_lag,max_lag+yedges[1]-yedges[0]))
+    plot_images(avg_data[yedges[0]-max_lag:yedges[1]+max_lag+1,xedges[0]-max_lag:xedges[1]+max_lag+1],mask=mini_mask)
+
+    start = time()
+    sf = filpy.asym_sf(avg_data,mask_ends=mask,result='div')
+    tot_sf = filpy.combine_results(sf)
+    end = time()
+    print('STFC TIME:',(end-start)/60,'m')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    img = ax.imshow(tot_sf,origin='lower')
+    fig.colorbar(img,ax=ax)
+    max_lag = tot_sf.shape[0]//2
+    circle_num = 5
+    radii = np.arange(5,max_lag+(max_lag%circle_num),(max_lag+1)//circle_num)
+    centre = (max_lag,max_lag)
+    for r in radii:
+        circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
+        ax.add_patch(circle)
+        ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+
+    plt.figure()
+    plt.title('SF')
+    dists, iso_sf = filpy.convolve_result(sf)
+    cnts, bins = np.histogram(dists, 200, weights=iso_sf)
+    plt.stairs(cnts,bins)
+
 
     plt.show()
 
