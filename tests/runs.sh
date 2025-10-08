@@ -3,7 +3,7 @@ dimensions=(100 500 700 1000 2000)
 maxlags=(10 100 200 400 500)
 indexes=(0 1 2 3 4)
 
-for i in ${indexes[0]}
+for i in ${indexes[@]}
 do
     echo "===================================="
     echo "START PROCESS DIM ${dimensions[$i]}"

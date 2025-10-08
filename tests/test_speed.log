@@ -1,0 +1,130 @@
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:48:47.030041
+FRAME:	 (100, 100)
+METHOD:	 SEQUENCE
+MASK:	 (10, 90) (10, 90)
+MAXLAG:	 10
+CORR SHAPE:	 (11, 11, 4)
+
+COMPUTATIONAL TIME:  0.0003483851750691732  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:48:47.878648
+FRAME:	 (100, 100)
+METHOD:	 PARALLEL
+MASK:	 (10, 90) (10, 90)
+MAXLAG:	 10
+CORR SHAPE: (11, 11, 4)
+
+COMPUTATIONAL TIME:  0.001147301991780599  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:48:48.815756
+FRAME:	 (500, 500)
+METHOD:	 SEQUENCE
+MASK:	 (100, 400) (100, 400)
+MAXLAG:	 100
+CORR SHAPE:	 (101, 101, 4)
+
+COMPUTATIONAL TIME:  0.5313214937845866  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:49:21.531322
+FRAME:	 (500, 500)
+METHOD:	 PARALLEL
+MASK:	 (100, 400) (100, 400)
+MAXLAG:	 100
+CORR SHAPE: (101, 101, 4)
+
+COMPUTATIONAL TIME:  0.3144660075505575  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:49:41.261700
+FRAME:	 (700, 700)
+METHOD:	 SEQUENCE
+MASK:	 (200, 500) (200, 500)
+MAXLAG:	 200
+CORR SHAPE:	 (201, 201, 4)
+
+COMPUTATIONAL TIME:  2.0765397826830547  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:51:46.698608
+FRAME:	 (700, 700)
+METHOD:	 PARALLEL
+MASK:	 (200, 500) (200, 500)
+MAXLAG:	 200
+CORR SHAPE: (201, 201, 4)
+
+COMPUTATIONAL TIME:  1.2665858070055644  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:53:03.567792
+FRAME:	 (1000, 1000)
+METHOD:	 SEQUENCE
+MASK:	 (400, 600) (400, 600)
+MAXLAG:	 400
+CORR SHAPE:	 (283, 283, 4)
+
+COMPUTATIONAL TIME:  1.3629067500432333  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:54:26.194733
+FRAME:	 (1000, 1000)
+METHOD:	 PARALLEL
+MASK:	 (400, 600) (400, 600)
+MAXLAG:	 400
+CORR SHAPE: (283, 283, 4)
+
+COMPUTATIONAL TIME:  0.8743612209955851  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 10:55:19.589713
+FRAME:	 (2000, 2000)
+METHOD:	 SEQUENCE
+MASK:	 (500, 1500) (500, 1500)
+MAXLAG:	 500
+CORR SHAPE:	 (501, 501, 4)
+
+COMPUTATIONAL TIME:  147.67272496620814  m
+
+============================================================
+
+Package Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param/filpy
+Project Dir: /home/bernardo/Scrivania/FISICA/ASTROFISICA/&Argomenti/Filaments/filaments_strc_param
+DATE:	 2025-10-08 13:23:00.873769
+FRAME:	 (2000, 2000)
+METHOD:	 PARALLEL
+MASK:	 (500, 1500) (500, 1500)
+MAXLAG:	 500
+CORR SHAPE: (501, 501, 4)
+
+COMPUTATIONAL TIME:  102.82821680307389  m
+
+============================================================
+
