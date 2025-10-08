@@ -6,12 +6,40 @@ import argparse
 from .test_func import *
 from .test_func import distance
 from PIL import Image
+import os
 
 logger_name = __name__ 
 logger = logging.getLogger(logger_name)
 logger.setLevel('DEBUG')
 
 
+IMG_DIR = TEST_DIR + 'test_results'
+if not os.path.isdir(IMG_DIR.PATH):
+    os.mkdir(IMG_DIR.PATH)
+
+
+def test_convolve_result(res_matrix: np.ndarray) -> tuple[np.ndarray,np.ndarray]:
+    flat_res = np.sum(res_matrix,axis=2)
+    ydim, xdim = flat_res.shape
+    start_ram = ram_usage()
+    xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
+    end_ram = ram_usage()
+    print('XX YY RAM:',(end_ram-start_ram)/(1024)**3,'Gb')
+    dist = np.sqrt(xx**2+yy**2)
+    start_ram = ram_usage()
+    unq_dist = np.unique(dist[dist<=xdim])
+    end_ram = ram_usage()
+    print('UNIQUE DIST RAM:',(end_ram-start_ram)/(1024)**3,'Gb')
+    start_ram = ram_usage()
+    pos = [ np.asarray(np.where(dist==d)).astype(int) for d in unq_dist]
+    end_ram = ram_usage()
+    print('POS RAM:',(end_ram-start_ram)/(1024)**3,'Gb')
+    # norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
+    start_ram = ram_usage()
+    flat_res = np.asarray([np.sum(flat_res[yy[*p],xx[*p]])/(4*p.shape[1]) for p in pos])
+    end_ram = ram_usage()
+    print('SUM RAM:',(end_ram-start_ram)/(1024)**3,'Gb')
+    return unq_dist, flat_res
 
 
 def plot_images(image: np.ndarray, mask: tuple | None = None,**kwargs):
@@ -62,8 +90,13 @@ if __name__ == '__main__':
                 ch_e.setLevel('INFO')
             logger.addHandler(ch_e)
 
+    tracemalloc.start()
+    IMG_NAME = 'Pisa_test-case_IMG_5371.jpeg'
+    PIC_PATH = filpy.FileVar(IMG_NAME,PIC_DIR) 
+    IMG_DIR = IMG_DIR + IMG_NAME.split('.')[0]
+    if not os.path.isdir(IMG_DIR.PATH):
+        os.mkdir(IMG_DIR.PATH)
 
-    PIC_PATH = filpy.FileVar('Pisa_test-case_IMG_5371.jpeg',PIC_DIR) 
     picture = Image.open(PIC_PATH.path())
     data = np.asarray(picture)
     avg_data = np.average(data,axis=2)
@@ -73,14 +106,32 @@ if __name__ == '__main__':
     cut_data = avg_data[*cut]
     print(cut_data.shape)
     mask = (xedges,yedges)
+    start_ram = ram_usage()
     plot_images(avg_data,mask=mask)
+    plt.savefig((IMG_DIR+'field.png').PATH)
+    end_ram = ram_usage()
+    print('RAM IMAGE:',(end_ram-start_ram)/(1024)**3,'GB')
     plot_images(cut_data)
+    # plt.show()
+    # plt.close('all')
     
+    IMG_DIR = IMG_DIR + f'_{xedges[0]}.{yedges[0]}'
+    if not os.path.isdir(IMG_DIR.PATH):
+        os.mkdir(IMG_DIR.PATH)
+
     start = time()
-    corr = filpy.asym_tpcf(avg_data,mask_ends=mask,result='div',zero_cover=True)
+    corr, stfc = filpy.asym_tpcf_n_sf(avg_data,mask_ends=mask)
     tot_corr = filpy.combine_results(corr)
+    tot_stfc = filpy.combine_results(stfc)
     end = time()
-    print('CORR TIME:',(end-start)/60,'m')
+    print('ALL TIME:',(end-start)/60,'m')
+
+
+    # start = time()
+    # corr = filpy.asym_tpcf(avg_data,mask_ends=mask,result='div',zero_cover=False)
+    # tot_corr = filpy.combine_results(corr)
+    # end = time()
+    # print('CORR TIME:',(end-start)/60,'m')
 
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
@@ -94,28 +145,36 @@ if __name__ == '__main__':
         circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
         ax.add_patch(circle)
         ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+    fig.savefig((IMG_DIR+'tpcf-2d.png').PATH)
 
+    
 
     plt.figure()
     plt.title('TPCF')
-    dists, iso_corr = filpy.convolve_result(corr)
-    cnts, bins = np.histogram(dists, 200, weights=iso_corr)
-    plt.stairs(cnts,bins)
+    start_ram = ram_usage()
+    dists, iso_corr = test_convolve_result(corr)
+    end_ram = ram_usage()
+    print('MARG TPCF:', (end_ram-start_ram)/(1024)**3, 'Gb')
+    plt.plot(dists,iso_corr,'.--')
+    plt.savefig((IMG_DIR+'tpcf-1d.png').PATH)
+    
 
     mini_mask = ((max_lag,max_lag+xedges[1]-xedges[0]),(max_lag,max_lag+yedges[1]-yedges[0]))
     plot_images(avg_data[yedges[0]-max_lag:yedges[1]+max_lag+1,xedges[0]-max_lag:xedges[1]+max_lag+1],mask=mini_mask)
+    plt.savefig((IMG_DIR+'frame.png').PATH)
 
-    start = time()
-    sf = filpy.asym_sf(avg_data,mask_ends=mask,result='div')
-    tot_sf = filpy.combine_results(sf)
-    end = time()
-    print('STFC TIME:',(end-start)/60,'m')
+
+    # start = time()
+    # stfc = filpy.asym_sf(avg_data,mask_ends=mask,result='div')
+    # tot_stfc = filpy.combine_results(stfc)
+    # end = time()
+    # print('STFC TIME:',(end-start)/60,'m')
 
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1)
-    img = ax.imshow(tot_sf,origin='lower')
-    fig.colorbar(img,ax=ax)
-    max_lag = tot_sf.shape[0]//2
+    img = ax.imshow(tot_stfc,origin='lower',norm='log',vmin=tot_stfc[tot_stfc!=0].min())
+    fig.colorbar(img,ax=ax,extend='min')
+    max_lag = tot_stfc.shape[0]//2
     circle_num = 5
     radii = np.arange(5,max_lag+(max_lag%circle_num),(max_lag+1)//circle_num)
     centre = (max_lag,max_lag)
@@ -123,15 +182,52 @@ if __name__ == '__main__':
         circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
         ax.add_patch(circle)
         ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+    fig.savefig((IMG_DIR+'stfc-2d.png').PATH)
+
+
 
     plt.figure()
     plt.title('SF')
-    dists, iso_sf = filpy.convolve_result(sf)
-    cnts, bins = np.histogram(dists, 200, weights=iso_sf)
-    plt.stairs(cnts,bins)
+    start_ram = ram_usage()
+    dists, iso_sf = test_convolve_result(stfc)
+    end_ram = ram_usage()
+    print('MARG SF:', (end_ram-start_ram)/(1024)**3, 'Gb')
+    plt.plot(dists,iso_sf,'.--')
+    plt.savefig((IMG_DIR+'stfc-1d.png').PATH)
 
+    plt.figure()
+    norm_sf = iso_sf/iso_sf.sum()
+    bin_num = 100
+    bin_dist = np.arange(0,dists[-1]+2)
+    bin_data = [ np.mean(norm_sf[(dists >= bin_dist[i])*(dists < bin_dist[i+1])]) if np.any((dists >= bin_dist[i])*(dists < bin_dist[i+1])) else 0 for i in range(len(bin_dist)-1)]
+
+    plt.stairs(bin_data,bin_dist)
+    plt.savefig((IMG_DIR+'stfc-hist.png').PATH)
+
+    plt.figure()
+    counts, sf_bins = np.histogram(bin_data,100)
+
+    max_pos = counts.argmax()
+    values = (sf_bins[max_pos-1],sf_bins[max_pos])
+    poss = np.where((bin_data>=values[0])*(bin_data<=values[1]))[0]
+    # ch_lag = bin_dist[poss].mean()
+    # print('CH_LAG', ch_lag)
+    # ch_lag = (ch_lag + bin_dist[poss+1].mean())/2
+    # print('CH_LAG2',ch_lag)
+
+
+    plt.hist(bin_data,100)
+    plt.savefig((IMG_DIR+'stfc-hist-distr.png').PATH)
+
+
+
+
+    snapshot = tracemalloc.take_snapshot()
+    display_top(snapshot, logger=logger)
 
     plt.show()
+
+
 
     exit()
 
