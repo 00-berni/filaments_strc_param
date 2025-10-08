@@ -161,8 +161,37 @@ if __name__ == '__main__':
     tot_corr[corr_dim-1,corr_dim-1] = 0
     plt.imshow(tot_corr,origin='lower')
 
-    plt.figure()
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
     tot_corr = filpy.asym_tpcf(data,(xlim,ylim),result='cum',zero_cover=True)
-    plt.imshow(tot_corr,origin='lower')
+    img = ax.imshow(tot_corr,origin='lower')
+    fig.colorbar(img,ax=ax)
+    circle_num = 5
+    # radii = np.arange(5,max_lag+(max_lag%circle_num),(max_lag+1)//circle_num)
+    radii = np.arange(25,max_lag,25)
+    centre = (max_lag,max_lag)
+    for r in radii:
+        circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
+        ax.add_patch(circle)
+        ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    sf = filpy.asym_sf(data,(xlim,ylim),result='div')
+    tot_sf = filpy.combine_results(sf)
+    img = ax.imshow(tot_sf,origin='lower',norm='log',vmin=tot_sf[tot_sf!=0].min())
+    fig.colorbar(img,ax=ax,extend='min')
+    circle_num = 5
+    radii = np.arange(5,max_lag+(max_lag%circle_num),(max_lag+1)//circle_num)
+    centre = (max_lag,max_lag)
+    for r in radii:
+        circle = plt.Circle(centre,r,color='white',fill=False,linestyle='dashed')
+        ax.add_patch(circle)
+        ax.annotate(f'{r:.0f}',(centre[0],centre[0]),(centre[0]+int(r/np.sqrt(2))+3,centre[0]+int(r/np.sqrt(2))+3),color='white')
+
+    plt.figure()
+    dists, iso_stfc = filpy.convolve_result(sf)
+
+    plt.plot(dists,iso_stfc,'.--')
 
     plt.show()
