@@ -680,7 +680,8 @@ def step_tpcf(step: int) -> list[np.ndarray]:
     j, i = step
     # compute the correlation
     if i**2+j**2 <= G_max_lag**2:
-        return [np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i])/G_xx.size for k,t in zip(xsgn,ysgn)]
+        return [  np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i])/G_xx.size 
+                 for k,t in zip(xsgn,ysgn)]
     else:
         return [0,0,0,0]
 
@@ -708,14 +709,29 @@ def step_sf(step: int) -> list[np.ndarray]:
     j, i = step
     # compute the correlation
     if i**2+j**2 <= G_max_lag**2:
-        return [np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order)/G_xx.size for k,t in zip(xsgn,ysgn)]
+        return [  np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order)/G_xx.size 
+                 for k,t in zip(xsgn,ysgn)]
     else:
         return [0,0,0,0]
 
 
+def step_all(step: int) -> np.ndarray:
+    # define couples to identify the 4 quadrants
+    xsgn = (1,1,-1,-1)
+    ysgn = (1,-1,-1,1)
+    # compute the position in the vector distance space
+    j, i = step
+    # compute the correlation
+    if i**2+j**2 <= G_max_lag**2:
+        return [ [ np.sum(G_tmp_data[G_yy,G_xx] * G_tmp_data[G_yy+t*j,G_xx+k*i])/G_xx.size, 
+                   np.sum(np.abs(G_tmp_data[G_yy,G_xx] - G_tmp_data[G_yy+t*j,G_xx+k*i])**G_order)/G_xx.size] 
+                 for k,t in zip(xsgn,ysgn)]
+    else:
+        return [[0,0]]*4
 
 
-def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2, processes: int = cpu_count()-1) -> np.ndarray:
+
+def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf','all'], order: int = 2, processes: int = cpu_count()-1) -> np.ndarray | tuple[np.ndarray,np.ndarray]:
     """Compute the TPCF or the SF by parallelization
 
     Parameters
@@ -732,7 +748,7 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     Returns
     -------
     results : np.ndarray
-        the TPCF or the SF per each quadrant
+        the TPCF or the SF per each quadrant or both
 
     Notes
     -----
@@ -740,6 +756,8 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     """
     global G_tmp_data           #: the copy of the reference frame
     global G_xx, G_yy           #: the map of all possible pixel positions of the mask
+    global G_order          #: the order of the SF
+    G_order = order
     # copy data to prevent losses of information
     G_tmp_data = np.copy(data)
     ydim, xdim = data.shape     #: size of the frame
@@ -760,15 +778,21 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
         G_tmp_data -= G_tmp_data.mean()
         with Pool(processes=processes) as pool:
             results = pool.map(step_tpcf, positions)
+        results = np.asarray(results).reshape(res_dim,res_dim,4)
     elif mode == 'sf':          #: compute the SF
-        global G_order          #: the order of the SF
-        G_order = order
         with Pool(processes=processes) as pool:
             results = pool.map(step_sf, positions)
-    results = np.asarray(results).reshape(res_dim,res_dim,4)
+        results = np.asarray(results).reshape(res_dim,res_dim,4)
+    elif mode == 'all': 
+        # remove the mean
+        G_tmp_data -= G_tmp_data.mean()
+        with Pool(processes=processes) as pool:
+            results = np.asarray(pool.map(step_all, positions))
+        results = ( results[:,:,0].reshape(res_dim,res_dim,4),
+                    results[:,:,1].reshape(res_dim,res_dim,4) )
     return results
 
-def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2) -> np.ndarray:
+def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
     """Compute the TPCF or the SF in sequence mode
 
     Parameters
@@ -801,22 +825,39 @@ def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     xx, yy = np.meshgrid(np.arange(m_xdim),np.arange(m_ydim))
     xx += xo
     yy += yo
-    # inizialize the results matrix
-    results = np.zeros((res_dim,res_dim,4))
     # define couples to identify the 4 quadrants
     xsgn = (1,1,-1,-1)
     ysgn = (1,-1,-1,1)
     if mode == 'tpcf':              #: compute the TPCF
+        # inizialize the results matrix
+        results = np.zeros((res_dim,res_dim,4))
         # remove the mean
         tmp_data -= tmp_data.mean()
         for j in range(res_dim):
             for i in range(res_dim):
                 results[j,i] = [np.sum(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])/xx.size if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
     elif mode == 'sf':              #: compute the SF
+        # inizialize the results matrix
+        results = np.zeros((res_dim,res_dim,4))
         for j in range(res_dim):
             for i in range(res_dim):
-                results[j,i] = [np.sum(np.abs(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])**order)/xx.size if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
-    results = np.asarray(results)
+                results[j,i] = [np.sum(np.abs(tmp_data[yy,xx] - tmp_data[yy+t*j,xx+k*i])**order)/xx.size if i**2+j**2 <= max_lag**2 else 0 for k,t in zip(xsgn,ysgn) ]
+    elif mode == 'all':              #: compute the SF
+        # inizialize the results matrix
+        corr_i = np.zeros((res_dim,res_dim,4))
+        stfc_i = np.zeros((res_dim,res_dim,4))
+        for j in range(res_dim):
+            for i in range(res_dim):
+                corr_i[j,i] = [  np.sum(tmp_data[yy,xx] * tmp_data[yy+t*j,xx+k*i])/xx.size 
+                                if i**2+j**2 <= max_lag**2 
+                                else 0 
+                               for k,t in zip(xsgn,ysgn) ]
+                stfc_i[j,i] = [   np.sum(np.abs(tmp_data[yy,xx] - tmp_data[yy+t*j,xx+k*i])**order)/xx.size 
+                                if i**2+j**2 <= max_lag**2 
+                                else 0 
+                               for k,t in zip(xsgn,ysgn) ]
+        results = (corr_i, stfc_i)
+        del corr_i, stfc_i
     return results
 
 
@@ -904,15 +945,31 @@ def asym_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], 
         stfc = combine_results(stfc)
     return stfc
 
+def asym_tpcf_n_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div',zero_cover: bool = False, **compute_kwargs) -> tuple[np.ndarray, np.ndarray]:
+    ydim, xdim = data.shape     #: size of the frame
+    if max(ydim,xdim) <= 50:    #: no parallelization
+        corr, stfc = sequence_compute(data,mask_ends=mask_ends,mode='all', order=order)
+    else:                       #: require parallelization
+        corr, stfc = parallel_compute(data,mask_ends=mask_ends,mode='all',order=order,**compute_kwargs)
+    
+    if zero_cover:
+        corr[0,0,:] = np.zeros(4)
+    if result == 'cum':         #: 2D picture
+        corr = combine_results(corr)
+        stfc = combine_results(stfc)
+    return corr, stfc
+
+
+
 def convolve_result(res_matrix: np.ndarray, mode: Literal['sum','mean'] = 'sum') -> tuple[np.ndarray,np.ndarray]:
     flat_res = np.sum(res_matrix,axis=2)
     ydim, xdim = flat_res.shape
     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
     dist = np.sqrt(xx**2+yy**2)
-    unq_dist = np.unique(dist)
-    pos = [ dist==d for d in unq_dist]
-    norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
-    flat_res = np.asarray([np.sum(flat_res[yy[p],xx[p]])/norm_val(p) for p in pos])
+    unq_dist = np.sort(np.unique(dist[dist <= xdim]))
+    pos = [ np.asarray(np.where(dist==d)).astype(int) for d in unq_dist]
+    # norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
+    flat_res = np.asarray([np.sum(flat_res[yy[*p],xx[*p]])/(4 * p.shape[1]) for p in pos])
     return unq_dist, flat_res
 
 
