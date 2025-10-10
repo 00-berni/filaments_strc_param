@@ -33,6 +33,28 @@ class PathVar():
         """
         self.PATH = path  if path != '' else PathVar.this_dir()
 
+    def check_dir(self) -> bool:
+        """Check the presence of directories in the path
+        
+        Returns
+        -------
+        dir_presence : bool
+            `True` if the path is real
+        """
+        return os.path.isdir(self.PATH)
+
+    def make_dir(self) -> None:
+        """Make the directories required in the path"""
+        if not self.check_dir():
+            dirs = []
+            tmp_path = self.PATH
+            while not os.path.isdir(tmp_path):
+                tmp_path, dir = os.path.split(tmp_path)
+                dirs += [dir]
+            for dir in dirs[::-1]:                   
+                tmp_path = os.path.join(tmp_path,dir)
+                os.mkdir(tmp_path)
+
     def split(self) -> tuple[str,str]:
         """Split the last directory from the global path
 
@@ -85,7 +107,10 @@ class PathVar():
     
     def __str__(self) -> str:
         return self.PATH 
-     
+    
+    def __repr__(self) -> str:
+        return 'PathVar: "' + self.PATH + '"'
+    
 
 class FileVar():
     """Handle the file(s) path(s)
@@ -107,9 +132,9 @@ class FileVar():
         filename : str | list[str]
             file name or list of files names
         dirpath : str | PathVar, optional
-            directory path, by default ''
+            directory path, by default `''`
         path : bool, optional
-            if `True` the `filename` path is computed, by default False
+            if `True` the `filename` path is computed, by default `False`
         """
         if path: 
             dirpath  = os.path.dirname(filename)
@@ -117,7 +142,7 @@ class FileVar():
         if isinstance(dirpath, str): dirpath = PathVar(path=dirpath)
         
         self.DIR  = dirpath.copy()
-        self.FILE = filename
+        self.FILE = filename if isinstance(filename, str) else [*filename]
 
     def path(self) -> str | list[str]:
         """Compute the file(s) path(s)
@@ -139,6 +164,15 @@ class FileVar():
         new_file = FileVar(filename=self.FILE,dirpath=self.DIR,path=False)
         return new_file
 
+    def __add__(self, new_file: str | list[str]) -> 'FileVar':
+        new_filevar = self.copy()
+        filename = new_filevar.FILE 
+        if isinstance(filename,str):
+            new_filevar.FILE = [filename, new_file]
+        else:
+            new_filevar.FILE += [new_file] 
+        return new_filevar
+
     def __getitem__(self,item: int) -> str:
         """Select a certain file path from a list of ones
 
@@ -153,10 +187,12 @@ class FileVar():
             the chosen path
         """
         path = self.path()
-        if isinstance(path,str): return TypeError('Variable is not subscriptable')
-        else: return path[item]
+        if isinstance(path,str): 
+            return TypeError('Variable is not subscriptable')
+        else: 
+            return path[item]
     
-    def __setitem__(self,key:int,item:str) -> None:
+    def __setitem__(self, key: int, item: str) -> None:
         """Modify a file name of a list of paths
 
         Parameters
@@ -173,6 +209,10 @@ class FileVar():
 
     def __str__(self) -> str:
         return str(self.path())
+    
+    def __repr__(self) -> str:
+        return 'FileVar: "' + self.__str__() + '"'
+
 
 
 ## Paths
