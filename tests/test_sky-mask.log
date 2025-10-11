@@ -1,3 +1,36 @@
-INFO:__main__: RUN RANDOM SAMPLING
-INFO:__main__: run:	2025-10-10 17:57:15.189185
-INFO:__main__: Mask size:	(350,175)
+INFO:__main__: RUN RANDOM SAMPLING SCRIPT
+INFO:__main__: DATE:	2025-10-11 22:55:07.537520
+INFO:__main__: Mask size:	(355,175)
+INFO:__main__: Image size:	(3250,3864)
+INFO:__main__: Region of the sampling:	(2107,2901)
+INFO:__main__: Centre:	(421,2274)
+	Filename: tpfc-sf_421-2274.csv
+	COMPUTATIONAL TIME: 2.8475639541943867 m
+INFO:__main__: Centre:	(322,894)
+	Filename: tpfc-sf_322-894.csv
+	COMPUTATIONAL TIME: 0.9928250392278035 m
+INFO:__main__: Centre:	(950,1751)
+	Filename: tpfc-sf_950-1751.csv
+	COMPUTATIONAL TIME: 7.424755569299062 m
+INFO:__main__: Centre:	(1468,2178)
+	Filename: tpfc-sf_1468-2178.csv
+	COMPUTATIONAL TIME: 7.414041638374329 m
+INFO:__main__: Centre:	(833,2869)
+	Filename: tpfc-sf_833-2869.csv
+	COMPUTATIONAL TIME: 7.392171156406403 m
+INFO:__main__: Centre:	(397,2834)
+	Filename: tpfc-sf_397-2834.csv
+	COMPUTATIONAL TIME: 2.2844382166862487 m
+INFO:__main__: Centre:	(567,1680)
+	Filename: tpfc-sf_567-1680.csv
+	COMPUTATIONAL TIME: 7.220725945631663 m
+INFO:__main__: Centre:	(1268,1616)
+	Filename: tpfc-sf_1268-1616.csv
+	COMPUTATIONAL TIME: 7.431766696770986 m
+INFO:__main__: Centre:	(1361,2220)
+	Filename: tpfc-sf_1361-2220.csv
+	COMPUTATIONAL TIME: 7.444776813189189 m
+INFO:__main__: Centre:	(1939,1663)
+	Filename: tpfc-sf_1939-1663.csv
+	COMPUTATIONAL TIME: 7.488395682970682 m
+INFO:__main__: END FOR ROUTINE
