@@ -772,7 +772,13 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     G_xx, G_yy = np.meshgrid(np.arange(m_xdim),np.arange(m_ydim))
     G_xx += xo
     G_yy += yo
-    positions = np.asarray(np.meshgrid(np.arange(res_dim),np.arange(res_dim))).T.reshape(res_dim*res_dim,2)
+    positions = np.asarray(np.meshgrid(np.arange(res_dim),np.arange(res_dim)))
+    try:
+        positions = positions.T.reshape(res_dim*res_dim,2)
+    except ValueError:
+        print('RES DIM',res_dim)
+        print('LEN', len(positions))
+        raise
     if mode == 'tpcf':          #: compute the TPCF
         # remove the mean
         G_tmp_data -= G_tmp_data.mean()
