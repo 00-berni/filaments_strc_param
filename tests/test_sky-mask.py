@@ -110,8 +110,8 @@ if __name__ == '__main__':
             np.random.seed(ARGS.seed)
             SAMPLE = np.random.choice(XRDIM*YRDIM,size=ARGS.num,replace=ARGS.replace)
             YPOS, XPOS = np.unravel_index(SAMPLE,(YRDIM,XRDIM))
-            XSAMPLE = np.arange(XRDIM)[XPOS]
-            YSAMPLE = np.arange(YRDIM)[YPOS]
+            XSAMPLE = np.arange(XRDIM)[XPOS]+XREGION[0]
+            YSAMPLE = np.arange(YRDIM)[YPOS]+YREGION[0]
             del SAMPLE, XPOS, YPOS
         else:
             XSAMPLE = [ARGS.sample[0]]
@@ -120,7 +120,6 @@ if __name__ == '__main__':
         plt.plot(XSAMPLE,YSAMPLE,'.',color='red')
         plt.show()
         plt.close('all')
-
         FILE_DIR = RES_DIR + (DATE.date().strftime("%Y-%m-%d") + f'_{m_xsize}-{m_ysize}')  
         FILE_DIR.make_dir()      
         file_paths_list = filpy.FileVar([],FILE_DIR)

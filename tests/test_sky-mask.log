@@ -1,230 +1,76 @@
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-11 22:55:07.537520
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Centre:	(421,2274)
-	Filename: tpfc-sf_421-2274.csv
-	COMPUTATIONAL TIME: 2.8475639541943867 m
-INFO:__main__: Centre:	(322,894)
-	Filename: tpfc-sf_322-894.csv
-	COMPUTATIONAL TIME: 0.9928250392278035 m
-INFO:__main__: Centre:	(950,1751)
-	Filename: tpfc-sf_950-1751.csv
-	COMPUTATIONAL TIME: 7.424755569299062 m
-INFO:__main__: Centre:	(1468,2178)
-	Filename: tpfc-sf_1468-2178.csv
-	COMPUTATIONAL TIME: 7.414041638374329 m
-INFO:__main__: Centre:	(833,2869)
-	Filename: tpfc-sf_833-2869.csv
-	COMPUTATIONAL TIME: 7.392171156406403 m
-INFO:__main__: Centre:	(397,2834)
-	Filename: tpfc-sf_397-2834.csv
-	COMPUTATIONAL TIME: 2.2844382166862487 m
-INFO:__main__: Centre:	(567,1680)
-	Filename: tpfc-sf_567-1680.csv
-	COMPUTATIONAL TIME: 7.220725945631663 m
-INFO:__main__: Centre:	(1268,1616)
-	Filename: tpfc-sf_1268-1616.csv
-	COMPUTATIONAL TIME: 7.431766696770986 m
-INFO:__main__: Centre:	(1361,2220)
-	Filename: tpfc-sf_1361-2220.csv
-	COMPUTATIONAL TIME: 7.444776813189189 m
-INFO:__main__: Centre:	(1939,1663)
-	Filename: tpfc-sf_1939-1663.csv
-	COMPUTATIONAL TIME: 7.488395682970682 m
-INFO:__main__: END FOR ROUTINE
-INFO:__main__: ===============
-INFO:__main__: ===============
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 15:56:30.398323
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 15:58:01.177874
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 15:58:13.212849
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 15:58:26.705247
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 15:58:38.952522
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 16:27:32.020002
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-14 16:28:02.153141
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 11:27:40.568961
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 11:28:21.576967
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 11:28:25.487412
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 11:28:55.288822
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 14:33:55.779295
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 14:33:59.440477
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 14:39:42.418017
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 14:39:49.533118
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 14:40:10.730878
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Print the list of data
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 15:13:05.292425
+INFO:__main__: DATE:	2025-10-15 20:12:44.000698
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: Image size:	(3250,3864)
 INFO:__main__: Mask sizes:	355 - 175
 INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5.0
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 15:14:52.327791
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Mask sizes:	355 - 175
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5.0
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 15:15:29.827007
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Mask sizes:	355 - 175
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5.0
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 15:15:48.282121
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Mask sizes:	355 - 175
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 15:16:35.694051
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Mask sizes:	355 - 175
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5
-INFO:__main__: Centre:	(1070,1459)
-	Filename: tpfc-sf_1070-1459.npz
-	COMPUTATIONAL TIME: 7.742950483163198 m
+INFO:__main__: Centre:	(2021,1608)
+	Filename: tpfc-sf_2021-1608.npz
+	COMPUTATIONAL TIME: 7.588237237930298 m
+INFO:__main__: Centre:	(1939,948)
+	Filename: tpfc-sf_1939-948.npz
+	COMPUTATIONAL TIME: 7.39645383755366 m
+INFO:__main__: Centre:	(1894,3142)
+	Filename: tpfc-sf_1894-3142.npz
+	COMPUTATIONAL TIME: 7.405718036492666 m
+INFO:__main__: Centre:	(1855,1126)
+	Filename: tpfc-sf_1855-1126.npz
+	COMPUTATIONAL TIME: 7.431737196445465 m
+INFO:__main__: Centre:	(1573,2620)
+	Filename: tpfc-sf_1573-2620.npz
+	COMPUTATIONAL TIME: 7.3954001545906065 m
+INFO:__main__: Centre:	(1466,966)
+	Filename: tpfc-sf_1466-966.npz
+	COMPUTATIONAL TIME: 7.524093397458395 m
+INFO:__main__: Centre:	(1807,651)
+	Filename: tpfc-sf_1807-651.npz
+	COMPUTATIONAL TIME: 7.282714295387268 m
+INFO:__main__: Centre:	(1835,1215)
+	Filename: tpfc-sf_1835-1215.npz
+	COMPUTATIONAL TIME: 7.277931312719981 m
+INFO:__main__: Centre:	(1285,2155)
+	Filename: tpfc-sf_1285-2155.npz
+	COMPUTATIONAL TIME: 7.273698528607686 m
+INFO:__main__: Centre:	(2042,2483)
+	Filename: tpfc-sf_2042-2483.npz
+	COMPUTATIONAL TIME: 7.271903018156688 m
+INFO:__main__: Centre:	(607,1868)
+	Filename: tpfc-sf_607-1868.npz
+	COMPUTATIONAL TIME: 7.278526898225149 m
+INFO:__main__: Centre:	(2288,823)
+	Filename: tpfc-sf_2288-823.npz
+	COMPUTATIONAL TIME: 7.266981287797292 m
+INFO:__main__: Centre:	(1591,900)
+	Filename: tpfc-sf_1591-900.npz
+	COMPUTATIONAL TIME: 7.27183909813563 m
+INFO:__main__: Centre:	(2534,2034)
+	Filename: tpfc-sf_2534-2034.npz
+	COMPUTATIONAL TIME: 7.266527632872264 m
+INFO:__main__: Centre:	(617,2244)
+	Filename: tpfc-sf_617-2244.npz
+	COMPUTATIONAL TIME: 7.278279956181844 m
+INFO:__main__: Centre:	(978,2959)
+	Filename: tpfc-sf_978-2959.npz
+	COMPUTATIONAL TIME: 7.257770017782847 m
+INFO:__main__: Centre:	(1834,995)
+	Filename: tpfc-sf_1834-995.npz
+	COMPUTATIONAL TIME: 7.301073960463206 m
+INFO:__main__: Centre:	(1034,1069)
+	Filename: tpfc-sf_1034-1069.npz
+	COMPUTATIONAL TIME: 7.2905164440472925 m
+INFO:__main__: Centre:	(1200,1410)
+	Filename: tpfc-sf_1200-1410.npz
+	COMPUTATIONAL TIME: 7.258494325478872 m
+INFO:__main__: Centre:	(2485,2815)
+	Filename: tpfc-sf_2485-2815.npz
+	COMPUTATIONAL TIME: 7.261917849381764 m
 INFO:__main__: END FOR ROUTINE
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:36:14.155371
+INFO:__main__: DATE:	2025-10-15 23:18:37.356773
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: Print the list of data
 INFO:__main__: 
@@ -232,85 +78,7 @@ INFO:__main__:
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:36:29.776421
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:36:40.176879
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:37:02.445351
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:37:36.217718
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:37:45.345682
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:38:07.563851
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:38:20.790111
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:39:04.837418
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 16:39:18.053923
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 18:35:52.297856
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: Image size:	(3250,3864)
-INFO:__main__: Mask sizes:	355 - 175
-INFO:__main__: Region of the sampling:	(2107,2901)
-INFO:__main__: Seed:	5
-INFO:__main__: Centre:	(1070,1459)
-	Filename: tpfc-sf_1070-1459.npz
-	COMPUTATIONAL TIME: 7.518593561649323 m
-INFO:__main__: END FOR ROUTINE
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 18:44:46.965405
+INFO:__main__: DATE:	2025-10-15 23:18:49.932835
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: Print the list of data
 INFO:__main__: 
@@ -318,7 +86,7 @@ INFO:__main__:
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 18:44:51.039111
+INFO:__main__: DATE:	2025-10-15 23:18:52.438915
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: Print the list of data
 INFO:__main__: 
@@ -326,7 +94,7 @@ INFO:__main__:
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 18:44:55.845382
+INFO:__main__: DATE:	2025-10-15 23:19:00.656588
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: Print the list of data
 INFO:__main__: 
@@ -334,138 +102,55 @@ INFO:__main__:
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 18:45:08.674984
+INFO:__main__: DATE:	2025-10-15 23:19:06.518984
+INFO:__main__: Mask size:	(355,175)
+INFO:__main__: Print the list of data
+INFO:__main__: 
+============================================================
+INFO:__main__: 
+============================================================
+INFO:__main__: RUN RANDOM SAMPLING SCRIPT
+INFO:__main__: DATE:	2025-10-15 23:19:12.724663
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:39:54.377317
+INFO:__main__: DATE:	2025-10-15 23:19:37.644592
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:39:57.120050
+INFO:__main__: DATE:	2025-10-15 23:19:57.931570
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:47:46.306609
+INFO:__main__: DATE:	2025-10-15 23:20:11.035971
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:48:51.060908
+INFO:__main__: DATE:	2025-10-15 23:20:24.255974
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:52:12.079519
+INFO:__main__: DATE:	2025-10-15 23:20:48.347897
 INFO:__main__: Mask size:	(355,175)
 INFO:__main__: 
 ============================================================
 INFO:__main__: 
 ============================================================
 INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:52:56.519869
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:53:25.556268
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:54:20.380385
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:55:31.319648
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:56:20.965264
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:58:47.041415
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:59:05.233723
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:59:26.783342
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 19:59:51.147402
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 20:00:32.101475
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 20:00:59.972020
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 20:01:44.032214
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 20:03:39.731806
-INFO:__main__: Mask size:	(355,175)
-INFO:__main__: 
-============================================================
-INFO:__main__: 
-============================================================
-INFO:__main__: RUN RANDOM SAMPLING SCRIPT
-INFO:__main__: DATE:	2025-10-15 20:05:05.574288
+INFO:__main__: DATE:	2025-10-15 23:21:03.196091
 INFO:__main__: Mask size:	(355,175)
