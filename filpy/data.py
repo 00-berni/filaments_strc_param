@@ -66,6 +66,15 @@ class PathVar():
             directory/file name
         """
         return os.path.split(self.PATH)
+    
+    def dir_list(self, dir: str = '', print_res: bool = False) -> list[str]:
+        path = os.path.join(self.PATH,dir)
+        files = os.listdir(path)
+        if print_res:
+            print('Files in "' + path +'"')
+            for i in range(len(files)):
+                print(f'{i:2d} - {files[i]}')
+        return files
 
     def copy(self) -> 'PathVar':
         """Copy the class variable"""
