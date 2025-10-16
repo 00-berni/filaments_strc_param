@@ -167,11 +167,25 @@ class FileVar():
             return (dirname + filename).PATH
         else:
             return [(dirname + name).PATH for name in filename]
+        
+    def update_file(self) -> None:
+        obj_list = self.DIR.dir_list()
+        if isinstance(self.FILE,str):
+            self.FILE = [self.FILE] + obj_list
+        else:
+            self.FILE += obj_list
 
     def copy(self) -> 'FileVar':
         """Copy the variable"""
         new_file = FileVar(filename=self.FILE,dirpath=self.DIR,path=False)
         return new_file
+
+    def __len__(self) -> int:
+        if isinstance(self.FILE,str):
+            return 0
+        else:
+            return len(self.FILE)
+
 
     def __add__(self, new_file: str | list[str]) -> 'FileVar':
         new_filevar = self.copy()
@@ -222,6 +236,10 @@ class FileVar():
     def __repr__(self) -> str:
         return 'FileVar: "' + self.__str__() + '"'
 
+
+def dir_files(curr_dir: PathVar, dir: str = '', print_res: bool = False) -> FileVar:
+    obj_list = curr_dir.dir_list(dir=dir,print_res=print_res)
+    return FileVar(obj_list,curr_dir+dir)
 
 
 ## Paths
