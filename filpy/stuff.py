@@ -966,16 +966,31 @@ def asym_tpcf_n_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,
     return corr, stfc
 
 
+def parallel_convolve_result(dist: float) -> float:
+    pos = np.asarray(np.where(G_dists==dist)).astype(int)
+    return np.sum(G_flat_res[G_c_yy[*pos],G_c_xx[*pos]])/(4*pos.shape[1])
 
-def convolve_result(res_matrix: np.ndarray, mode: Literal['sum','mean'] = 'sum') -> tuple[np.ndarray,np.ndarray]:
+
+def convolve_result(res_matrix: np.ndarray,**compute_kwargs) -> tuple[np.ndarray,np.ndarray]:
     flat_res = np.sum(res_matrix,axis=2)
     ydim, xdim = flat_res.shape
     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
     dist = np.sqrt(xx**2+yy**2)
     unq_dist = np.sort(np.unique(dist[dist <= xdim]))
-    pos = [ np.asarray(np.where(dist==d)).astype(int) for d in unq_dist]
-    # norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
-    flat_res = np.asarray([np.sum(flat_res[yy[*p],xx[*p]])/(4 * p.shape[1]) for p in pos])
+    if len(unq_dist) < 1400:
+        pos = [ np.asarray(np.where(dist==d)).astype(int) for d in unq_dist]
+        # norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
+        flat_res = np.asarray([np.sum(flat_res[yy[*p],xx[*p]])/(4 * p.shape[1]) for p in pos])
+    else:
+        if 'processes' not in compute_kwargs.keys():
+            compute_kwargs['processes'] = cpu_count - 1
+        global G_dists, G_c_xx, G_c_yy, G_flat_res
+        G_dists = dist
+        G_c_xx = xx
+        G_c_yy = yy
+        G_flat_res = flat_res
+        with Pool(**compute_kwargs) as pool:
+            flat_res = np.asarray(pool.map(parallel_convolve_result,unq_dist))
     return unq_dist, flat_res
 
 
