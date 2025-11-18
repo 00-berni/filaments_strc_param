@@ -293,7 +293,7 @@ def write_NDfield_ascii(filename, field):
     np.savetxt(filename, field, header=header, fmt="%.12g", comments="")
 
 
-def change_field_value_with_file(ndnet_fname, density_file, field_name="field_value"):
+def change_field_value_with_file(ndnet_fname: str, density_file, field_name: str = "field_value"):
     ncv_cmd = ["netconv", ndnet_fname,
                "-outName", ndnet_fname,
                "-addField", density_file, field_name, 
