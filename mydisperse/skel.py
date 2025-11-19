@@ -5,6 +5,7 @@ from builtins import map
 from builtins import range
 from builtins import object
 
+from typing import TextIO, Callable
 import numpy as np
 from scipy.spatial import cKDTree as KDTree 
 from tvtk.api import tvtk
@@ -13,12 +14,11 @@ import itertools
 from multiprocessing import Pool
 
 import numbers
-from pydisperse.catalogvtk import CatalogVtk
+from mydisperse.catalogvtk import CatalogVtk
 
 class SkelError(Exception):
     pass
 
-from amunra import cool_plot_specifics
 import matplotlib.gridspec as gridspec
 ## needed for pickling instance method in python 2 (used in pool.map)
 #import copy_reg, types
@@ -31,61 +31,82 @@ import matplotlib.gridspec as gridspec
 
 
 # read a line, skipping comment lines    
-def _readline(f):
+def _readline(f: TextIO) -> str:
     _COMMENT = '#'
     for line in f:
-        if line.find(_COMMENT) !=0: break
+        if line.find(_COMMENT) != 0: break
     return line    
 
 
-def _check_p(f, pattern, optional=False):
+def _check_p(f: TextIO, pattern: str, optional: bool = False) -> str:
     line = _readline(f)
-    if line.find(pattern) !=0 :
-        if not(optional): raise SkelError('wrong format, missing: {0}'.format(pattern))
-    else: return line
+    if line.find(pattern) != 0:
+        if not(optional): 
+            raise SkelError('wrong format, missing: {0}'.format(pattern))
+    else: 
+        return line
 
 
 
 class CriticalPoint(object):
-    def __init__(self, typ, pos, val, pair, boundary, destCritId, filId):
-        self.typ = typ
-        self.pos = pos
-        self.val = val
-        self.pair = pair
-        self.boundary = boundary
-        self.destCritId = destCritId
-        self.filId = filId
+    def __init__(self, typ: int, pos: np.ndarray, val: float, pair: int, boundary: int, destCritId: list[int], filId: list[int]):
+        """Constructor of the class
+
+        Parameters
+        ----------
+        typ : int
+            critical index
+        pos : np.ndarray
+            CP position
+        val : float
+            CP value
+        pair : int
+            index of the CP in the persistence pair
+        boundary : int
+            0 if CP is not on the boundary
+        destCritId : list[int]
+            list of index of the other extremity CP for each filament connected to it
+        filId : list[int]
+            list of the filaments indeces
+        """
+        self.typ = typ                  
+        self.pos = pos                  
+        self.val = val                  
+        self.pair = pair                 
+        self.boundary = boundary         
+        self.destCritId = destCritId     
+        self.filId = filId               
 
     @property
-    def nfil(self):
+    def nfil(self) -> int:
         return len(self.filId)
     
-    def unconnect_fil(self, filidx):
+    def unconnect_fil(self, filidx) -> None:
         del self.filId[filidx]
         del self.destCritId[filidx]
         
-    def convert_distance(self, convert):
+    def convert_distance(self, convert: Callable):
         self.pos = convert(self.pos)
 
 
 class Filaments(object):
-    def __init__(self, fils):
+    def __init__(self, fils: list['Filament']):
         self.fils = fils
         self.get_lenghts()
 
-    def get_lenghts(self):
+    def get_lenghts(self) -> None:
         self.lenghts = []
         for fil in self.fils:
             self.lenghts.append(fil.len)
 
-    def get_property_array(self, item):
+    def get_property_array(self, item: str) -> np.ndarray:
         data = []
         for fil in self.fils:
             data.append(fil.__getattribute__(item))
         setattr(self, item, np.array(data))
         return np.array(data)
 
-    def __getattr__(self, item):
+    def __getattr__(self, item: str) -> np.ndarray | None:
         if item not in self.__dict__.keys():
             try:
                 setattr(self, item, self.get_property_array(item))
@@ -93,13 +114,13 @@ class Filaments(object):
                 raise(AttributeError, 'The attribute is not present')
             return self.__dict__[item]
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.fils)
 
-    def __iter__(self):
+    def __iter__(self) -> 'FilsIterator':
         return FilsIterator(self.fils)
 
-    def __getitem__(self, i=None):
+    def __getitem__(self, i: numbers.Integral | slice | np.ndarray | None = None) -> 'Filament' | 'Filaments':
         Fils = self.return_fils(i)
         for attr in self.__dict__.keys():
             try:
@@ -108,7 +129,7 @@ class Filaments(object):
                 continue
         return Fils
 
-    def __add__(self, other):
+    def __add__(self, other: 'Filament' | list['Filament']) -> 'Filaments':
         if isinstance(other, Filament):
             self.fils.append(other)
             for attr in self.__dict__.keys():
@@ -133,7 +154,7 @@ class Filaments(object):
             raise TypeError("Unsupported operand type(s) for +: 'Filaments' and '{}'".format(type(other)))
 
 
-    def remove(self, other):
+    def remove(self, other: int | 'Filament') -> None:
         if isinstance(other, int):
             self.fils.pop(other)
         elif isinstance(other, Filament):
@@ -149,7 +170,7 @@ class Filaments(object):
             except:
                 continue
 
-    def __sub__(self, other):
+    def __sub__(self, other: 'Filament' | list['Filament']) -> 'Filaments':
         if isinstance(other, Filament):
             try:
                 self.fils.remove(other)
@@ -179,7 +200,7 @@ class Filaments(object):
         else:
             raise TypeError("Unsupported operand type(s) for -: 'Filaments' and '{}'".format(type(other)))
 
-    def return_fils(self, i):
+    def return_fils(self, i: numbers.Integral | slice | np.ndarray | None) -> 'Filament' | 'Filaments':
         if isinstance(i, numbers.Integral):
             if i < 0:
                 i += len(self)
@@ -198,7 +219,7 @@ class Filaments(object):
         else:
             raise 'Invalid indeces format'
 class FilsIterator:
-    def __init__(self, fils):
+    def __init__(self, fils: list['Filament']):
         self._fils = fils
         self._index = 0
 
@@ -210,35 +231,46 @@ class FilsIterator:
         # End of Iteration
         raise StopIteration
 class Filament(object):
-    def __init__(self, cp1, cp2, points):
+    def __init__(self, cp1: CriticalPoint, cp2: CriticalPoint, points: np.ndarray):
+        """Constructor of the class
+
+        Parameters
+        ----------
+        cp1 : CriticalPoint
+            start CP   
+        cp2 : CriticalPoint
+            end CP
+        points : np.ndarray
+            sample points of the filament `points.shape == (numb_points, space_dim)`
+        """
         self._cp1 = cp1
         self._cp2 = cp2
         self._points = points
             
     @property
-    def cp1(self):
+    def cp1(self) -> CriticalPoint:
         return self._cp1
     
     @property
-    def cp2(self):
+    def cp2(self) -> CriticalPoint:
         return self._cp2
 
     @property
-    def points(self):
+    def points(self) -> np.ndarray:
         return self._points    
     @points.setter
-    def points(self, value):
+    def points(self, value: np.ndarray) -> None:
         self._points = value
 
     @property
-    def nsamp(self):
+    def nsamp(self) -> int:
         return self._points.shape[0]
         
-    def mid_segments(self):
+    def mid_segments(self) -> np.ndarray:
         return (np.roll(self._points, 1, axis=0) + self._points)[1:]/2.
 
     @property
-    def segments_len(self):
+    def segments_len(self) -> np.ndarray:
         try:
             return self._segs_len
         except AttributeError:
@@ -247,7 +279,7 @@ class Filament(object):
             return self._segs_len
         
     @property
-    def len(self):
+    def len(self) -> float:
         try:
             return self._len
         except AttributeError:
@@ -255,22 +287,22 @@ class Filament(object):
             return self._len
         
     @property
-    def segments_cumlen_from_cp1(self):
+    def segments_cumlen_from_cp1(self) -> np.ndarray:
         try:
             return self._segs_clen_cp1
         except AttributeError:
-            self._segs_clen_cp1 = self._compute_segments_cumlen()
+            self._segs_clen_cp1 = self._compute_segments_cumlen(reverse=False)
             return self._segs_clen_cp1
 
     @property
-    def segments_cumlen_from_cp2(self):
+    def segments_cumlen_from_cp2(self) -> np.ndarray:
         try:
             return self._segs_clen_cp2
         except AttributeError:
             self._segs_clen_cp2 = self._compute_segments_cumlen(reverse=True)
             return self._segs_clen_cp2
         
-    def _compute_segments_cumlen(self, reverse=False):
+    def _compute_segments_cumlen(self, reverse: bool = False) -> np.ndarray:
         """distance from cp1 to each mid-segments
                     from cp2 if reverse is True 
         """            
@@ -281,16 +313,16 @@ class Filament(object):
         else: 
             return np.cumsum(slen) -  slen / 2.
                 
-    def convert_distance(self, convert):
+    def convert_distance(self, convert: Callable) -> None:
         self._points = convert(self._points)    
 
 
                             
 class Skel(object):
         
-    def __init__(self, filename=''):
-        self.crit = []  #create a list of critical points
-        self.fil = []
+    def __init__(self, filename: str = ''):
+        self.crit = []      #: list of critical points
+        self.fil  = []      #: list of filaments
         if filename:
             self._filename = filename
             self.read_NDskl_ascii()
@@ -312,80 +344,87 @@ class Skel(object):
     def read_NDskl_ascii(self):
         with open(self._filename, 'r') as f:
             if _check_p(f, 'ANDSKEL'):
-                self.ndims = int(_readline(f))
+                self.ndims = int(_readline(f))                  
 
-            line = _check_p(f, 'BBOX',optional=True)
+            line = _check_p(f, 'BBOX', optional=True)           #: bounding box, defined by `x0` and `delta`
             if line: 
                 start = line.find('BBOX') + 4
                 s1 = line.find('[', start)
                 s2 = line.find(']', start)
                 sub = line[s1+1:s2]
-                self.bbox = np.asfarray(sub.split(','))
+                self.bbox = np.asfarray(sub.split(','))         #: `[x0_1, ... , x0_ndims]`
                 start = s2 + 1
                 s1 = line.find('[',start)
                 s2 = line.find(']',start)
                 sub = line[s1+1:s2]
-                self.bbox_delta = np.asfarray(sub.split(','))
-                
-            if _check_p(f, '[CRITICAL POINTS]'):
-                ncrit = int(_readline(f))
+                self.bbox_delta = np.asfarray(sub.split(','))   #: `[delta_1, ... , delta_ndims]`
+
+            # check the critical points section    
+            if _check_p(f, '[CRITICAL POINTS]'):                
+                ncrit = int(_readline(f))                       
                 print('reading: {0} critical points'.format(ncrit))
-                for _ in range(ncrit):
-    
+                
+                for _ in range(ncrit):    
                     # read 1st line: info on the cp
                     data = _readline(f).split()
-                    typ = int(data[0])
-                    pos = np.array([float(x) for x in data[1:1 + self.ndims]])
-                    val = float(data[1 + self.ndims])
-                    pair = int(data[2 + self.ndims])
-                    boundary = int(data[3 + self.ndims])
-    
-                    #read 2nd line:  number of filaments that connect to the CP
-                    nfil = int(_readline(f))
+                    typ = int(data[0])                                                 
+                    pos = np.array([float(x) for x in data[1:1 + self.ndims]])   
+                    val = float(data[1 + self.ndims])           
+                    pair = int(data[2 + self.ndims])            
+                    boundary = int(data[3 + self.ndims])        
+
+                    # read 2nd line:  number of filaments that connect to the CP
+                    nfil = int(_readline(f))                   
                     
-                    #read nfil lines: destination and cp of the nfil filaments
-                    destCritId = []
-                    filId  = []
+                    # collect each filament information in lists
+                    destCritId = []                             
+                    filId  = []                                 
+                    # read nfil lines: destination and cp of the nfil filaments
                     for _ in range(nfil):
                         data = _readline(f).split()
                         destCritId.append(int(data[0]))
                         filId.append(int(data[1]))
-    
+                    
+                    # store information of the CP
                     this_crit = CriticalPoint(typ, pos, val, pair,
-                        boundary, destCritId, filId)
+                                              boundary, destCritId, filId)
                     self.crit.append(this_crit)
-                                   
+            
+            # check the filaments section
             if _check_p(f, '[FILAMENTS]'):
                 nfil = int(_readline(f))
                 print('reading: {0} filaments'.format(nfil))
+
                 for _ in range(nfil):
-                    #print('reading filament i:{0}'.format(i))                
+                    # print('reading filament i:{0}'.format(i))                
                     data = _readline(f).split()
+                    # extract info about extrema
                     cp1 = int(data[0])
                     cp2 = int(data[1])
-                    nsamp = int(data[2])
-                    fil_points = np.zeros([nsamp,self.ndims])
-                    # read points
+                    nsamp = int(data[2])    #: number of sampling points
+                    fil_points = np.zeros([nsamp, self.ndims])
+                    # build the filament
                     n_to_read = nsamp * self.ndims
                     index = 0
                     while n_to_read:
                         data = np.asfarray(_readline(f).split())
                         npoints = np.size(data) // self.ndims
-                        fil_points[index:index+npoints, :] = \
-                            data.reshape([npoints, self.ndims])
+                        fil_points[index:index+npoints, :] = data.reshape([npoints, self.ndims])
                         index += npoints
                         n_to_read -= np.size(data)
+                    # store the data
                     this_fil = Filament(self.crit[cp1], self.crit[cp2], fil_points)
                     self.fil.append(this_fil)
-                    
+            
+            # check CPs data information
             if _check_p(f, '[CRITICAL POINTS DATA]', optional=True):
                 print('reading: critical points data')
-                # read data names
-                self.ncrit_data = int(_readline(f))
+                self.ncrit_data = int(_readline(f))     #: number of fields associated to each CP
+                # collect the names in a list
                 self.crit_data_name = []
                 for _ in range(self.ncrit_data):
                     self.crit_data_name.append(_readline(f).strip())
-                # read data
+                # read and collect data for each CP
                 for cp in self.crit:
                     cp.data = [eval(Str) for Str in _readline(f).split()]
 
@@ -398,21 +437,19 @@ class Skel(object):
                 self.crit_data_name.append('persistence_nsigmas')
                 ######################################################################################
 
-
+            # check filaments data information
             if _check_p(f, '[FILAMENTS DATA]', optional=True):
                 print('reading: filaments data')
-                # read data names
                 self.nfil_data = int(_readline(f))
-                self.fil_data_name = []
+                # collect the names in a list
+                self.fil_data_name = []     #: number of fields associated to each sampling point of each filament.
                 for _ in range(self.nfil_data):
                     self.fil_data_name.append(_readline(f).strip()) 
-                # read data
+                # read and store data of each filament
                 for fil in self.fil:
                     fil.data = [eval(Str) for Str in _readline(f).split()]
 
-
-    # replace id numbers pointing to filament 
-    # or critical points by there object reference
+    # replace id numbers pointing to FIL or CP by there object reference
     def _chain(self):
         for cp in self.crit:
             try:
