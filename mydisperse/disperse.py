@@ -1,6 +1,6 @@
-from typing import Literal
 from __future__ import print_function
 
+from typing import Literal
 from subprocess import check_call, call
 import numpy as np
 
