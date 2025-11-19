@@ -6,7 +6,7 @@ from amunra.data.PostProcessSim import Sim_PP_class
 from amunra.utils import find_sim_path
 from yt.units.yt_array import unyt_array as ytarr
 
-from pydisperse.skl_hdf5_comparison import skl_hdf5_comparison
+from mydisperse.skl_hdf5_comparison import skl_hdf5_comparison
 import os
 import re
 import h5py
