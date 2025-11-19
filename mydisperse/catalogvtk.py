@@ -14,7 +14,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
 
     __ = Any
     
-    def __init__(self, vtkfilename='', obj=None, update=True, **traits):
+    def __init__(self, vtkfilename: str = '', obj = None, update: bool = True, **traits):
         tvtk.UnstructuredGrid.__init__(self, obj=obj, update=update, **traits)
         if vtkfilename:
             self.read_vtu(vtkfilename)
@@ -27,21 +27,21 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         else:
             raise Exception('Invalid Delaunay vtu tessealation')
             
-    def read_vtu(self, filename):
-        # read vtu delaunay network file
+    def read_vtu(self, filename: str) -> None:
+        """read vtu delaunay network file"""
         print("Reading vtu file {0} \n".format(filename))
         v = tvtk.XMLUnstructuredGridReader(file_name=filename)
         v.update()
-        ug = v.output # ug for Unstructured Grid
+        ug = v.output       #: Unstructured Grid
         self.__dict__.update(ug.__dict__)
    
-    def write_vtu(self,filename):
+    def write_vtu(self, filename: str) -> None:
         print("Writing vtu file {0} \n".format(filename))
         w = tvtk.XMLUnstructuredGridWriter(file_name=filename)
         w.set_input_data(self)
         w.write()
 
-    def add_point_array(self, array, array_name):
+    def add_point_array(self, array: np.ndarray, array_name: str) -> None:
         nb_arr = self.point_data.number_of_arrays
 #        if array.dtype.type is np.string_ :
 #            tmp = tvtk.StringArray()
@@ -52,19 +52,20 @@ class CatalogVtk(tvtk.UnstructuredGrid):
             self.point_data.add_array(array)
             self.point_data.get_array(nb_arr).name = array_name
     
-    def get_cells(self):
+    def get_cells(self) -> tvtk.UnstructuredGrid:
         cells = tvtk.UnstructuredGrid.get_cells(self).to_array().astype(int)
         #cells.shape = (cells.size // (self._dim+2), self._dim+2)
         cells = cells.reshape((-1, self._dim+2))
         cells = cells[:, 1:] # remove type of cells column
         return cells
 
-    def getPointArray(self):
+    def getPointArray(self) -> np.ndarray:
         return self.points.to_array()[:,:self._dim]
             
-    def remove_guards(self, nbgal=None):
-        # remove guard particles on the boundary 
-        # (added by option "-btype smooth" of delaunay_3D)
+    def remove_guards(self, nbgal: int | None = None) -> None:
+        """remove guard particles on the boundary
+        (added by option "-btype smooth" of delaunay_3D)
+        """ 
         if self.nbguard:
             # lets assume all guards are at the end ... (faster to remove)
             firstguard = np.flatnonzero(self.guardmask)[0]
@@ -86,7 +87,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
                 self.point_data.add_array(tmp)
 
     @property
-    def guardmask(self):
+    def guardmask(self) -> np.ndarray:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index == np.array([-1])
@@ -99,11 +100,11 @@ class CatalogVtk(tvtk.UnstructuredGrid):
             return np.array([], dtype=bool)
         
     @property
-    def nbguard(self):
+    def nbguard(self) -> float:
         return self.guardmask.sum()
 
     @property
-    def galmask(self):
+    def galmask(self) -> np.ndarray:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index != np.array([-1])
@@ -116,11 +117,11 @@ class CatalogVtk(tvtk.UnstructuredGrid):
             return np.ones(self.points.number_of_points, dtype=bool)
        
     @property
-    def nbgal(self):
+    def nbgal(self) -> float:
         return self.galmask.sum()
                      
     @property
-    def volume(self):
+    def volume(self) -> float:
         if self._dim !=3:
             raise Exception('Volume not defined for 2D tesselation')
         vol = 0.
@@ -130,7 +131,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         return vol
     
     @property
-    def area(self):
+    def area(self) -> float:
         if self._dim !=2:
             raise Exception('Area not defined for 3D tesselation')
         area = 0.
@@ -140,7 +141,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         return area
     
     
-    def interpolate_data(self, points):
+    def interpolate_data(self, points: np.ndarray):
         probe_data = tvtk.PolyData(points=points)
         probe = tvtk.ProbeFilter()
         probe.set_input_data(probe_data)
@@ -148,37 +149,37 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         probe.update()
         return probe.output.point_data
 
-    def interpolate_data2(self, points, fieldname):
+    def interpolate_data2(self, points: np.ndarray, fieldname: str) -> np.ndarray:
         if self._delaunay is None:
             self._delaunay = Delaunay(self.getPointArray())
         interp = LinearNDInterpolator(self._delaunay, self.point_data.get_array(fieldname))
         
         return interp(points)
 
-    def _determine_principal_axis(self):
+    def _determine_principal_axis(self) -> None:
         p = self.getPointArray()
         p = p - p.mean(axis=0)
         _, _, v = np.linalg.svd(p, full_matrices=False)
         self._PA_rot = v
         
-    def orient_principal_axis(self):
+    def orient_principal_axis(self) -> None:
         if not self._PA_oriented:
             if self._PA_rot is None:
                 self._determine_principal_axis()
-            p = getPointArray()
+            p = self.getPointArray()
             p = p - p.mean()
             p = self._PA_rot.dot(p.T).T
             self.points = p
             self._PA_oriented = True
         
-    def orient_back_original(self):
+    def orient_back_original(self) -> None:
         if self._PA_oriented:
             p = self.getPointArray()
             p = self._PA_rot.T.dot(p.T).T
             self.points = p
             
              
-    def uniform_grid(self, array_name, pixsize, average=0, orientPA=True):
+    def uniform_grid(self, array_name: str, pixsize: int, average: float = 0, orientPA: bool = True) -> tuple[np.ndarray, float]:
         
         print("Interpolating data array on a uniform grid")
         if self.dim !=3:
