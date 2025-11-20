@@ -49,7 +49,8 @@ def _check_p(f: TextIO, pattern: str, optional: bool = False) -> str:
 
 
 class CriticalPoint(object):
-    def __init__(self, typ: int, pos: np.ndarray, val: float, pair: int, boundary: int, destCritId: list[int], filId: list[int]):
+    def __init__(self, typ: int, pos: np.ndarray, val: float, pair: int | 'CriticalPoint', 
+                 boundary: int, destCritId: list[int | 'CriticalPoint'], filId: list[int | 'Filament']):
         """Constructor of the class
 
         Parameters
@@ -81,155 +82,14 @@ class CriticalPoint(object):
     def nfil(self) -> int:
         return len(self.filId)
     
-    def unconnect_fil(self, filidx) -> None:
+    def unconnect_fil(self, filidx: int) -> None:
         del self.filId[filidx]
         del self.destCritId[filidx]
         
-    def convert_distance(self, convert: Callable):
+    def convert_distance(self, convert: Callable[[np.ndarray],np.ndarray]):
         self.pos = convert(self.pos)
 
 
-class Filaments(object):
-    def __init__(self, fils: list['Filament']):
-        self.fils = fils
-        self.get_lenghts()
-
-    def get_lenghts(self) -> None:
-        self.lenghts = []
-        for fil in self.fils:
-            self.lenghts.append(fil.len)
-
-    def get_property_array(self, item: str) -> np.ndarray:
-        data = []
-        for fil in self.fils:
-            data.append(fil.__getattribute__(item))
-        setattr(self, item, np.array(data))
-        return np.array(data)
-
-    def __getattr__(self, item: str) -> np.ndarray | None:
-        if item not in self.__dict__.keys():
-            try:
-                setattr(self, item, self.get_property_array(item))
-            except:
-                raise(AttributeError, 'The attribute is not present')
-            return self.__dict__[item]
-
-    def __len__(self) -> int:
-        return len(self.fils)
-
-    def __iter__(self) -> 'FilsIterator':
-        return FilsIterator(self.fils)
-
-    def __getitem__(self, i: numbers.Integral | slice | np.ndarray | None = None) -> 'Filament' | 'Filaments':
-        Fils = self.return_fils(i)
-        for attr in self.__dict__.keys():
-            try:
-                Fils.get_property_array(attr)
-            except:
-                continue
-        return Fils
-
-    def __add__(self, other: 'Filament' | list['Filament']) -> 'Filaments':
-        if isinstance(other, Filament):
-            self.fils.append(other)
-            for attr in self.__dict__.keys():
-                try:
-                    self.get_property_array(attr)
-                except:
-                    continue
-            return self
-        elif isinstance(other, list):
-            for fil in other:
-                if isinstance(fil, Filament):
-                    self.fils.append(fil)
-                else:
-                    raise TypeError("Unsupported operand type(s) for +: 'Filaments' and list of '{}'".format(type(fil)))
-            for attr in self.__dict__.keys():
-                try:
-                    self.get_property_array(attr)
-                except:
-                    continue
-            return self
-        else:
-            raise TypeError("Unsupported operand type(s) for +: 'Filaments' and '{}'".format(type(other)))
-
-
-    def remove(self, other: int | 'Filament') -> None:
-        if isinstance(other, int):
-            self.fils.pop(other)
-        elif isinstance(other, Filament):
-            try:
-                self.fils.remove(other)
-            except ValueError:
-                print("Filament {} not found in Filaments".format(other))
-        else:
-            TypeError("Unsupported type(s) for remove: passed '{}'".format(type(other)))
-        for attr in self.__dict__.keys():
-            try:
-                self.get_property_array(attr)
-            except:
-                continue
-
-    def __sub__(self, other: 'Filament' | list['Filament']) -> 'Filaments':
-        if isinstance(other, Filament):
-            try:
-                self.fils.remove(other)
-            except ValueError:
-                print("Filament {} not found in Filaments".format(other))
-            for attr in self.__dict__.keys():
-                try:
-                    self.get_property_array(attr)
-                except:
-                    continue
-            return self
-        elif isinstance(other, list):
-            for fil in other:
-                if isinstance(fil, Filament):
-                    try:
-                        self.fils.remove(fil)
-                    except ValueError:
-                        print("Filament {} not found in Filaments".format(other))
-                else:
-                    TypeError("Unsupported operand type(s) for -: 'Filaments' and list of '{}'".format(type(fil)))
-            for attr in self.__dict__.keys():
-                try:
-                    self.get_property_array(attr)
-                except:
-                    continue
-            return self
-        else:
-            raise TypeError("Unsupported operand type(s) for -: 'Filaments' and '{}'".format(type(other)))
-
-    def return_fils(self, i: numbers.Integral | slice | np.ndarray | None) -> 'Filament' | 'Filaments':
-        if isinstance(i, numbers.Integral):
-            if i < 0:
-                i += len(self)
-            if 0 <= i < len(self):
-                return self.fils[i]
-        elif isinstance(i, slice):
-            return Filaments(self.fils[i])
-        elif np.array_equal(i, i.astype(int)) or np.array_equal(i, i.astype(bool)):
-            if len(i) != len(self):
-                # in this case i is a vector of indeces
-                return Filaments(np.array(self.fils)[i])
-            else:
-                # then i is a mask
-                i = i.astype(bool)
-                return Filaments(np.array(self.fils)[i])
-        else:
-            raise 'Invalid indeces format'
-class FilsIterator:
-    def __init__(self, fils: list['Filament']):
-        self._fils = fils
-        self._index = 0
-
-    def __next__(self):
-        ''''Returns the next value from team object's lists '''
-        if self._index < len(self._fils):
-            self._index += 1
-            return self._fils[self._index - 1]
-        # End of Iteration
-        raise StopIteration
 class Filament(object):
     def __init__(self, cp1: CriticalPoint, cp2: CriticalPoint, points: np.ndarray):
         """Constructor of the class
@@ -313,16 +173,160 @@ class Filament(object):
         else: 
             return np.cumsum(slen) -  slen / 2.
                 
-    def convert_distance(self, convert: Callable) -> None:
+    def convert_distance(self, convert: Callable[[np.ndarray],np.ndarray]) -> None:
         self._points = convert(self._points)    
 
+class FilsIterator:
+    def __init__(self, fils: list[Filament]):
+        self._fils = fils
+        self._index = 0
+
+    def __next__(self):
+        ''''Returns the next value from team object's lists '''
+        if self._index < len(self._fils):
+            self._index += 1
+            return self._fils[self._index - 1]
+        # End of Iteration
+        raise StopIteration
 
                             
+class Filaments(object):
+    def __init__(self, fils: list[Filament]):
+        self.fils = fils
+        self.get_lenghts()
+
+    def get_lenghts(self) -> None:
+        self.lenghts = []
+        for fil in self.fils:
+            self.lenghts.append(fil.len)
+
+    def get_property_array(self, item: str) -> np.ndarray:
+        data = []
+        for fil in self.fils:
+            data.append(fil.__getattribute__(item))
+        setattr(self, item, np.array(data))
+        return np.array(data)
+
+    def __getattr__(self, item: str) -> np.ndarray | None:
+        if item not in self.__dict__.keys():
+            try:
+                setattr(self, item, self.get_property_array(item))
+            except:
+                raise(AttributeError, 'The attribute is not present')
+            return self.__dict__[item]
+
+    def __len__(self) -> int:
+        return len(self.fils)
+
+    def __iter__(self) -> 'FilsIterator':
+        return FilsIterator(self.fils)
+
+    def __getitem__(self, i: numbers.Integral | slice | np.ndarray | None = None) -> Filament | 'Filaments':
+        Fils = self.return_fils(i)
+        for attr in self.__dict__.keys():
+            try:
+                Fils.get_property_array(attr)
+            except:
+                continue
+        return Fils
+
+    def __add__(self, other: Filament | list[Filament]) -> 'Filaments':
+        if isinstance(other, Filament):
+            self.fils.append(other)
+            for attr in self.__dict__.keys():
+                try:
+                    self.get_property_array(attr)
+                except:
+                    continue
+            return self
+        elif isinstance(other, list):
+            for fil in other:
+                if isinstance(fil, Filament):
+                    self.fils.append(fil)
+                else:
+                    raise TypeError("Unsupported operand type(s) for +: 'Filaments' and list of '{}'".format(type(fil)))
+            for attr in self.__dict__.keys():
+                try:
+                    self.get_property_array(attr)
+                except:
+                    continue
+            return self
+        else:
+            raise TypeError("Unsupported operand type(s) for +: 'Filaments' and '{}'".format(type(other)))
+
+
+    def remove(self, other: int | Filament) -> None:
+        if isinstance(other, int):
+            self.fils.pop(other)
+        elif isinstance(other, Filament):
+            try:
+                self.fils.remove(other)
+            except ValueError:
+                print("Filament {} not found in Filaments".format(other))
+        else:
+            TypeError("Unsupported type(s) for remove: passed '{}'".format(type(other)))
+        for attr in self.__dict__.keys():
+            try:
+                self.get_property_array(attr)
+            except:
+                continue
+
+    def __sub__(self, other: Filament | list[Filament]) -> 'Filaments':
+        if isinstance(other, Filament):
+            try:
+                self.fils.remove(other)
+            except ValueError:
+                print("Filament {} not found in Filaments".format(other))
+            for attr in self.__dict__.keys():
+                try:
+                    self.get_property_array(attr)
+                except:
+                    continue
+            return self
+        elif isinstance(other, list):
+            for fil in other:
+                if isinstance(fil, Filament):
+                    try:
+                        self.fils.remove(fil)
+                    except ValueError:
+                        print("Filament {} not found in Filaments".format(other))
+                else:
+                    TypeError("Unsupported operand type(s) for -: 'Filaments' and list of '{}'".format(type(fil)))
+            for attr in self.__dict__.keys():
+                try:
+                    self.get_property_array(attr)
+                except:
+                    continue
+            return self
+        else:
+            raise TypeError("Unsupported operand type(s) for -: 'Filaments' and '{}'".format(type(other)))
+
+    def return_fils(self, i: numbers.Integral | slice | np.ndarray | None) -> Filament | 'Filaments':
+        if isinstance(i, numbers.Integral):
+            if i < 0:
+                i += len(self)
+            if 0 <= i < len(self):
+                return self.fils[i]
+        elif isinstance(i, slice):
+            return Filaments(self.fils[i])
+        elif np.array_equal(i, i.astype(int)) or np.array_equal(i, i.astype(bool)):
+            if len(i) != len(self):
+                # in this case i is a vector of indeces
+                return Filaments(np.array(self.fils)[i])
+            else:
+                # then i is a mask
+                i = i.astype(bool)
+                return Filaments(np.array(self.fils)[i])
+        else:
+            raise 'Invalid indeces format'
+
+
+            
 class Skel(object):
         
     def __init__(self, filename: str = ''):
-        self.crit = []      #: list of critical points
-        self.fil  = []      #: list of filaments
+        self.crit : list[CriticalPoint] = []      #: list of critical points
+        self.fil  : list[Filament]      = []      #: list of filaments
         if filename:
             self._filename = filename
             self.read_NDskl_ascii()
@@ -425,12 +429,14 @@ class Skel(object):
                 for _ in range(self.ncrit_data):
                     self.crit_data_name.append(_readline(f).strip())
                 # read and collect data for each CP
+################! There's no presence of .data in CriticalPoint or a line in which he updates it !###############
                 for cp in self.crit:
                     cp.data = [eval(Str) for Str in _readline(f).split()]
 
                 ######################################################################################  ADDED TO SOLVE MISSING RATIO
                     if 'persistence_ratio' not in self.crit_data_name:
                         p_id = self.crit_data_name.index('persistence')
+################! There's no presence of .data in CriticalPoint or a line in which he updates it !###############
                         cp.data.append(cp.data[p_id])
                         cp.data.append(cp.data[p_id])
                 self.crit_data_name.append('persistence_ratio')
@@ -446,11 +452,13 @@ class Skel(object):
                 for _ in range(self.nfil_data):
                     self.fil_data_name.append(_readline(f).strip()) 
                 # read and store data of each filament
+################! There's no presence of .data in Filament or a line in which he updates it !###############
                 for fil in self.fil:
                     fil.data = [eval(Str) for Str in _readline(f).split()]
 
-    # replace id numbers pointing to FIL or CP by there object reference
+####! DA CAPIRE QUESTA PARTE !##################################################
     def _chain(self):
+        """ replace id numbers pointing to FIL or CP by there object reference"""
         for cp in self.crit:
             try:
                 cp.pair = self.crit[cp.pair]
@@ -462,26 +470,25 @@ class Skel(object):
                 cp.pair = cp
                 cp.destCritId = [self.crit[i] for i in cp.destCritId]
                 cp.filId = [self.fil[i] for i in cp.filId]
-                 
-    def isValid(self):
-        """check the consistency of the tree"""
+#!##############################################################################!#
+
+    def isValid(self) -> bool:
+        """ check the consistency of the tree"""
         for crit in self.crit:
             for j in range(crit.nfil):
                 fil = crit.filId[j]
-                if (fil.cp1 == crit and fil.cp2 != crit.destCritId[j])\
-                    or (fil.cp2 == crit and fil.cp1 != crit.destCritId[j])\
-                    or (fil.cp1 != crit and fil.cp2 != crit):
+                if (fil.cp1 == crit and fil.cp2 != crit.destCritId[j]) or \
+                   (fil.cp2 == crit and fil.cp1 != crit.destCritId[j]) or \
+                   (fil.cp1 != crit and fil.cp2 != crit):
                     raise SkelError('wrong critical point {0} and associated filament {1}'\
                     .format(self.crit.index(crit),j))
-        bad = good = []
+        bad  = []
+        good = []
         for i,fil in enumerate(self.fil):
-            if not(fil in fil.cp1.filId) or not(fil in fil.cp2.filId):
+            if (fil not in fil.cp1.filId) or (fil not in fil.cp2.filId):
                 # don't raise the error but remove the filament from the list
-                print("wrong filament {0}, \
-                    not listed in its critical points".format(i))
+                print("wrong filament {0}, not listed in its critical points".format(i))
                 bad.append(fil)
-                #raise SkelError("wrong filament {0}, \
-                #   not listed in its critical points".format(i))
             else: 
                 good.append(fil)
 
@@ -491,9 +498,8 @@ class Skel(object):
 
 
     @property
-    def is_broken_down(self):
-        """Check if the breakdown option was set when running mse 
-        """
+    def is_broken_down(self) -> bool:
+        """ Check if the breakdown option was set when running mse"""
         try:
             return self._is_broken_down
         except AttributeError:
@@ -505,8 +511,8 @@ class Skel(object):
             return self._is_broken_down
 
             
-    def filter_nodes_alone(self, filter_filaments=True):
-        """remove the nodes with only one filament connected to it
+    def filter_nodes_alone(self, filter_filaments: bool = True) -> None:
+        """ remove the nodes with only one filament connected to it
             and eventually removes the associated filaments
         """
         #alones_idx, alones_cp =zip(*[(i, cp) for i, cp in enumerate(self.crit) if cp.nfil==1 and cp.typ==3])
@@ -534,7 +540,7 @@ class Skel(object):
                 saddle.unconnect_fil(Id_in_saddle)
                 # if saddle is alone remove it
                 if saddle.nfil == 0:
-                    mask[self.crit.index(saddle)]  = False
+                    mask[self.crit.index(saddle)] = False
                     
         # remove the maxima
         self.crit[:] = np.array(self.crit)[mask]
@@ -546,7 +552,7 @@ class Skel(object):
 
     def filter_spurious_saddles(self):
         """remove the spurious saddles on the border superposed to maxima 
-        plus the filament of null-length that connect them.
+           plus the filament of null-length that connect them.
         """
         mask = np.ones(self.ncrit, dtype=bool)
         mask_fil = np.ones(self.nfil, dtype=bool)
@@ -572,20 +578,22 @@ class Skel(object):
                     filId_in_max = f2.cp2.filId.index(f2)
                     f2.cp2.unconnect_fil(filId_in_max)
                     
-        self.fil[:] = np.array(self.fil)[mask_fil]
+        self.fil[:]  = np.array(self.fil)[mask_fil]
         self.crit[:] = np.array(self.crit)[mask]        
     
     
     def generate_Ids(self):
         self.ncrit_data += 1
         self.crit_data_name.append('OriginalId')
+################! There's no presence of .data in CriticalPoint or a line in which he updates it !###############
         for i,cp in enumerate(self.crit):
             cp.data.append(i)
         
             
-    def distance_to_nearest_node(self, points):
-        """compute the distance of a given point to 
-        nearest node (critical point 3)"""
+    def distance_to_nearest_node(self, points: np.ndarray) -> tuple[float, int]:
+        """ compute the distance of a given point to 
+            nearest node (critical point 3)
+        """
         # nodes = (x for x in self.crit if x.typ==3)
         try:
             tree = self._node_tree
@@ -598,9 +606,10 @@ class Skel(object):
         return d, crits_id[idx]
 
 
-    def distance_to_nearest_saddle(self, points):
-        """compute the distance of a given point to 
-        nearest saddle-2 (critical point 2)"""
+    def distance_to_nearest_saddle(self, points: np.ndarray) -> tuple[float, int]:
+        """ compute the distance of a given point to 
+            nearest saddle-2 (critical point 2)
+        """
         # nodes = (x for x in self.crit if x.typ==3)
         try:
             tree = self._saddle_tree
@@ -612,7 +621,7 @@ class Skel(object):
         return d, saddles_id[idx]
 
         
-    def distance_to_skel(self, points, big=None):
+    def distance_to_skel(self, points: np.ndarray, big: float | None = None) -> tuple[np.ndarray, list[np.ndarray], list[np.ndarray]]:
         """compute the distance of a given point to the nearest filament"""
         try:
             b = self._big_segments_limit
@@ -662,10 +671,10 @@ class Skel(object):
         return distances, fil_indexes, seg_indexes
 
                            
-    def distance_along_filament_to_node(self, fil_index, seg_index):
-        '''Compute the distance inside a filament (starting at seg_index) up to node.
-        For nodes there is no ambiguity: going up certainly lead to one unique node
-        '''
+    def distance_along_filament_to_node(self, fil_index: int, seg_index: int):
+        """ Compute the distance inside a filament (starting at seg_index) up to node.
+            For nodes there is no ambiguity: going up certainly lead to one unique node
+        """
         f = self.fil[fil_index]
         fil_lst, cp = self.follow_filament_to_cp(f.cp2, f)
         if fil_lst is None: raise SkelError("could not follow filament to node")
@@ -731,18 +740,18 @@ class Skel(object):
         return all_fil_list, all_saddle_list
         
 
-    def follow_filament_to_cp(self, p, fil, node=True):
-        """follow filament chain through bifurcation points up to node
-           (if node=True) or up to saddle (if node=False)
+    def follow_filament_to_cp(self, p: CriticalPoint, fil: Filament, node: bool = True) -> tuple[deque[Filament] | Filament, CriticalPoint] | tuple[None, None] | tuple[deque[Filament], list[CriticalPoint]]:
+        """ follow filament chain through bifurcation points up to node
+            (if node=True) or up to saddle (if node=False)
         """
         if node:
             cpgood = self.ndims
             cpbad  = self.ndims - 1
         else:
             cpgood = self.ndims - 1
-            cpbad = self.ndims
+            cpbad  = self.ndims
         if p.typ == cpgood: return deque([fil]), p
-        if p.typ == cpbad: return None, None
+        if p.typ == cpbad:  return None, None
         # then bifurcation
         new_fil_lst = None
         for i in range(p.nfil):
@@ -750,14 +759,14 @@ class Skel(object):
             if f == fil: continue
             this_p = p.destCritId[i]
             fil_lst, cp_lst = self.follow_filament_to_cp(this_p, f, node)
-            if fil_lst != None: 
+            if fil_lst is not None: 
                 if all([isinstance(x,Filament) for x in fil_lst]):
                     fil_lst.appendleft(fil)
                 else:
                     for c in fil_lst:
                         c.appendleft(fil)
                 if new_fil_lst is None:                     
-                    new_fil_lst = deque([fil_lst])
+                    new_fil_lst = deque ([fil_lst])
                     new_cp_lst = [cp_lst]
                 else: 
                     new_fil_lst.append(fil_lst)
@@ -821,23 +830,23 @@ class Skel(object):
         return fof_indices, fof_size
 
                     
-    def convert_distance(self, conversion):
+    def convert_distance(self, conversion: Callable[[np.ndarray], np.ndarray]) -> None:
         for fil in self.fil:
             fil.convert_distance(conversion)
         for crit in self.crit:
             crit.convert_distance(conversion)
 
     @property        
-    def len(self):
+    def len(self) -> float:
         return np.sum([f.len for f in self.fil])
 
     
     @property
-    def mean_len(self):
+    def mean_len(self) -> float:
         return np.mean([f.len for f in self.fil])
 
 
-    def compute_segments_density(self, delaunay_cat, FieldName):
+    def compute_segments_density(self, delaunay_cat: CatalogVtk, FieldName: str) -> None:
         assert(isinstance(delaunay_cat, CatalogVtk))
         midsegs = np.vstack([fil.mid_segments() for fil in self.fil])
         all_segs_density = delaunay_cat.interpolate_data2(midsegs, FieldName)
@@ -847,7 +856,7 @@ class Skel(object):
             fil.segments_density = all_segs_density[filstart[fil_id]:filstart[fil_id+1]]
 
 
-    def persistence_histogram(self):
+    def persistence_histogram(self) -> None:
         import matplotlib.pyplot as plt
 
         persistence_ratio_id = self.crit_data_name.index('persistence_ratio')
@@ -906,7 +915,7 @@ class Skel(object):
         plt.xlabel('persistence')
         plt.legend()
 
-    def persistence_diagram(self):
+    def persistence_diagram(self) -> None:
         import matplotlib.pyplot as plt
 
         persistence_ratio_id = self.crit_data_name.index('persistence_ratio')
@@ -1087,7 +1096,7 @@ class Skel(object):
 
 
 
-    def write_vtp(self, filename):
+    def write_vtp(self, filename: str) -> None:
         """
         write skeleton to a vtk PolyData file (.vtp format)
         """
@@ -1166,7 +1175,7 @@ class Skel(object):
 
         
         
-    def write_crits(self, filename):
+    def write_crits(self, filename: str) -> None:
         with open(filename, 'w') as f:
             print("Writing ascii .crits file {0} \n".format(filename))
             f.write("#critical points\n")
