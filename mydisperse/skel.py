@@ -671,7 +671,7 @@ class Skel(object):
         return distances, fil_indexes, seg_indexes
 
                            
-    def distance_along_filament_to_node(self, fil_index: int, seg_index: int):
+    def distance_along_filament_to_node(self, fil_index: int, seg_index: int) -> tuple[float, int]:
         """ Compute the distance inside a filament (starting at seg_index) up to node.
             For nodes there is no ambiguity: going up certainly lead to one unique node
         """
@@ -686,9 +686,9 @@ class Skel(object):
         return d, cp_id
 
 
-    def distance_along_filament_to_saddle(self, fil_index, seg_index):
-        '''Compute the distance inside a filament (starting at seg_index) up to saddle.
-        This implementation is only valid for non broken skeleton (ie it leads to a unique saddle)
+    def distance_along_filament_to_saddle(self, fil_index: int, seg_index: int) -> tuple[float, int]:
+        ''' Compute the distance inside a filament (starting at seg_index) up to saddle.
+            This implementation is only valid for non broken skeleton (ie it leads to a unique saddle)
         '''
         f = self.fil[fil_index]
         fil_lst, cp = self.follow_filament_to_cp(f.cp1, f, node=False)
@@ -701,7 +701,7 @@ class Skel(object):
         return d, cp_id
 
              
-    def filaments_from_saddle(self, crit_index):
+    def filaments_from_saddle(self, crit_index: int) -> tuple[list[Filament],list[CriticalPoint]]:
         p = self.crit[crit_index]
         if p.typ != self.ndims-1:
             raise SkelError('wrong type, saddle point expected (type {})'.format(self.ndims-1))
@@ -718,12 +718,12 @@ class Skel(object):
         return all_fil_list, all_node_list
 
 
-    def filaments_from_node(self, crit_index):
-        '''return the list of filaments and saddles connected to node
-        This routine is useful in the case of broken skeleton (option -breakdown of skelconv)
-        otherwise it is straightforward.
-        Each filament is returned as a list of broken filament 
-        (ie with bifurcation point at extremities)
+    def filaments_from_node(self, crit_index: int) -> tuple[list[Filament],list[CriticalPoint]]:
+        ''' return the list of filaments and saddles connected to node
+            This routine is useful in the case of broken skeleton (option -breakdown of skelconv)
+            otherwise it is straightforward.
+            Each filament is returned as a list of broken filament 
+            (ie with bifurcation point at extremities)
         '''
         p = self.crit[crit_index]
         if p.typ != self.ndims:
@@ -777,7 +777,7 @@ class Skel(object):
         return new_fil_lst, new_cp_lst
 
 
-    def fof_arround_max(self, delaunay_cat, fieldname, densfrac=.1, fof_max=30):
+    def fof_arround_max(self, delaunay_cat, fieldname: str, densfrac: float = .1, fof_max: int = 30):
         """compute fof, 
                 starting from max, 
                 stopping at the density fraction densfrac between max and the highest connected saddle.
