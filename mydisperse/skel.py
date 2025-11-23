@@ -5,13 +5,16 @@ from builtins import map
 from builtins import range
 from builtins import object
 
-from typing import TextIO, Callable
+from typing import TextIO, Callable, Any, Literal
+from numpy.typing import NDArray
+from matplotlib.figure import Figure
 import numpy as np
 from scipy.spatial import cKDTree as KDTree 
 from tvtk.api import tvtk
 from collections import deque
 import itertools
 from multiprocessing import Pool
+from scipy.spatial import Delaunay
 
 import numbers
 from mydisperse.catalogvtk import CatalogVtk
@@ -49,7 +52,7 @@ def _check_p(f: TextIO, pattern: str, optional: bool = False) -> str:
 
 
 class CriticalPoint(object):
-    def __init__(self, typ: int, pos: np.ndarray, val: float, pair: int | 'CriticalPoint', 
+    def __init__(self, typ: int, pos: NDArray[np.int_], val: float, pair: int | 'CriticalPoint', 
                  boundary: int, destCritId: list[int | 'CriticalPoint'], filId: list[int | 'Filament']):
         """Constructor of the class
 
@@ -57,7 +60,7 @@ class CriticalPoint(object):
         ----------
         typ : int
             critical index
-        pos : np.ndarray
+        pos : NDArray[np.int_]
             CP position
         val : float
             CP value
@@ -86,12 +89,12 @@ class CriticalPoint(object):
         del self.filId[filidx]
         del self.destCritId[filidx]
         
-    def convert_distance(self, convert: Callable[[np.ndarray],np.ndarray]):
+    def convert_distance(self, convert: Callable[[NDArray[np.int_]],NDArray[np.int_]]):
         self.pos = convert(self.pos)
 
 
 class Filament(object):
-    def __init__(self, cp1: CriticalPoint, cp2: CriticalPoint, points: np.ndarray):
+    def __init__(self, cp1: CriticalPoint, cp2: CriticalPoint, points: NDArray[np.int_]):
         """Constructor of the class
 
         Parameters
@@ -100,7 +103,7 @@ class Filament(object):
             start CP   
         cp2 : CriticalPoint
             end CP
-        points : np.ndarray
+        points : NDArray[np.int_]
             sample points of the filament `points.shape == (numb_points, space_dim)`
         """
         self._cp1 = cp1
@@ -116,21 +119,21 @@ class Filament(object):
         return self._cp2
 
     @property
-    def points(self) -> np.ndarray:
+    def points(self) -> NDArray[np.int_]:
         return self._points    
     @points.setter
-    def points(self, value: np.ndarray) -> None:
+    def points(self, value: NDArray[np.int_]) -> None:
         self._points = value
 
     @property
     def nsamp(self) -> int:
         return self._points.shape[0]
         
-    def mid_segments(self) -> np.ndarray:
+    def mid_segments(self) -> NDArray[np.int_]:
         return (np.roll(self._points, 1, axis=0) + self._points)[1:]/2.
 
     @property
-    def segments_len(self) -> np.ndarray:
+    def segments_len(self) -> NDArray[np.float64]:
         try:
             return self._segs_len
         except AttributeError:
@@ -147,7 +150,7 @@ class Filament(object):
             return self._len
         
     @property
-    def segments_cumlen_from_cp1(self) -> np.ndarray:
+    def segments_cumlen_from_cp1(self) -> NDArray[np.float64]:
         try:
             return self._segs_clen_cp1
         except AttributeError:
@@ -155,14 +158,14 @@ class Filament(object):
             return self._segs_clen_cp1
 
     @property
-    def segments_cumlen_from_cp2(self) -> np.ndarray:
+    def segments_cumlen_from_cp2(self) -> NDArray[np.float64]:
         try:
             return self._segs_clen_cp2
         except AttributeError:
             self._segs_clen_cp2 = self._compute_segments_cumlen(reverse=True)
             return self._segs_clen_cp2
         
-    def _compute_segments_cumlen(self, reverse: bool = False) -> np.ndarray:
+    def _compute_segments_cumlen(self, reverse: bool = False) -> NDArray[np.float64]:
         """distance from cp1 to each mid-segments
                     from cp2 if reverse is True 
         """            
@@ -173,7 +176,7 @@ class Filament(object):
         else: 
             return np.cumsum(slen) -  slen / 2.
                 
-    def convert_distance(self, convert: Callable[[np.ndarray],np.ndarray]) -> None:
+    def convert_distance(self, convert: Callable[[NDArray[np.int_]],NDArray[np.int_]]) -> None:
         self._points = convert(self._points)    
 
 class FilsIterator:
@@ -200,14 +203,14 @@ class Filaments(object):
         for fil in self.fils:
             self.lenghts.append(fil.len)
 
-    def get_property_array(self, item: str) -> np.ndarray:
+    def get_property_array(self, item: str) -> np.ndarray[tuple[int, ...], CriticalPoint | int]:
         data = []
         for fil in self.fils:
             data.append(fil.__getattribute__(item))
         setattr(self, item, np.array(data))
         return np.array(data)
 
-    def __getattr__(self, item: str) -> np.ndarray | None:
+    def __getattr__(self, item: str) -> np.ndarray[tuple[int, ...], CriticalPoint | int] | None:
         if item not in self.__dict__.keys():
             try:
                 setattr(self, item, self.get_property_array(item))
@@ -221,7 +224,7 @@ class Filaments(object):
     def __iter__(self) -> 'FilsIterator':
         return FilsIterator(self.fils)
 
-    def __getitem__(self, i: numbers.Integral | slice | np.ndarray | None = None) -> Filament | 'Filaments':
+    def __getitem__(self, i: numbers.Integral | slice | NDArray[np.int_ | np.bool] | None = None) -> Filament | 'Filaments':
         Fils = self.return_fils(i)
         for attr in self.__dict__.keys():
             try:
@@ -301,7 +304,7 @@ class Filaments(object):
         else:
             raise TypeError("Unsupported operand type(s) for -: 'Filaments' and '{}'".format(type(other)))
 
-    def return_fils(self, i: numbers.Integral | slice | np.ndarray | None) -> Filament | 'Filaments':
+    def return_fils(self, i: numbers.Integral | slice | NDArray[np.int_ | np.bool] | None) -> Filament | 'Filaments':
         if isinstance(i, numbers.Integral):
             if i < 0:
                 i += len(self)
@@ -590,7 +593,7 @@ class Skel(object):
             cp.data.append(i)
         
             
-    def distance_to_nearest_node(self, points: np.ndarray) -> tuple[float, int]:
+    def distance_to_nearest_node(self, points: NDArray[np.int_]) -> tuple[float, int]:
         """ compute the distance of a given point to 
             nearest node (critical point 3)
         """
@@ -606,7 +609,7 @@ class Skel(object):
         return d, crits_id[idx]
 
 
-    def distance_to_nearest_saddle(self, points: np.ndarray) -> tuple[float, int]:
+    def distance_to_nearest_saddle(self, points: NDArray[np.int_]) -> tuple[float, int]:
         """ compute the distance of a given point to 
             nearest saddle-2 (critical point 2)
         """
@@ -621,7 +624,7 @@ class Skel(object):
         return d, saddles_id[idx]
 
         
-    def distance_to_skel(self, points: np.ndarray, big: float | None = None) -> tuple[np.ndarray, list[np.ndarray], list[np.ndarray]]:
+    def distance_to_skel(self, points: NDArray[np.int_], big: float | None = None) -> tuple[NDArray[np.float64], list[NDArray[np.int_]], list[NDArray[np.int_]]]:
         """compute the distance of a given point to the nearest filament"""
         try:
             b = self._big_segments_limit
@@ -777,7 +780,7 @@ class Skel(object):
         return new_fil_lst, new_cp_lst
 
 
-    def fof_arround_max(self, delaunay_cat, fieldname: str, densfrac: float = .1, fof_max: int = 30):
+    def fof_arround_max(self, delaunay_cat: CatalogVtk, fieldname: str, densfrac: float = .1, fof_max: int = 30):
         """compute fof, 
                 starting from max, 
                 stopping at the density fraction densfrac between max and the highest connected saddle.
@@ -830,7 +833,7 @@ class Skel(object):
         return fof_indices, fof_size
 
                     
-    def convert_distance(self, conversion: Callable[[np.ndarray], np.ndarray]) -> None:
+    def convert_distance(self, conversion: Callable[[NDArray[np.int_]], NDArray[np.int_]]) -> None:
         for fil in self.fil:
             fil.convert_distance(conversion)
         for crit in self.crit:
@@ -979,7 +982,7 @@ class Skel(object):
         plt.show()
 
 
-    def dump_persistence_diagram(self, mode='nsig'):
+    def dump_persistence_diagram(self, mode: Literal['nsig','persistence','ratio'] = 'nsig') -> Figure:
         import matplotlib.pyplot as plt
         variables={'nsig':'persistence_nsigmas', 'persistence':'persistence', 'ratio':'persistence_ratio'}
 
@@ -1097,9 +1100,7 @@ class Skel(object):
 
 
     def write_vtp(self, filename: str) -> None:
-        """
-        write skeleton to a vtk PolyData file (.vtp format)
-        """
+        """ write skeleton to a vtk PolyData file (.vtp format)"""
         # get nb o f  points
         npoints = self.ncrit
         fil_npoints = np.array([fil.nsamp-2 for fil in self.fil])
@@ -1200,10 +1201,10 @@ class Skel(object):
 
  
     
-voids_buf = None # global var for pool.map
+voids_buf: 'VoidsRegion' | None = None # global var for pool.map
 def _compute_cell_vol(idcell):
     global voids_buf
-    cell = voids_buf.get_cell(idcell)
+    cell = voids_buf.get_cells(idcell)
     return abs(cell.compute_volume(*cell.points))
 
 class VoidsRegion(object):
@@ -1214,12 +1215,12 @@ class VoidsRegion(object):
             
     def _read(self,filename):        
         print("Reading: Void manifolds")
-        v=tvtk.XMLUnstructuredGridReader(file_name=filename)
+        v = tvtk.XMLUnstructuredGridReader(file_name=filename)
         v.update()
         self.voids = v.output 
 
 
-    def get_cells(self):
+    def get_cells(self) -> NDArray[np.int_]:
         cells = self.voids.get_cells().to_array().astype(int)
         cells.shape = (cells.size // 5, 5)
         cells = cells[:, 1:5] # remove type of cells column
@@ -1345,7 +1346,7 @@ class NodesRegion(object):
             cellsid &= np.in1d(cells[:,2],points)
             cellsid &= np.in1d(cells[:,3],points)      
             for icell in np.flatnonzero(cellsid):    
-                cell = self.vr.voids.get_cell(icell)
+                cell = self.vr.voids.get_cells(icell)
                 vol = cell.compute_volume(*cell.points) 
                 nodes_vol[i] += vol
             if nodes_vol[i]:
@@ -1367,7 +1368,7 @@ class Walls(object):
     def _compute_centers(self):
         self._centers = np.zeros((self.walls.number_of_cells,3))
         for i in  range(self.walls.number_of_cells):
-            cell = self.walls.get_cell(i)
+            cell = self.walls.get_cells(i)
             cell.triangle_center(cell.points[0],cell.points[1],cell.points[2],
                 self._centers[i])
 
@@ -1403,7 +1404,7 @@ class Walls(object):
         for i,si in enumerate(usi):
             cellsid, = np.where(source_index==np.array(si))
             for icell in cellsid:
-                cell = self.walls.get_cell(icell)
+                cell = self.walls.get_cells(icell)
                 self._surfaces[i] += cell.compute_area() 
 
     @property                                                                  
