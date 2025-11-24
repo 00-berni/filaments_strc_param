@@ -9,7 +9,7 @@ __all__ = [
             'show_image'
           ]
 
-def quickplot(data: Sequence[NDArray] | NDArray, numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
+def quickplot(data: Union[Sequence[NDArray], NDArray], numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
     """Display a plot quickly.
 
     Parameters
@@ -119,7 +119,7 @@ def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar
 
 
 ##*
-def show_image(data: NDArray | list[NDArray], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: Optional[list[str]] = None, show: bool = False, projection: Optional[str] = None, **figargs) ->  Optional[tuple[Figure, Axes | NDArray]]:
+def show_image(data: Union[NDArray, list[NDArray]], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: Optional[list[str]] = None, show: bool = False, projection: Optional[str] = None, **figargs) ->  Optional[tuple[Figure, Union[Axes, NDArray]]]:
     """To plot quickly one or a set of fits pictures
     
     Parameters

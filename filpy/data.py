@@ -1,6 +1,7 @@
 import os
 from pandas import read_csv
 import astropy.units as u
+from .typing import *
 
 
 class PathVar():
@@ -133,7 +134,7 @@ class FileVar():
         
     """
 
-    def __init__(self, filename: str | list[str], dirpath: str | PathVar = '', path: bool = False) -> None:
+    def __init__(self, filename: Union[str, list[str]], dirpath: Union[str, PathVar] = '', path: bool = False) -> None:
         """Construct the file(s) path(s) variable
 
         Parameters
@@ -153,7 +154,7 @@ class FileVar():
         self.DIR  = dirpath.copy()
         self.FILE = filename if isinstance(filename, str) else [*filename]
 
-    def path(self) -> str | list[str]:
+    def path(self) -> Union[str, list[str]]:
         """Compute the file(s) path(s)
 
         Returns
@@ -187,7 +188,7 @@ class FileVar():
             return len(self.FILE)
 
 
-    def __add__(self, new_file: str | list[str]) -> 'FileVar':
+    def __add__(self, new_file: Union[str, list[str]]) -> 'FileVar':
         new_filevar = self.copy()
         filename = new_filevar.FILE 
         if isinstance(filename,str):

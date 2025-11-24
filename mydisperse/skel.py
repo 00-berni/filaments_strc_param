@@ -5,7 +5,7 @@ from builtins import map
 from builtins import range
 from builtins import object
 
-from typing import TextIO, Callable, Any, Literal
+from typing import TextIO, Callable, Union, Literal, Optional
 from numpy.typing import NDArray
 from matplotlib.figure import Figure
 import numpy as np
@@ -62,8 +62,8 @@ def _check_p(f: TextIO, pattern: str, optional: bool = False) -> str:
 
 
 class CriticalPoint(object):
-    def __init__(self, typ: int, pos: NDArray[np.int_], val: float, pair: int | 'CriticalPoint', 
-                 boundary: int, destCritId: list[int | 'CriticalPoint'], filId: list[int | 'Filament']):
+    def __init__(self, typ: int, pos: NDArray[np.int_], val: float, pair: Union[int, 'CriticalPoint'], 
+                 boundary: int, destCritId: list[Union[int, 'CriticalPoint']], filId: list[Union[int, 'Filament']]):
         """Constructor of the class
 
         Parameters
@@ -213,14 +213,14 @@ class Filaments(object):
         for fil in self.fils:
             self.lenghts.append(fil.len)
 
-    def get_property_array(self, item: str) -> np.ndarray[tuple[int, ...], CriticalPoint | int]:
+    def get_property_array(self, item: str) -> np.ndarray[tuple[int, ...], Union[int, CriticalPoint]]:
         data = []
         for fil in self.fils:
             data.append(fil.__getattribute__(item))
         setattr(self, item, np.array(data))
         return np.array(data)
 
-    def __getattr__(self, item: str) -> np.ndarray[tuple[int, ...], CriticalPoint | int] | None:
+    def __getattr__(self, item: str) -> Optional[np.ndarray[tuple[int, ...], Union[int, CriticalPoint]]]:
         if item not in self.__dict__.keys():
             try:
                 setattr(self, item, self.get_property_array(item))
@@ -234,7 +234,7 @@ class Filaments(object):
     def __iter__(self) -> 'FilsIterator':
         return FilsIterator(self.fils)
 
-    def __getitem__(self, i: numbers.Integral | slice | NDArray[np.int_ | np.bool] | None = None) -> Filament | 'Filaments':
+    def __getitem__(self, i: Optional[Union[numbers.Integral, slice, NDArray[Union[np.int_, np.bool_]]]] = None) -> Union[Filament, 'Filaments']:
         Fils = self.return_fils(i)
         for attr in self.__dict__.keys():
             try:
@@ -243,7 +243,7 @@ class Filaments(object):
                 continue
         return Fils
 
-    def __add__(self, other: Filament | list[Filament]) -> 'Filaments':
+    def __add__(self, other: Union[Filament, list[Filament]]) -> 'Filaments':
         if isinstance(other, Filament):
             self.fils.append(other)
             for attr in self.__dict__.keys():
@@ -268,7 +268,7 @@ class Filaments(object):
             raise TypeError("Unsupported operand type(s) for +: 'Filaments' and '{}'".format(type(other)))
 
 
-    def remove(self, other: int | Filament) -> None:
+    def remove(self, other: Union[int, Filament]) -> None:
         if isinstance(other, int):
             self.fils.pop(other)
         elif isinstance(other, Filament):
@@ -284,7 +284,7 @@ class Filaments(object):
             except:
                 continue
 
-    def __sub__(self, other: Filament | list[Filament]) -> 'Filaments':
+    def __sub__(self, other: Union[Filament, list[Filament]]) -> 'Filaments':
         if isinstance(other, Filament):
             try:
                 self.fils.remove(other)
@@ -314,7 +314,7 @@ class Filaments(object):
         else:
             raise TypeError("Unsupported operand type(s) for -: 'Filaments' and '{}'".format(type(other)))
 
-    def return_fils(self, i: numbers.Integral | slice | NDArray[np.int_ | np.bool] | None) -> Filament | 'Filaments':
+    def return_fils(self, i: Optional[Union[numbers.Integral, slice, NDArray[Union[np.int_,  np.bool_]]]]) -> Union[Filament, 'Filaments']:
         if isinstance(i, numbers.Integral):
             if i < 0:
                 i += len(self)
@@ -634,7 +634,7 @@ class Skel(object):
         return d, saddles_id[idx]
 
         
-    def distance_to_skel(self, points: NDArray[np.int_], big: float | None = None) -> tuple[NDArray[np.float64], list[NDArray[np.int_]], list[NDArray[np.int_]]]:
+    def distance_to_skel(self, points: NDArray[np.int_], big: Optional[float] = None) -> tuple[NDArray[np.float64], list[NDArray[np.int_]], list[NDArray[np.int_]]]:
         """compute the distance of a given point to the nearest filament"""
         try:
             b = self._big_segments_limit
@@ -753,7 +753,7 @@ class Skel(object):
         return all_fil_list, all_saddle_list
         
 
-    def follow_filament_to_cp(self, p: CriticalPoint, fil: Filament, node: bool = True) -> tuple[deque[Filament] | Filament, CriticalPoint] | tuple[None, None] | tuple[deque[Filament], list[CriticalPoint]]:
+    def follow_filament_to_cp(self, p: CriticalPoint, fil: Filament, node: bool = True) -> Union[tuple[Union[deque[Filament], Filament], CriticalPoint], tuple[None, None], tuple[deque[Filament], list[CriticalPoint]]]:
         """ follow filament chain through bifurcation points up to node
             (if node=True) or up to saddle (if node=False)
         """
@@ -1211,7 +1211,7 @@ class Skel(object):
 
  
     
-voids_buf:  tvtk.UnstructuredGrid | None = None # global var for pool.map
+voids_buf: Optional[tvtk.UnstructuredGrid] = None # global var for pool.map
 def _compute_cell_vol(idcell: int) -> tvtk.UnstructuredGrid:
     global voids_buf
     cell = voids_buf.get_cell(idcell)

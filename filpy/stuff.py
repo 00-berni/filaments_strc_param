@@ -23,7 +23,7 @@ def log_path(file_path: FileVar) -> str:
     log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
     return file_path.DIR.__add__(log_name).PATH
 
-def reorganize_index(idxes: tuple[int, ...] | IntArray, axis: Optional[int], shape: tuple) -> tuple[IntArray]:
+def reorganize_index(idxes: Union[tuple[int, ...], IntArray], axis: Optional[int], shape: tuple) -> tuple[IntArray]:
     """Convert a 1D positions in a nD positions
 
     Parameters
@@ -140,7 +140,7 @@ def timeit(func):
         return result
     return timeit_wrapper
 
-def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -> float | np.ndarray:
+def distance(p1: Union[tuple[int,int], IntArray], p2: Union[tuple[int,int], IntArray]) -> Union[float, FloatArray]:
     """Compute the Euclidean distance between two projectionist
 
     Parameters
@@ -326,7 +326,7 @@ def __float_dist(field: FloatArray, distances: ArrayLike, order: Optional[int] =
             results[1] = structs              
     return results
 
-def compute_tpcf(field: np.ndarray, bins: int | float | np.ndarray, no_zero: bool = False, precision: int = 14, display_plot: bool = True) -> np.ndarray:
+def compute_tpcf(field: FloatArray, bins: Union[int, float, FloatArray], no_zero: bool = False, precision: int = 14, display_plot: bool = True) -> FloatArray:
     """Compute the Two Point Correlation Function (TPCF) in a frame for a set of distances
 
     Parameters
@@ -445,7 +445,7 @@ def tpcf(field: np.ndarray, precision: int = 14, display_plot: bool = True) -> t
     return distances, correlations
 
 
-def compute_sf(field: np.ndarray, bins: int | float | np.ndarray, order: int, precision: int = 14, display_plot: bool = True) -> np.ndarray:
+def compute_sf(field: FloatArray, bins: Union[int, float, FloatArray], order: int, precision: int = 14, display_plot: bool = True) -> FloatArray:
     """Compute the Two Point Correlation Function (TPCF) in a frame for a set of distances
 
     Parameters
@@ -558,7 +558,7 @@ def struc_fun(field: np.ndarray, order: int = 2, precision: int = 14, display_pl
     structs = compute_sf(field=field, bins=distances, order=order, precision=precision, display_plot=display_plot)
     return distances, structs
 
-def tpcf_n_sf(field: np.ndarray, bins: int | float | np.ndarray, order: int = 2, no_zero: bool = False, precision: int = 14, display_plot: bool = True) -> tuple[np.ndarray, np.ndarray]:
+def tpcf_n_sf(field: FloatArray, bins: Union[int, float, FloatArray], order: int = 2, no_zero: bool = False, precision: int = 14, display_plot: bool = True) -> tuple[FloatArray, FloatArray]:
     field = np.copy(field) - field.mean()   #: data after subtracting the mean
     xdim, ydim = field.shape                #: sizes of the frame
     if isinstance(bins,(float,int)):        #: condition for a single distance 
@@ -731,7 +731,7 @@ def step_all(step: int) -> np.ndarray:
 
 
 
-def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf','all'], order: int = 2, processes: int = cpu_count()-1) -> np.ndarray | tuple[np.ndarray,np.ndarray]:
+def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf','all'], order: int = 2, processes: int = cpu_count()-1) -> Union[FloatArray, tuple[FloatArray, FloatArray]]:
     """Compute the TPCF or the SF by parallelization
 
     Parameters
@@ -798,7 +798,7 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
                     results[:,:,1].reshape(res_dim,res_dim,4) )
     return results
 
-def sequence_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2) -> np.ndarray | tuple[np.ndarray, np.ndarray]:
+def sequence_compute(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf'], order: int = 2) -> Union[FloatArray, tuple[FloatArray, FloatArray]]:
     """Compute the TPCF or the SF in sequence mode
 
     Parameters

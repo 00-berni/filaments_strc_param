@@ -10,7 +10,7 @@ from traits.api import Any
 from numpy.lib.stride_tricks import as_strided
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import Delaunay
-from typing import Optional
+from typing import Optional, Union 
 
 class CatalogVtk(tvtk.UnstructuredGrid):
 
@@ -89,7 +89,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
                 self.point_data.add_array(tmp)
 
     @property
-    def guardmask(self) -> NDArray[np.int_] | NDArray[np.bool_]:
+    def guardmask(self) -> Union[NDArray[np.int_], NDArray[np.bool_]]:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index == np.array([-1])
@@ -106,7 +106,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         return self.guardmask.sum()
 
     @property
-    def galmask(self) -> NDArray[np.int_] | NDArray[np.bool_]:
+    def galmask(self) -> Union[NDArray[np.int_], NDArray[np.bool_]]:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index != np.array([-1])
