@@ -10,12 +10,13 @@ from traits.api import Any
 from numpy.lib.stride_tricks import as_strided
 from scipy.interpolate import LinearNDInterpolator
 from scipy.spatial import Delaunay
+from typing import Optional
 
 class CatalogVtk(tvtk.UnstructuredGrid):
 
     __ = Any
     
-    def __init__(self, vtkfilename: str = '', obj = None, update: bool = True, **traits):
+    def __init__(self, vtkfilename: str = '', obj: Optional[NDArray[np.float64]] = None, update: bool = True, **traits):
         tvtk.UnstructuredGrid.__init__(self, obj=obj, update=update, **traits)
         if vtkfilename:
             self.read_vtu(vtkfilename)
@@ -63,7 +64,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
     def getPointArray(self) -> NDArray:
         return self.points.to_array()[:,:self._dim]
             
-    def remove_guards(self, nbgal: int | None = None) -> None:
+    def remove_guards(self, nbgal: Optional[int] = None) -> None:
         """remove guard particles on the boundary
         (added by option "-btype smooth" of delaunay_3D)
         """ 

@@ -119,7 +119,7 @@ def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar
 
 
 ##*
-def show_image(data: NDArray | list[NDArray], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: list[str] | None = None, show: bool = False, projection: str | None = None, **figargs) -> None | tuple[Figure, Axes | NDArray]:
+def show_image(data: NDArray | list[NDArray], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: Optional[list[str]] = None, show: bool = False, projection: Optional[str] = None, **figargs) ->  Optional[tuple[Figure, Axes | NDArray]]:
     """To plot quickly one or a set of fits pictures
     
     Parameters

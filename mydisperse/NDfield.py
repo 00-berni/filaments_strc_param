@@ -12,6 +12,7 @@ from os import path
 import struct
 import numpy as np
 from numpy.typing import NDArray
+from typing import Optional
 
 ND_CHAR   = 1<<0
 ND_UCHAR  = 1<<1
@@ -62,7 +63,7 @@ typedef struct NDfield_str
 """
 
 
-def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: str | None = None, coord: bool = False) -> None:
+def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: Optional[str] = None, coord: bool = False) -> None:
     """Write a NDfield according to the native binary format of Disperse
 
     Parameters
@@ -137,7 +138,7 @@ def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: str |
         f.write(buffer)
 
 
-def write_NDfield_coord(pos: NDArray[np.int_], filename: str, mass: NDArray[np.float64] | None = None, comment: str | None = None):
+def write_NDfield_coord(pos: NDArray[np.int_], filename: str, mass: Optional[NDArray[np.float64]] = None, comment: Optional[str] = None):
     # store the field
     write_NDfield(pos, filename, comment = comment, coord = True)
     # add the mass field

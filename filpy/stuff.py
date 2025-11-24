@@ -23,7 +23,7 @@ def log_path(file_path: FileVar) -> str:
     log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
     return file_path.DIR.__add__(log_name).PATH
 
-def reorganize_index(idxes: tuple[int, ...] | IntArray, axis: int | None, shape: tuple) -> tuple[IntArray]:
+def reorganize_index(idxes: tuple[int, ...] | IntArray, axis: Optional[int], shape: tuple) -> tuple[IntArray]:
     """Convert a 1D positions in a nD positions
 
     Parameters
@@ -47,7 +47,7 @@ def reorganize_index(idxes: tuple[int, ...] | IntArray, axis: int | None, shape:
         axes[axis] = idxes
         return tuple(axes) 
 
-def find_argmax(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
+def find_argmax(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
     """Compute the position of the max in a ndimensional array
 
     Parameters
@@ -70,7 +70,7 @@ def find_argmax(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
         return reorganize_index(maxpos,axis=axis,shape=obj.shape)
         
 
-def find_max(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
+def find_max(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
     """Compute the maxima along axis
 
     Parameters
@@ -88,7 +88,7 @@ def find_max(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
     obj = np.asarray(obj)
     return obj[find_argmax(obj,axis=axis)]
 
-def find_argmin(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
+def find_argmin(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
     """Compute the position of the nin in a ndimensional array
 
     Parameters
@@ -110,7 +110,7 @@ def find_argmin(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
     else:
         return reorganize_index(minpos,axis=axis,shape=obj.shape)
 
-def find_min(obj: ArrayLike, axis: ArrayLike | None = None) -> ArrayLike:
+def find_min(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
     """Compute the minima along axis
 
     Parameters
@@ -213,7 +213,7 @@ def __compute_pxs(distances: np.ndarray, precision: int = 15) -> np.ndarray:
     return pxs        
 
 
-def __discrete_dist(field: np.ndarray, distances: ArrayLike, order: int | None = None, mode: Literal['all','tpcf','sf'] = 'all', precision: int = 14) -> list[np.ndarray | None]:
+def __discrete_dist(field: FloatArray, distances: ArrayLike, order: Optional[int] = None, mode: Literal['all','tpcf','sf'] = 'all', precision: int = 14) -> list[Optional[FloatArray]]:
     """Compute the tpcf for integer distances
 
     Parameters
@@ -270,7 +270,7 @@ def __discrete_dist(field: np.ndarray, distances: ArrayLike, order: int | None =
         results[1] = structs
     return results
 
-def __float_dist(field: np.ndarray, distances: ArrayLike, order: int | None = None, mode: Literal['all','tpcf','sf'] = 'all', precision: int = 14) -> list[np.ndarray | None]:
+def __float_dist(field: FloatArray, distances: ArrayLike, order: Optional[int] = None, mode: Literal['all','tpcf','sf'] = 'all', precision: int = 14) -> list[Optional[FloatArray]]:
     """Compute the tpcf for not-integer distances
 
     Parameters

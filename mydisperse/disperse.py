@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-from typing import Literal
+from typing import Literal, Optional
 from numpy.typing import NDArray
 from subprocess import check_call, call
 import numpy as np
@@ -29,7 +29,7 @@ def run(cmd: str) -> None:
 
 opt_default = {}
    
-def run_delaunay(filename: str, nsmooth: float, density_file: None | str = None, btype: Literal['mirror','periodic','smooth','void'] = 'smooth', dim: Literal['2D','3D'] = '3D', blocks: None | list[int] = None) -> str:
+def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = None, btype: Literal['mirror','periodic','smooth','void'] = 'smooth', dim: Literal['2D','3D'] = '3D', blocks: Optional[list[int]] = None) -> str:
     """Delaunay 2D and 3D command of DisPerSE
 
     Parameters
@@ -180,9 +180,9 @@ def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dic
     return outnames
        
                             
-def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: float | None = None, 
-                 walls: bool = False, patches: bool = False, mask: str | None = None, 
-                 robustness: bool = False, nthreads: int | None = None, dim: Literal['2D','3D'] = '3D') -> dict[str, str]:
+def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] = None, 
+                 walls: bool = False, patches: bool = False, mask: Optional[str] = None, 
+                 robustness: bool = False, nthreads: Optional[int] = None, dim: Literal['2D','3D'] = '3D') -> dict[str, str]:
     """DisPerSE pipeline
     
     Parameters

@@ -1,4 +1,4 @@
-from typing import Literal, Sequence
+from typing import Literal, Sequence, Optional
 from numpy.typing import NDArray, ArrayLike
 from numpy import int_, float64, bool_
 from matplotlib.figure import Figure
@@ -12,6 +12,7 @@ BoolArray  = NDArray[bool_]
 __all__ = [
            'Literal',
            'Sequence',
+           'Optional',
            'NDArray',
            'ArrayLike',
            'IntArray',
