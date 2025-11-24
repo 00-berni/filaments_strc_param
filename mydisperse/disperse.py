@@ -14,7 +14,8 @@ __all__ = [
            'change_field_value'
           ]
 
-def run(cmd: str) -> None:
+
+def run(cmd: list[str], executable: list[str] = ['/bin/bash','-i','-c'], last: list[str] = ['&&']) -> None:
     """Run the code
 
     Parameters
@@ -25,11 +26,15 @@ def run(cmd: str) -> None:
     print()
     print(' '.join(cmd))
     print()
-    check_call(cmd)
+    # if executable or last:
+    #     cmd[0]  = '"' + cmd[0]
+    #     cmd[-1] = cmd[-1] + '"'
+    #     cmd = [' '.join(cmd)]
+    check_call(executable+cmd+last)
 
 opt_default = {}
    
-def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = None, btype: Literal['mirror','periodic','smooth','void'] = 'smooth', dim: Literal['2D','3D'] = '3D', blocks: Optional[list[int]] = None) -> str:
+def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = None, btype: Literal['mirror','periodic','smooth','void'] = 'smooth', dim: Literal['2D','3D'] = '3D', blocks: Optional[list[int]] = None, outdir: str = '.',**runkwargs) -> str:
     """Delaunay 2D and 3D command of DisPerSE
 
     Parameters
@@ -76,16 +81,24 @@ def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = No
     else:
         blocks_opt = ["-blocks", format(blocks[0], 'd'), format(blocks[1], 'd')]
 
+    from os import path
+    input_dir, input_name = path.split(filename)
+    if input_dir == outdir:
+        outname = filename
+    else:
+        outname = path.join(outdir, input_name)
+
     # run the command for tasselation
     run( ["delaunay_" + dim, filename,
-          "-outName", filename,
+          "-outName", outname,
           "-btype", btype] +
-          blocks_opt )  
+          blocks_opt,
+          **runkwargs )  
 
-    ndnet_fname = filename + ".NDnet"       #: NDnet file
+    ndnet_fname = outname + ".NDnet"       #: NDnet file
     # rename the output for the -blocks option
     if blocks is not None:        
-        temp_ndnet_fname = filename + "_G.NDnet"
+        temp_ndnet_fname = outname + "_G.NDnet"
         print(" rename {0} into {1} \n".format(temp_ndnet_fname, ndnet_fname))
         call(["mv", temp_ndnet_fname, ndnet_fname])
         
@@ -100,10 +113,11 @@ def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = No
     if nsmooth > 0:
         run( ["netconv", ndnet_fname,
               "-outName", ndnet_fname,
-              "-smoothData", "field_value", format(nsmooth,'g')]  )
+              "-smoothData", "field_value", format(nsmooth,'g')],
+              **runkwargs  )
         # update the output file
         old_SDndnet_fname = ndnet_fname + ".SD.NDnet"
-        SDndnet_fname = filename + ".SD{0:d}.NDnet".format(nsmooth)
+        SDndnet_fname = outname + ".SD{0:d}.NDnet".format(nsmooth)
         print(" rename {0} into {1} \n".format(old_SDndnet_fname, SDndnet_fname))
         call(["mv", old_SDndnet_fname, SDndnet_fname])
     else:
@@ -112,7 +126,8 @@ def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = No
     # convert to vtu
     run( ["netconv", SDndnet_fname,
           "-outName", SDndnet_fname,
-          "-to", "vtu"] )
+          "-to", "vtu"],
+          **runkwargs )
 
     # remove the previous NDnet file
     if SDndnet_fname != ndnet_fname:
@@ -182,7 +197,7 @@ def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dic
                             
 def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] = None, 
                  walls: bool = False, patches: bool = False, mask: Optional[str] = None, 
-                 robustness: bool = False, nthreads: Optional[int] = None, dim: Literal['2D','3D'] = '3D') -> dict[str, str]:
+                 robustness: bool = False, nthreads: Optional[int] = None, dim: Literal['2D','3D'] = '3D', outdir: str = '.',**runkwargs) -> dict[str, str]:
     """DisPerSE pipeline
     
     Parameters
@@ -211,7 +226,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     Returns
     -------
     outnames : dict[str,str]
-        Dictionary with the names of each output file. See output of `run_delaunay()`
+        Dictionary with the names of each output file. See output of `skl_names()`
     """   
     if cutp:
         nsigstr = "_c{0:.3g}".format(cutp)
@@ -244,30 +259,39 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
         nthreads_opt = []
     else:
         nthreads_opt = ["-nthreads", format(nthreads)] 
-        
+
+    from os import path
+    input_dir, input_name = path.split(filename)
+    if input_dir == outdir:
+        outname = filename
+    else:
+        outname = path.join(outdir, input_name)
+
     # run mse
     run( ["mse", filename,
-          "-outName", filename,
+          "-outName", outname,
           "-upSkl", 
           "-manifolds"] +
           nsigopt +
           mask_opt +
           nthreads_opt +  
           robustness_opt +
-         ["-forceLoops"] )
+         ["-forceLoops"],
+         **runkwargs )
 
     # set the name of NDskl file
-    base_name = "{0}{1}".format(filename, nsigstr)
+    base_name = "{0}{1}".format(outname, nsigstr)
     skl_name = base_name + ".up.NDskl"
 
     if patches:        
         # dump Voids for tagging the galaxies
         run( ["mse", filename,
-              "-outName", filename,
-              "-loadMSC", filename + ".MSC"] +
+              "-outName", outname,
+              "-loadMSC", outname + ".MSC"] +
               nsigopt + 
              ["-dumpManifolds", "J0a",
-              "-forceLoops"] )
+              "-forceLoops"],
+              **runkwargs )
 
         # converting voids NDnet file to vtu
         voids_name = base_name + "_manifolds_J0a.NDnet"
@@ -275,7 +299,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                        "-outName", voids_name,
                        "-to", "vtu"]
         netconv_cmd.extend(conv_smooth)
-        run(netconv_cmd)
+        run(netconv_cmd,**runkwargs)
    
         # dump Nodes' region for tagging the galaxies
         if dim == '3D':
@@ -285,11 +309,12 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
         else:
             raise ValueError("The dim variable can assume only the values '2D' and '3D'")              
         run( ["mse", filename,
-              "-outName", filename,
-              "-loadMSC", filename + ".MSC"] +
+              "-outName", outname,
+              "-loadMSC", outname + ".MSC"] +
               nsigopt +
              ["-dumpManifolds", node_manifold,
-              "-forceLoops"] )
+              "-forceLoops"],
+              **runkwargs )
     
         # converting nodes ndnet file to vtu
         nodes_name =  base_name + "_manifolds_" + node_manifold + ".NDnet"
@@ -297,16 +322,17 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                        "-outName", nodes_name,
                        "-to", "vtu"]
         netconv_cmd.extend(conv_smooth)              
-        run(netconv_cmd)
+        run(netconv_cmd,**runkwargs)
             
     if walls and dim=='3D':
         # dump Walls
         run( ["mse", filename,
-              "-outName", filename,
-              "-loadMSC", filename + ".MSC"] +
+              "-outName", outname,
+              "-loadMSC", outname + ".MSC"] +
               nsigopt +
              ["-dumpManifolds", "J1a",
-              "-forceLoops"] )
+              "-forceLoops"],
+              **runkwargs )
     
         # converting and smoothing walls ndnet file to vtu
         walls_name =  base_name + "_manifolds_J1a.NDnet"
@@ -314,14 +340,14 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                        "-outName", walls_name,
                        "-to", "vtu"]
         netconv_cmd.extend(conv_smooth)         
-        run(netconv_cmd)              
+        run(netconv_cmd, **runkwargs)              
     
     # converting and smoothing NDskl to ascii format
     skelconv_cmd = ["skelconv", skl_name,
                     "-outName", skl_name,
                     "-to","NDskl_ascii"]
     skelconv_cmd.extend(conv_smooth)
-    run(skelconv_cmd)          
+    run(skelconv_cmd, **runkwargs)          
 
    # converting and smoothing NDskl to ascii format with breakdown
     skelconv_cmd = ["skelconv", skl_name,
@@ -329,7 +355,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                     "-breakdown",
                     "-to","NDskl_ascii"]
     skelconv_cmd.extend(conv_smooth)
-    run(skelconv_cmd)          
+    run(skelconv_cmd, **runkwargs)          
     
     # converting and smoothing NDskl to vtp format to open in paraview 
     # no breakdown to keep source index the same
@@ -337,7 +363,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                     "-outName", skl_name,
                     "-to", "vtp"]
     skelconv_cmd.extend(conv_smooth)
-    run(skelconv_cmd)              
+    run(skelconv_cmd, **runkwargs)              
     
     ## converting NDskl to ascii critical points 
 #     skelconv_cmd=["skelconv",skl_name,
@@ -345,7 +371,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
 #                   "-breakdown",
 #                   "-to","crits_ascii"]
 #     skelconv_cmd.extend(conv_smooth)
-#     run(skelconv_cmd)
+#     run(skelconv_cmd, **runkwargs)
 #         
     # converting NDskl to ascii segments
     skelconv_cmd=["skelconv",skl_name,
@@ -353,10 +379,10 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
                   "-breakdown",
                   "-to","segs_ascii"]
     skelconv_cmd.extend(conv_smooth)           
-    run(skelconv_cmd)
+    run(skelconv_cmd, **runkwargs)
     
     # remove temp files    
-    call(["rm", filename+".MSC", skl_name])
+    call(["rm", outname+".MSC", skl_name])
     if patches:
         call(['rm', voids_name, nodes_name])
     if walls:
@@ -380,7 +406,7 @@ def write_NDfield_ascii(filename: str, field: NDArray[np.float64]) -> None:
     np.savetxt(filename, field, header=header, fmt="%.12g", comments="")
 
 
-def change_field_value_with_file(ndnet_fname: str, density_file: str, field_name: str = "field_value") -> None:
+def change_field_value_with_file(ndnet_fname: str, density_file: str, field_name: str = "field_value", outdir: str = '', **runkwargs) -> None:
     """Add the density file to a NDnet file
 
     Parameters
@@ -392,17 +418,24 @@ def change_field_value_with_file(ndnet_fname: str, density_file: str, field_name
     field_name : str, optional
         The name of the additional field in the output file, by default `"field_value"`
     """
+    from os import path
+    input_dir, input_name = path.split(ndnet_fname)
+    if input_dir == outdir:
+        outname = ndnet_fname
+    else:
+        outname = path.join(outdir, input_name)
+
     # add the field to `ndnet_fname`
     ncv_cmd = ["netconv", ndnet_fname,
-               "-outName", ndnet_fname,
+               "-outName", outname,
                "-addField", density_file, field_name, 
               ]
-    run(ncv_cmd)
+    run(ncv_cmd, **runkwargs)
 
     # update the output file
-    old_ndnet_fname = ndnet_fname + ".NDnet"
-    print(" rename {0} into {1} \n".format(old_ndnet_fname, ndnet_fname))
-    call(["mv", old_ndnet_fname, ndnet_fname])
+    old_ndnet_fname = outname + ".NDnet"
+    print(" rename {0} into {1} \n".format(old_ndnet_fname, outname))
+    call(["mv", old_ndnet_fname, outname])
 
 
 def change_field_value(ndnet_fname: str, field_value: NDArray[np.float64], field_name: str = "field_value") -> None:
