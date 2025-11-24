@@ -1203,7 +1203,7 @@ class Skel(object):
 voids_buf:  tvtk.UnstructuredGrid | None = None # global var for pool.map
 def _compute_cell_vol(idcell: int) -> tvtk.UnstructuredGrid:
     global voids_buf
-    cell = voids_buf.get_cells(idcell)
+    cell = voids_buf.get_cell(idcell)
     return abs(cell.compute_volume(*cell.points))
 
 class VoidsRegion(object):
