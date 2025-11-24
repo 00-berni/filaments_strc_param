@@ -32,6 +32,17 @@ import matplotlib.gridspec as gridspec
 #copy_reg.pickle(types.MethodType, _reduce_method)
 
 
+__all__ = [ 
+           'CriticalPoint', 
+           'Filament', 
+           'FilsIterator', 
+           'Filaments', 
+           'Skel', 
+           'VoidsRegion', 
+           'NodesRegion',
+           'Walls' 
+          ]
+
 # read a line, skipping comment lines    
 def _readline(f: TextIO) -> str:
     _COMMENT = '#'

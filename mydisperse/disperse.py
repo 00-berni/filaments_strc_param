@@ -5,6 +5,15 @@ from numpy.typing import NDArray
 from subprocess import check_call, call
 import numpy as np
 
+__all__ = [
+           'run_delaunay',
+           'skl_names',
+           'run_disperse',
+           'write_NDfield_ascii',
+           'change_field_value_with_file',
+           'change_field_value'
+          ]
+
 def run(cmd: str) -> None:
     """Run the code
 
