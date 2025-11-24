@@ -1,9 +1,9 @@
 from __future__ import print_function
 
 from typing import Literal
+from numpy.typing import NDArray
 from subprocess import check_call, call
 import numpy as np
-
 
 def run(cmd: str) -> None:
     """Run the code
@@ -357,14 +357,14 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: float | None = No
     return outnames
 
 
-def write_NDfield_ascii(filename: str, field: np.ndarray) -> None:
+def write_NDfield_ascii(filename: str, field: NDArray[np.float64]) -> None:
     """Save the field in ASCII
 
     Parameters
     ----------
     filename : str
         Density field file name
-    field : np.ndarray
+    field : NDArray[np.float64]
         A regular grid to be interpolated 
     """
     header = "ANDFIELD\n[{0}]".format(field.size)
@@ -396,14 +396,14 @@ def change_field_value_with_file(ndnet_fname: str, density_file: str, field_name
     call(["mv", old_ndnet_fname, ndnet_fname])
 
 
-def change_field_value(ndnet_fname: str, field_value: np.ndarray, field_name: str = "field_value") -> None:
+def change_field_value(ndnet_fname: str, field_value: NDArray[np.float64], field_name: str = "field_value") -> None:
     """Add the density field
 
     Parameters
     ----------
     ndnet_fname : str
         The name of a file containing an unstructured network (for instance, persistence pairs or manifolds as output by mse) in a readable network file format
-    field_value : np.ndarray
+    field_value : NDArray[np.float64]
         A regular grid to be interpolated
     field_name : str, optional
         Tag for the field file, by default `"field_value"`

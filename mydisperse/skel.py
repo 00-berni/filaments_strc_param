@@ -14,7 +14,6 @@ from tvtk.api import tvtk
 from collections import deque
 import itertools
 from multiprocessing import Pool
-from scipy.spatial import Delaunay
 
 import numbers
 from mydisperse.catalogvtk import CatalogVtk
@@ -1201,19 +1200,19 @@ class Skel(object):
 
  
     
-voids_buf: 'VoidsRegion' | None = None # global var for pool.map
-def _compute_cell_vol(idcell):
+voids_buf:  tvtk.UnstructuredGrid | None = None # global var for pool.map
+def _compute_cell_vol(idcell: int) -> tvtk.UnstructuredGrid:
     global voids_buf
     cell = voids_buf.get_cells(idcell)
     return abs(cell.compute_volume(*cell.points))
 
 class VoidsRegion(object):
     
-    def __init__(self,filename):
+    def __init__(self, filename: str):
         self._read(filename)
 
             
-    def _read(self,filename):        
+    def _read(self, filename: str) -> None:        
         print("Reading: Void manifolds")
         v = tvtk.XMLUnstructuredGridReader(file_name=filename)
         v.update()
@@ -1227,7 +1226,7 @@ class VoidsRegion(object):
         return cells
 
         
-    def indices_at_points(self):
+    def indices_at_points(self) -> NDArray[np.int_]:
         index = self.voids.point_data.get_array('index')
         if index:
             index = index.to_array().astype(int)
@@ -1251,7 +1250,7 @@ class VoidsRegion(object):
 
 
 
-    def volumes_and_mean_densities(self):
+    def volumes_and_mean_densities(self) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.int_]]:
         source_index = self.voids.cell_data.get_array('source_index')
         source_index = source_index.to_array().astype(int)
         usi, ri = np.unique(source_index, return_inverse=True)
@@ -1287,21 +1286,21 @@ class VoidsRegion(object):
                  
 class NodesRegion(object):
 
-    def __init__(self,filename,vr):
+    def __init__(self, filename: str, vr: VoidsRegion):
         self._read(filename)
-        if isinstance(vr,VoidsRegion):
+        if isinstance(vr, VoidsRegion):
             self.vr = vr
         else: raise SkelError('A VoidRegion is needed to initialize a NodeRegion')
  
            
-    def _read(self,filename):  
+    def _read(self, filename: str) -> None:  
         print("Reading: Peak manifolds")
         v=tvtk.XMLUnstructuredGridReader(file_name=filename)
         v.update()
         self.nodes = v.output 
  
    
-    def indices_at_points(self):
+    def indices_at_points(self) -> NDArray[np.int_]:
         index = self.nodes.point_data.get_array('index')
         if index:
             index = index.to_array().astype(int)
@@ -1319,7 +1318,7 @@ class NodesRegion(object):
         return nodes_index
 
             
-    def volumes_and_mean_densities(self):
+    def volumes_and_mean_densities(self) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.int_]]:
         cells = self.vr.get_cells()
         index_vr = self.vr.voids.point_data.get_array('index')
         if index_vr:
@@ -1358,14 +1357,14 @@ class NodesRegion(object):
 
 class Walls(object):
     
-    def __init__(self,filename):
+    def __init__(self, filename: str):
         print("Reading: Wall manifolds")
         v = tvtk.XMLUnstructuredGridReader(file_name=filename)
         v.update()
         self.walls = v.output 
 
     
-    def _compute_centers(self):
+    def _compute_centers(self) -> None:
         self._centers = np.zeros((self.walls.number_of_cells,3))
         for i in  range(self.walls.number_of_cells):
             cell = self.walls.get_cells(i)
@@ -1374,7 +1373,7 @@ class Walls(object):
 
 
     @property        
-    def centers(self):
+    def centers(self) -> NDArray[np.int_]:
         try:
             return self._centers
         except AttributeError:
@@ -1382,7 +1381,7 @@ class Walls(object):
             return self._centers
 
         
-    def distance(self,points):
+    def distance(self,points) -> tuple[NDArray[np.float64], NDArray[np.int_], NDArray[np.int_]]:
         try:
             distances, indexes = self._tree.query(points)
         except AttributeError:
@@ -1396,7 +1395,7 @@ class Walls(object):
         return distances, wall_ids, indexes
 
     
-    def _compute_surfaces(self):
+    def _compute_surfaces(self) -> None:
         source_index = self.walls.cell_data.get_array('source_index')
         source_index = source_index.to_array().astype(int)
         usi = np.unique(source_index)
@@ -1408,7 +1407,7 @@ class Walls(object):
                 self._surfaces[i] += cell.compute_area() 
 
     @property                                                                  
-    def surfaces(self):
+    def surfaces(self) -> NDArray[np.float64]:
         try:
             return self._surfaces
         except AttributeError:
@@ -1416,5 +1415,5 @@ class Walls(object):
             return self._surfaces
 
     @property    
-    def total_surface(self):
+    def total_surface(self) -> float:
         return np.sum(self.surfaces)

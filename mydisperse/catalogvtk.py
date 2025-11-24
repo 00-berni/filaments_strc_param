@@ -4,6 +4,7 @@ from builtins import zip
 from builtins import range
 
 import numpy as np
+from numpy.typing import NDArray
 from tvtk.api import tvtk
 from traits.api import Any
 from numpy.lib.stride_tricks import as_strided
@@ -41,7 +42,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         w.set_input_data(self)
         w.write()
 
-    def add_point_array(self, array: np.ndarray, array_name: str) -> None:
+    def add_point_array(self, array: NDArray, array_name: str) -> None:
         nb_arr = self.point_data.number_of_arrays
 #        if array.dtype.type is np.string_ :
 #            tmp = tvtk.StringArray()
@@ -52,14 +53,14 @@ class CatalogVtk(tvtk.UnstructuredGrid):
             self.point_data.add_array(array)
             self.point_data.get_array(nb_arr).name = array_name
     
-    def get_cells(self) -> tvtk.UnstructuredGrid:
+    def get_cells(self) -> NDArray[np.int_]:
         cells = tvtk.UnstructuredGrid.get_cells(self).to_array().astype(int)
         #cells.shape = (cells.size // (self._dim+2), self._dim+2)
         cells = cells.reshape((-1, self._dim+2))
         cells = cells[:, 1:] # remove type of cells column
         return cells
 
-    def getPointArray(self) -> np.ndarray:
+    def getPointArray(self) -> NDArray:
         return self.points.to_array()[:,:self._dim]
             
     def remove_guards(self, nbgal: int | None = None) -> None:
@@ -87,7 +88,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
                 self.point_data.add_array(tmp)
 
     @property
-    def guardmask(self) -> np.ndarray:
+    def guardmask(self) -> NDArray[np.int_] | NDArray[np.bool_]:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index == np.array([-1])
@@ -104,7 +105,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         return self.guardmask.sum()
 
     @property
-    def galmask(self) -> np.ndarray:
+    def galmask(self) -> NDArray[np.int_] | NDArray[np.bool_]:
         true_index = self.point_data.get_array('true_index')
         if true_index:
             mask = true_index != np.array([-1])
@@ -141,7 +142,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         return area
     
     
-    def interpolate_data(self, points: np.ndarray):
+    def interpolate_data(self, points: NDArray):
         probe_data = tvtk.PolyData(points=points)
         probe = tvtk.ProbeFilter()
         probe.set_input_data(probe_data)
@@ -149,7 +150,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
         probe.update()
         return probe.output.point_data
 
-    def interpolate_data2(self, points: np.ndarray, fieldname: str) -> np.ndarray:
+    def interpolate_data2(self, points: NDArray, fieldname: str) -> NDArray[np.float64]:
         if self._delaunay is None:
             self._delaunay = Delaunay(self.getPointArray())
         interp = LinearNDInterpolator(self._delaunay, self.point_data.get_array(fieldname))
@@ -179,7 +180,7 @@ class CatalogVtk(tvtk.UnstructuredGrid):
             self.points = p
             
              
-    def uniform_grid(self, array_name: str, pixsize: int, average: float = 0, orientPA: bool = True) -> tuple[np.ndarray, float]:
+    def uniform_grid(self, array_name: str, pixsize: int, average: float = 0, orientPA: bool = True) -> tuple[NDArray[np.float64], float]:
         
         print("Interpolating data array on a uniform grid")
         if self.dim !=3:
