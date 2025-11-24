@@ -1,21 +1,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from numpy import ndarray
 from astropy.io import fits
-from astropy.io.fits import HDUList
 from .display import show_image
+from .typing import *
+from .typing import HDUList
 
-def hotpx_remove(data: ndarray) -> ndarray:
+def hotpx_remove(data: FloatArray) -> FloatArray:
     """Remove hot pixels from the image
 
     Parameters
     ----------
-    data : ndarray
+    data : FloatArray
         spectrum data
 
     Returns
     -------
-    data : ndarrayfrom astropy
+    data : FloatArray
+        from astropy
 
     Notes
     -----
@@ -66,7 +67,7 @@ def hotpx_remove(data: ndarray) -> ndarray:
 #     # plt.yticks(ticks[1],tickslabel[1])
 
 
-def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, ndarray]:
+def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, FloatArray]:
     """Open fits file and extract data. 
 
     Parameters
@@ -87,7 +88,7 @@ def get_data_fit(path: str, lims: list[int | None] = [None,None,None,None], hotp
     -------
     hdul : HDUList
         hdul list of the fits
-    data : ndarray
+    data : FloatArray
         fits data
     """
     # open the file

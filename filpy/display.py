@@ -1,10 +1,7 @@
 import numpy as np
-from numpy import ndarray
-from numpy.typing import ArrayLike
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-from typing import Sequence, Any
+from .typing import * 
+from .typing import Axes, Figure
 
 __all__ = [
             'quickplot',
@@ -12,12 +9,12 @@ __all__ = [
             'show_image'
           ]
 
-def quickplot(data: Sequence[ndarray] | ndarray, numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
+def quickplot(data: Sequence[NDArray] | NDArray, numfig: int = None, fmt: str = '-', title: str = '', labels: Sequence[str] = ('',''), dim: Sequence[int] = [10,7], grid: bool = False,**pltargs) -> None:
     """Display a plot quickly.
 
     Parameters
     ----------
-    data : Sequence[ndarray] | ndarray
+    data : Sequence[NDArray] | NDArray
         one can pass a single array of data (on y axis) or 
         x data and y data or in addition the corresponding uncertainty/ies
     numfig : int, optional
@@ -49,14 +46,14 @@ def quickplot(data: Sequence[ndarray] | ndarray, numfig: int = None, fmt: str = 
     xl,yl = labels
     plt.figure(numfig,figsize=dim)
     plt.title(title,fontsize=font_size+2)
-    if isinstance(data,ndarray): data = [np.arange(len(data)),data]
+    if isinstance(data, np.ndarray): data = [np.arange(len(data)),data]
     plt.errorbar(*data,fmt=fmt,**pltargs)
     plt.xlabel(xl,fontsize=font_size)
     plt.ylabel(yl,fontsize=font_size)
     if grid: plt.grid(which='both',linestyle='--',alpha=0.2,color='grey')
 
 
-def plot_image(fig: Figure, ax: Axes, data: ndarray, subtitle: str = '',colorbar: bool = True, **figargs) -> None:
+def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar: bool = True, **figargs) -> None:
     """To plot fits images
 
     Parameters
@@ -122,12 +119,12 @@ def plot_image(fig: Figure, ax: Axes, data: ndarray, subtitle: str = '',colorbar
 
 
 ##*
-def show_image(data: ndarray | list[ndarray], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: list[str] | None = None, show: bool = False, projection: str | None = None, **figargs) -> None | tuple[Figure, Axes | ndarray]:
+def show_image(data: NDArray | list[NDArray], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: list[str] | None = None, show: bool = False, projection: str | None = None, **figargs) -> None | tuple[Figure, Axes | NDArray]:
     """To plot quickly one or a set of fits pictures
     
     Parameters
     ----------
-    data : ndarray | list[ndarray]
+    data : NDArray | list[NDArray]
         target(s)
     num_plots : Sequence[int], optional
         shape of grid of plots, by default `(1,1)`
@@ -146,7 +143,7 @@ def show_image(data: ndarray | list[ndarray], num_plots: Sequence[int] = (1,1), 
     -------
     fig : Figure
         figure if `show` is `False`
-    axs : Axes | ndarray
+    axs : Axes | NDArray
         axes if `show` is `False`
     """
     fig, axs = plt.subplots(*num_plots, figsize=dim, subplot_kw={'projection': projection}) 
