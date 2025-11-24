@@ -1,11 +1,11 @@
 from typing import Literal
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
 import time
 from multiprocessing import Pool, cpu_count
 from functools import wraps
 from .data import FileVar
 from .display import quickplot, plt
+from .typing import *
 
 def log_path(file_path: FileVar) -> str:
     """Compute the path of the log file
@@ -23,12 +23,12 @@ def log_path(file_path: FileVar) -> str:
     log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
     return file_path.DIR.__add__(log_name).PATH
 
-def reorganize_index(idxes: tuple | NDArray, axis: int | None, shape: tuple) -> tuple:
+def reorganize_index(idxes: tuple[int, ...] | IntArray, axis: int | None, shape: tuple) -> tuple[IntArray]:
     """Convert a 1D positions in a nD positions
 
     Parameters
     ----------
-    idxes : tuple | NDArray
+    idxes : tuple[int, ...] | IntArray
         1D indexes
     axis : int | None
         chosen axis
@@ -968,7 +968,7 @@ def asym_tpcf_n_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,
 
 def parallel_convolve_result(dist: float) -> float:
     pos = np.asarray(np.where(G_dists==dist)).astype(int)
-    return np.sum(G_flat_res[G_c_yy[*pos],G_c_xx[*pos]])/(4*pos.shape[1])
+    return np.sum(G_flat_res[G_c_yy[pos[0],pos[1]],G_c_xx[pos[0],pos[1]]])/(4*pos.shape[1])
 
 
 def convolve_result(res_matrix: np.ndarray,**compute_kwargs) -> tuple[np.ndarray,np.ndarray]:
@@ -980,7 +980,7 @@ def convolve_result(res_matrix: np.ndarray,**compute_kwargs) -> tuple[np.ndarray
     if len(unq_dist) < 1400:
         pos = [ np.asarray(np.where(dist==d)).astype(int) for d in unq_dist]
         # norm_val = lambda p : 4*len(p) if mode == 'mean' else 1
-        flat_res = np.asarray([np.sum(flat_res[yy[*p],xx[*p]])/(4 * p.shape[1]) for p in pos])
+        flat_res = np.asarray([np.sum(flat_res[yy[p[0],p[1]],xx[p[0],p[1]]])/(4 * p.shape[1]) for p in pos])
     else:
         if 'processes' not in compute_kwargs.keys():
             compute_kwargs['processes'] = cpu_count - 1
