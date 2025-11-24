@@ -16,7 +16,7 @@ import itertools
 from multiprocessing import Pool
 
 import numbers
-from mydisperse.catalogvtk import CatalogVtk
+from .catalogvtk import CatalogVtk
 
 class SkelError(Exception):
     pass
