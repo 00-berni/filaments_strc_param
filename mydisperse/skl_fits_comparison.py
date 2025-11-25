@@ -1,12 +1,14 @@
-from skel import Skel
+from .typing import *
+from .skel import Skel, Filament
 from astropy.io import fits as astrofits
-from amunra import cool_plot_specifics
+# from amunra import p
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import curve_fit
-from apophis.misc import constants as cst
-class skl_fits_comparison:
-    def __init__(self, fits_path, skl_path, grid_type='ppv', distance=3900):
+# from apophis.misc import constants as cst
+import astropy.units as u
+class skl_fits_comparison():
+    def __init__(self, fits_path: str, skl_path: str, grid_type: Literal['ppp','ppv'] = 'ppv', distance: float = 3900):
         tmp = astrofits.open(fits_path)
         self.fits_field = tmp[0].data.T # Transposing right now to avoid inconsistencies with SKELDATA
         self.fits_header = tmp[0].header
@@ -15,10 +17,11 @@ class skl_fits_comparison:
         self.grid_type = grid_type
         self.get_density_filaments()
         self.distance = distance
-    def convert_to_standard(self, array, num_axis):
+
+    def convert_to_standard(self, array: FloatArray, num_axis: int) -> FloatArray:
         central_v = self.fits_header['CRVAL{}'.format(num_axis)]
-        len_axis = self.fits_header['NAXIS{}'.format(num_axis)]
-        delta = self.fits_header['CDELT{}'.format(num_axis)]
+        len_axis  = self.fits_header['NAXIS{}'.format(num_axis)]
+        delta     = self.fits_header['CDELT{}'.format(num_axis)]
 
         min_val = central_v - len_axis/2 * delta
         array_converted = array * delta + min_val
@@ -27,13 +30,16 @@ class skl_fits_comparison:
     # REMEMBER FOR PPV: CUBES HAVE DIMENSION
     # MASS/(dx^2 * dv)
     # MULTIPLY FOR dv to get local column density of that velocity bin
-    def get_density_filaments(self):
+    def get_density_filaments(self) -> None:
         for fil in self.filaments:
             self.get_density_along(fil)
-    def get_density_along(self, fil):
+
+    def get_density_along(self, fil: Filament) -> None:
         # TODO
         #  right now it doens't take into account shifts from the true positions
-        xp, yp, zp = fil.points[:, 0].astype(int), fil.points[:, 1].astype(int), fil.points[:, 2].astype(int)
+        xp = fil.points[:, 0].astype(int)
+        yp = fil.points[:, 1].astype(int)
+        zp = fil.points[:, 2].astype(int)
         # remember in ppv this is not density!!!
         if self.grid_type == 'ppp':
             fil.density = self.fits_field[xp, yp, zp]
@@ -44,7 +50,7 @@ class skl_fits_comparison:
         else:
             raise ValueError('Unknown field type')
 
-    def plot_filaments_in_dens_vs_velocity_space(self):
+    def plot_filaments_in_dens_vs_velocity_space(self) -> None:
         # Assumes that the filaments are extracted from a ppv datacube
         if self.grid_type == 'ppp':
             raise TypeError("This is a ppp skeleton, you don't have such informtion")
@@ -55,11 +61,11 @@ class skl_fits_comparison:
             plt.plot(fil.intensity, Vrad_fils)
 
         plt.xscale('log')
-        plt.xlabel(r'Intensity\,[K (km/s)$^{-1}$]')
-        plt.ylabel(r'V$_\mathrm{rad}$ [km\,s$^{-1}$]')
+        plt.xlabel(r'Intensity\\,[K (km/s)$^{-1}$]')
+        plt.ylabel(r'V$_\\mathrm{rad}$ [km\\,s$^{-1}$]')
         plt.show()
 
-    def plot_filaments_in_phys_length_vs_velocity_space(self):
+    def plot_filaments_in_phys_length_vs_velocity_space(self) -> None:
         # Assumes that the filaments are extracted from a ppv datacube
         if self.grid_type == 'ppp':
             raise TypeError("This is a ppp skeleton, you don't have such informtion")
@@ -80,20 +86,20 @@ class skl_fits_comparison:
 
             plt.plot(segs_len, vel_len)
 
-        plt.xlabel(r'Length\,[degrees]')
-        plt.ylabel(r'V$_\mathrm{rad}$ [km\,s$^{-1}$]')
+        plt.xlabel(r'Length\\,[degrees]')
+        plt.ylabel(r'V$_\\mathrm{rad}$ [km\\,s$^{-1}$]')
         plt.show()
 
 
-    def get_density_cut_histogram(self, fil, space=10, points_per_distance=1, max_distance=30,
-                                  normalise_to_max_intensity=False, zero_intensity_at_border=False,
-                                  central_point=None
-                                  ):
-        # given a filament, it divides it into sets of 'space' points.
-        # For each set:
-        # it evaluates the radial profile in the perpedicular plane/line (ppp, ppv)
-        # The difference with a projection is that you take only the field data around the filaments
-
+    def get_density_cut_histogram(self, fil: Filament, space: int = 10, points_per_distance: int = 1, 
+                                  max_distance: float = 30, normalise_to_max_intensity: bool = False, zero_intensity_at_border: bool = False, central_point: Optional[Sequence] = None
+                                  ) -> list[FloatArray]:
+        """        
+            given a filament, it divides it into sets of 'space' points.
+            For each set:
+            it evaluates the radial profile in the perpedicular plane/line (ppp, ppv)
+            The difference with a projection is that you take only the field data around the filaments
+        """
         #########
         # Remember that one is the velocity space. Can be used to select the extent of the filament but not for the distance
         def split_array(arr, size):
@@ -207,15 +213,15 @@ class skl_fits_comparison:
 
         return segs_plot
 
-    def convert_pxs_in_pc(self, dist_pxs):
+    def convert_pxs_in_pc(self, dist_pxs: FloatArrayLike) -> FloatArrayLike:
         res = abs(self.fits_header['CDELT1']) * 3600 # from degrees to arcseconds
-        phys_dist = res * self.distance * cst.AU/cst.PC * dist_pxs
+        phys_dist = res * self.distance * u.au/u.pc * dist_pxs
         return phys_dist
 
-def linear_fit(x, a, b):
+def linear_fit(x, a: float, b: float) -> FloatArrayLike:
     return a*x+b
 
-def b_from_min_distance_from_zero(slope, distance):
+def b_from_min_distance_from_zero(slope: float, distance: FloatArrayLike) -> FloatArrayLike:
     # takes into account the sign of b
     return distance * np.sqrt(slope**2 + 1)
 
