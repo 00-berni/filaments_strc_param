@@ -30,7 +30,7 @@ def run(cmd: list[str], executable: list[str] = ['/bin/bash','-i','-c'], last: l
     #     cmd[0]  = '"' + cmd[0]
     #     cmd[-1] = cmd[-1] + '"'
     #     cmd = [' '.join(cmd)]
-    check_call(executable+cmd+last)
+    check_call(cmd)
 
 opt_default = {}
    
