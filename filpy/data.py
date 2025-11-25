@@ -45,7 +45,7 @@ class PathVar():
         return os.path.isdir(self.PATH)
 
     def make_dir(self) -> None:
-        """Make the directories required in the path"""
+        """Make the directories required in the path if they are not"""
         if not self.check_dir():
             dirs = []
             tmp_path = self.PATH
