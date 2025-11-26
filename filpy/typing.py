@@ -9,6 +9,7 @@ IntArray   = NDArray[int_]
 FloatArray = NDArray[float64]
 BoolArray  = NDArray[bool_]
 FloatArrayLike = Union[float, FloatArray]
+IntArrayLike = Union[int, IntArray]
 
 __all__ = [
            'Literal',
@@ -17,6 +18,7 @@ __all__ = [
            'Union',
            'NDArray',
            'FloatArrayLike',
+           'IntArrayLike',
            'ArrayLike',
            'IntArray',
            'FloatArray',

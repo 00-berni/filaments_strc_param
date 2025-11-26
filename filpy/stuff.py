@@ -42,34 +42,34 @@ def reorganize_index(idxes: Union[tuple[int, ...], IntArray], axis: Optional[int
     if axis is None:
         return np.unravel_index(idxes,shape)
     else:
-        axes = [ np.arange(s) for s in shape]
+        axes = [ np.arange(s).astype(int) for s in shape]
         axes[axis] = idxes
         return tuple(axes) 
 
-def find_argmax(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
+def find_argmax(obj: Sequence, axis: Optional[int] = None) -> IntArrayLike:
     """Compute the position of the max in a ndimensional array
 
     Parameters
     ----------
-    obj : ArrayLike
+    obj : FloatArray
         selected array
-    axis : ArrayLike | None, optional
-        chosen axis along which compute the maximum, by default None
+    axis : int | None, optional
+        chosen axis along which compute the maximum, by default `None`
 
     Returns
     -------
-    argmax : ArrayLike
+    argmax : IntArrayLike
         maxima positions
     """
     obj = np.asarray(obj)
-    maxpos = np.argmax(obj, axis=axis)
+    maxpos = np.argmax(obj, axis=axis).astype(int)
     if len(obj.shape) == 1:
         return maxpos
     else:
         return reorganize_index(maxpos,axis=axis,shape=obj.shape)
         
 
-def find_max(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
+def find_max(obj: FloatArray, axis: Optional[int] = None) -> ArrayLike:
     """Compute the maxima along axis
 
     Parameters
