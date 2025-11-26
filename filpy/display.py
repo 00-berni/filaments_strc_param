@@ -151,7 +151,7 @@ def show_image(data: Union[NDArray, list[NDArray]], num_plots: Sequence[int] = (
         if subtitles is None:
             subtitles = ['']*len(data)
         fig.suptitle(title, fontsize=20)
-        for (ax,elem,sub) in zip(axs,data,subtitles):
+        for (ax,elem,sub) in zip(axs.flatten(),data,subtitles):
             plot_image(fig,ax,elem,subtitle=sub,**figargs)
     else: 
         if subtitles is None:
