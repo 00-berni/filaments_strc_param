@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-from typing import Literal, Optional
-from numpy.typing import NDArray
+from .typing import *
+# from numpy.typing import NDArray
 from subprocess import check_call, call
 import numpy as np
 
@@ -392,7 +392,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     return outnames
 
 
-def write_NDfield_ascii(filename: str, field: NDArray[np.float64]) -> None:
+def write_NDfield_ascii(filename: str, field: FloatArray) -> None:
     """Save the field in ASCII
 
     Parameters
