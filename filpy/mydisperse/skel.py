@@ -928,7 +928,7 @@ class Skel(object):
         plt.xlabel('persistence')
         plt.legend()
 
-    def persistence_diagram(self) -> None:
+    def persistence_diagram(self, scale: Literal['log', 'linear'] = 'log') -> None:
         import matplotlib.pyplot as plt
 
         persistence_ratio_id = self.crit_data_name.index('persistence_ratio')
@@ -956,38 +956,72 @@ class Skel(object):
         pair1 = (np.where(typ[good[low]] == 1))[0]
         pair2 = (np.where(typ[good[low]] == 2))[0]
 
-        plt.figure()
-        plt.loglog(field_val[good[low[pair0]]], persistence_nsig[good[low[pair0]]],\
-                '.', label='min-saddle1')
-        plt.loglog(field_val[good[low[pair1]]], persistence_nsig[good[low[pair1]]],\
-                '.', label='saddle1-saddle2')
-        plt.loglog(field_val[good[low[pair2]]], persistence_nsig[good[low[pair2]]],\
-                '.', label='saddle2-max')
-        plt.xlabel('density')
-        plt.ylabel('persistence nsigmas')
-        plt.legend()
+        if scale == 'log':
+            plt.figure()
+            plt.loglog(field_val[good[low[pair0]]], persistence_nsig[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.loglog(field_val[good[low[pair1]]], persistence_nsig[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.loglog(field_val[good[low[pair2]]], persistence_nsig[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence nsigmas')
+            plt.legend()
 
-        plt.figure()
-        plt.loglog(field_val[good[low[pair0]]], persistence_ratio[good[low[pair0]]],\
-                '.', label='min-saddle1')
-        plt.loglog(field_val[good[low[pair1]]], persistence_ratio[good[low[pair1]]],\
-                '.', label='saddle1-saddle2')
-        plt.loglog(field_val[good[low[pair2]]], persistence_ratio[good[low[pair2]]],\
-                '.', label='saddle2-max')
-        plt.xlabel('density')
-        plt.ylabel('persistence ratio')
-        plt.legend()
+            plt.figure()
+            plt.loglog(field_val[good[low[pair0]]], persistence_ratio[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.loglog(field_val[good[low[pair1]]], persistence_ratio[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.loglog(field_val[good[low[pair2]]], persistence_ratio[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence ratio')
+            plt.legend()
 
-        plt.figure()
-        plt.loglog(field_val[good[low[pair0]]], persistence[good[low[pair0]]],\
-                '.', label='min-saddle1')
-        plt.loglog(field_val[good[low[pair1]]], persistence[good[low[pair1]]],\
-                '.', label='saddle1-saddle2')
-        plt.loglog(field_val[good[low[pair2]]], persistence[good[low[pair2]]],\
-                '.', label='saddle2-max')
-        plt.xlabel('density')
-        plt.ylabel('persistence')                  
-        plt.legend(loc=4)        
+            plt.figure()
+            plt.loglog(field_val[good[low[pair0]]], persistence[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.loglog(field_val[good[low[pair1]]], persistence[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.loglog(field_val[good[low[pair2]]], persistence[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence')                  
+            plt.legend(loc=4) 
+        elif scale == 'linear':      
+            plt.figure()
+            plt.plot(field_val[good[low[pair0]]], persistence_nsig[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.plot(field_val[good[low[pair1]]], persistence_nsig[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.plot(field_val[good[low[pair2]]], persistence_nsig[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence nsigmas')
+            plt.legend()
+
+            plt.figure()
+            plt.plot(field_val[good[low[pair0]]], persistence_ratio[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.plot(field_val[good[low[pair1]]], persistence_ratio[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.plot(field_val[good[low[pair2]]], persistence_ratio[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence ratio')
+            plt.legend()
+
+            plt.figure()
+            plt.plot(field_val[good[low[pair0]]], persistence[good[low[pair0]]],\
+                    '.', label='min-saddle1')
+            plt.plot(field_val[good[low[pair1]]], persistence[good[low[pair1]]],\
+                    '.', label='saddle1-saddle2')
+            plt.plot(field_val[good[low[pair2]]], persistence[good[low[pair2]]],\
+                    '.', label='saddle2-max')
+            plt.xlabel('density')
+            plt.ylabel('persistence')                  
+            plt.legend(loc=4)        
         
         plt.show()
 
