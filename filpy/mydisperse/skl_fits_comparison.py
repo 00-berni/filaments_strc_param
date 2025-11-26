@@ -225,6 +225,6 @@ def b_from_min_distance_from_zero(slope: float, distance: FloatArrayLike) -> Flo
     # takes into account the sign of b
     return distance * np.sqrt(slope**2 + 1)
 
-def min_distance_from_zero_from_b(a, b):
+def min_distance_from_zero_from_b(a: float, b: float) -> FloatArrayLike:
     # takes into account the sign of b
     return b * np.sqrt( 1 - a**2/(1 + a**2) )

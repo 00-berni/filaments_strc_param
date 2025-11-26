@@ -42,26 +42,6 @@ datatype_dict = {np.int8:    ND_CHAR,
                  np.float64: ND_DOUBLE}
 
 
-"""
-typedef struct NDfield_str
-{
- char comment[80];  // a comment on the data
- int dims[NDFIELD_MAX_DIMS];  // dimensions of the grid, must be [ndims,nparticles] when data represents sample particles coordinates (i.e. when fdims_index!=0)
- int ndims;  // number of dimensions of the space
- int n_dims;  // number of meaningfull values in dims array
- int fdims_index; // if 0, the field is a regular grid of dimensions dims, else the file contains the dims[0] coordinates of dims[1] particles.
- int datatype;  // type of the data (one of the ND_... defined above)
- double x0[NDFIELD_MAX_DIMS];  // origin of the bounding box
- double delta[NDFIELD_MAX_DIMS];  // extent of the bounding box
- char dummy[160];  // dummy data, for future extensions or for storing anything you want.
-
- void *val;  // pointer to data
-
- long nval;  // total number of particles (fdims_index==1) or pixels (fdims_index==0)
- int datasize;  // size in bytes of datatype type.
-} NDfield;
-"""
-
 
 def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: Optional[str] = None, coord: bool = False) -> None:
     """Write a NDfield according to the native binary format of Disperse
