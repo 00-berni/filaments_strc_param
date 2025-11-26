@@ -8,6 +8,7 @@ from astropy.io.fits import HDUList
 IntArray   = NDArray[int_]
 FloatArray = NDArray[float64]
 BoolArray  = NDArray[bool_]
+FloatArrayLike = Union[float, FloatArray]
 
 __all__ = [
            'Literal',
@@ -15,6 +16,7 @@ __all__ = [
            'Optional',
            'Union',
            'NDArray',
+           'FloatArrayLike',
            'ArrayLike',
            'IntArray',
            'FloatArray',
