@@ -12,7 +12,7 @@ from os import path
 import struct
 import numpy as np
 from numpy.typing import NDArray
-from typing import Optional
+from .typing import *
 
 ND_CHAR   = 1<<0
 ND_UCHAR  = 1<<1
@@ -43,7 +43,7 @@ datatype_dict = {np.int8:    ND_CHAR,
 
 
 
-def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: Optional[str] = None, coord: bool = False) -> None:
+def write_NDfield(data_array: FloatArray, filename: str, comment: Optional[str] = None, coord: bool = False) -> None:
     """Write a NDfield according to the native binary format of Disperse
 
     Parameters
@@ -88,7 +88,7 @@ def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: Optio
     # check the filename
     name, ext = path.splitext(filename)
     if not ext:
-        ext = 'NDfield'
+        ext = '.NDfield'
     filename = name + ext
     
     with open(filename, 'wb') as f:
@@ -118,7 +118,7 @@ def write_NDfield(data_array: NDArray[np.float64], filename: str, comment: Optio
         f.write(buffer)
 
 
-def write_NDfield_coord(pos: NDArray[np.int_], filename: str, mass: Optional[NDArray[np.float64]] = None, comment: Optional[str] = None):
+def write_NDfield_coord(pos: IntArray, filename: str, mass: Optional[FloatArray] = None, comment: Optional[str] = None):
     # store the field
     write_NDfield(pos, filename, comment = comment, coord = True)
     # add the mass field
