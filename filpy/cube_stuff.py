@@ -7,5 +7,19 @@ from spectral_cube import SpectralCube, Slice
 from .data import U_VEL
 
 def select_channel(cube: SpectralCube, vel_val: float) -> Slice:
+    """Select a specific channel
+
+    Parameters
+    ----------
+    cube : SpectralCube
+        data cube
+    vel_val : float
+        selected velocity channel
+
+    Returns
+    -------
+    cube[ch_pos] : Slice
+        data for that channel
+    """
     ch_pos = np.argmin(np.abs(cube.with_spectral_unit(U_VEL).spectral_axis - vel_val*U_VEL))
     return cube[ch_pos, : , :]

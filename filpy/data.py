@@ -69,6 +69,20 @@ class PathVar():
         return os.path.split(self.PATH)
     
     def dir_list(self, dir: str = '', print_res: bool = False) -> list[str]:
+        """List the files in the direct
+
+        Parameters
+        ----------
+        dir : str, optional
+            a subdirectory inside `self.Path`, by default `''`
+        print_res : bool, optional
+            if `True` the list is printed, by default `False`
+
+        Returns
+        -------
+        files : list[str]
+            list of the files
+        """
         path = os.path.join(self.PATH,dir)
         files = os.listdir(path)
         if print_res:
@@ -170,6 +184,7 @@ class FileVar():
             return [(dirname + name).PATH for name in filename]
         
     def update_file(self) -> None:
+        """Update the list of files in `self.DIR`"""
         obj_list = self.DIR.dir_list()
         if isinstance(self.FILE,str):
             self.FILE = [self.FILE] + obj_list
@@ -189,6 +204,18 @@ class FileVar():
 
 
     def __add__(self, new_file: Union[str, list[str]]) -> 'FileVar':
+        """Add a file or more to the list of files
+
+        Parameters
+        ----------
+        new_file : Union[str, list[str]]
+            a file or a list of files to add to `self.FILE`
+
+        Returns
+        -------
+        new_filevar : FileVar
+            the `FileVar` with the updated file list
+        """
         new_filevar = self.copy()
         filename = new_filevar.FILE 
         if isinstance(filename,str):
@@ -197,7 +224,7 @@ class FileVar():
             new_filevar.FILE += [new_file] 
         return new_filevar
 
-    def __getitem__(self,item: int) -> str:
+    def __getitem__(self, item: int) -> str:
         """Select a certain file path from a list of ones
 
         Parameters
@@ -239,11 +266,27 @@ class FileVar():
 
 
 def dir_files(curr_dir: PathVar, dir: str = '', print_res: bool = False) -> FileVar:
+    """Collect all the file in a directory
+
+    Parameters
+    ----------
+    curr_dir : PathVar
+        the current directory
+    dir : str, optional
+        a subdirectory of `curr_dir`, by default `''`
+    print_res : bool, optional
+        if `True` the list is printed, by default `False`
+
+    Returns
+    -------
+    file_list : FileVar
+        the collection of all the file in the directory
+    """
     obj_list = curr_dir.dir_list(dir=dir,print_res=print_res)
     return FileVar(obj_list,curr_dir+dir)
 
 
-## Paths
+## Useful paths for the library
 PKG_DIR = PathVar()
 PROJECT_DIR = PKG_DIR - 1
 MBM40_DIR = PROJECT_DIR + 'MBM40'
@@ -253,5 +296,6 @@ CO_PATHS = FileVar(CO_FILES, MBM40_DIR + 'CO')
 HI_PATHS = FileVar(HI_FILES, MBM40_DIR + 'HI')
 IR_PATHS = FileVar(IR_FILES, MBM40_DIR + 'IR')
 
+## Constants
 U_VEL = u.km / u.s
 u.add_enabled_units(u.def_unit(['K (Tb)'], represents=u.K))

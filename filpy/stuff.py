@@ -1,4 +1,3 @@
-from typing import Literal
 import numpy as np
 import time
 from multiprocessing import Pool, cpu_count
@@ -614,49 +613,8 @@ def tpcf_n_sf(field: FloatArray, bins: Union[int, float, FloatArray], order: int
     return corr, strc
 
 
-# def __mapping(coord: tuple[int,int], positions: tuple[np.ndarray,np.ndarray]) -> tuple[tuple[np.ndarray,np.ndarray],tuple[np.ndarray,np.ndarray]]:
-#     """Map the pixel at a certain lag and direction
 
-#     Parameters
-#     ----------
-#     coord : tuple[int,int]
-#         cartesian components of the direction vector
-#     positions : tuple[np.ndarray,np.ndarray]
-#         frame pixel positions
-
-#     Returns
-#     -------
-#     x_pos : tuple[np.ndarray,np.ndarray]
-#         the involved pixels and the corresponding ones at vector distance along x
-#     y_pos : tuple[np.ndarray,np.ndarray]
-#         the involved pixels and the corresponding ones at vector distance along y
-#     """
-#     # extract data
-#     i,j = coord
-#     xx, yy = positions
-#     # condition for x
-#     if i == 0:
-#         xpos = slice(None,None) 
-#     elif i > 0:
-#         xpos = slice(None,-i)
-#     else:
-#         xpos = slice(-i,None)
-#     # condition for y
-#     if j == 0:
-#         ypos = slice(None,None) 
-#     elif j > 0:
-#         ypos = slice(None,-j)
-#     else:
-#         ypos = slice(-j,None)
-#     # store results
-#     x = xx[ypos,xpos]
-#     y = yy[ypos,xpos]
-#     x_pos = (x,x+i)
-#     y_pos = (y,y+j)
-#     return x_pos, y_pos     
-
-
-def step_tpcf(step: int) -> list[np.ndarray]:
+def step_tpcf(step: int) -> list[FloatArrayLike]:
     """Compute the single step of parallelization for TPCF
 
     Parameters
@@ -666,7 +624,7 @@ def step_tpcf(step: int) -> list[np.ndarray]:
 
     Returns
     -------
-    corr_i : list[np.ndarray]
+    corr_i : list[FloatArrayLike]
         TPCF per each quadrant for a certain vector direction
 
     Notes
@@ -685,7 +643,7 @@ def step_tpcf(step: int) -> list[np.ndarray]:
     else:
         return [0,0,0,0]
 
-def step_sf(step: int) -> list[np.ndarray]:
+def step_sf(step: int) -> list[FloatArrayLike]:
     """Compute the single step of parallelization for TPCF
 
     Parameters
@@ -695,7 +653,7 @@ def step_sf(step: int) -> list[np.ndarray]:
 
     Returns
     -------
-    corr_i : list[np.ndarray]
+    sf_i : list[FloatArrayLike]
         SF per each quadrant for a certain vector direction
 
     Notes
@@ -715,7 +673,20 @@ def step_sf(step: int) -> list[np.ndarray]:
         return [0,0,0,0]
 
 
-def step_all(step: int) -> np.ndarray:
+def step_all(step: int) -> list[list[FloatArrayLike]]:
+    """Compute the single step of parallelization for both TPCF and SF
+
+
+    Parameters
+    ----------
+    step : int
+        the selected step
+
+    Returns
+    -------
+    res : list[list[FloatArrayLike]]
+        the TPCF or the SF per each quadrant or both
+    """
     # define couples to identify the 4 quadrants
     xsgn = (1,1,-1,-1)
     ysgn = (1,-1,-1,1)
@@ -731,12 +702,12 @@ def step_all(step: int) -> np.ndarray:
 
 
 
-def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf','all'], order: int = 2, processes: int = cpu_count()-1) -> Union[FloatArray, tuple[FloatArray, FloatArray]]:
+def parallel_compute(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[int,int]], mode: Literal['tpcf','sf','all'], order: int = 2, processes: int = cpu_count()-1) -> Union[FloatArray, tuple[FloatArray, FloatArray]]:
     """Compute the TPCF or the SF by parallelization
 
     Parameters
     ----------
-    data : np.ndarray
+    data : FloatArray
         the frame
     mode : Literal['tpcf','sf']
         the required operation
@@ -747,7 +718,7 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
 
     Returns
     -------
-    results : np.ndarray
+    results : FloatArray
         the TPCF or the SF per each quadrant or both
 
     Notes
@@ -756,7 +727,7 @@ def parallel_compute(data: np.ndarray,mask_ends: tuple[tuple[int,int], tuple[int
     """
     global G_tmp_data           #: the copy of the reference frame
     global G_xx, G_yy           #: the map of all possible pixel positions of the mask
-    global G_order          #: the order of the SF
+    global G_order              #: the order of the SF
     G_order = order
     # copy data to prevent losses of information
     G_tmp_data = np.copy(data)
@@ -803,7 +774,7 @@ def sequence_compute(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[in
 
     Parameters
     ----------
-    data : np.ndarray
+    data : FloatArray
         the frame
     mode : Literal['tpcf','sf']
         the required operation
@@ -812,7 +783,7 @@ def sequence_compute(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[in
 
     Returns
     -------
-    results : np.ndarray
+    results : FloatArray
         the TPCF or the SF per each quadrant
 
     Notes
@@ -867,17 +838,17 @@ def sequence_compute(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[in
     return results
 
 
-def combine_results(res_data: np.ndarray) -> np.ndarray:
+def combine_results(res_data: FloatArray) -> FloatArray:
     """Reshape the computed matrix for TPCF or SF to get a 2D picture
 
     Parameters
     ----------
-    res_data : np.ndarray
+    res_data : FloatArray
         computed matrix
 
     Returns
     -------
-    com_res : np.ndarray
+    com_res : FloatArray
         reshaped matrix
     """
     # store the size of the initial frame
@@ -891,19 +862,19 @@ def combine_results(res_data: np.ndarray) -> np.ndarray:
     com_res[ydim:,:xdim-1]   = res_data[:,::-1,3][1:,:-1]
     return com_res
 
-def asym_tpcf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], result: Literal['cum','div'] = 'div', zero_cover: bool = False, **compute_kwargs) -> np.ndarray: 
+def asym_tpcf(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[int,int]], result: Literal['cum','div'] = 'div', zero_cover: bool = False, **compute_kwargs) -> FloatArray: 
     """Compute the 2D TPCF
 
     Parameters
     ----------
-    data : np.ndarray
+    data : FloatArray
         frame matrix
     result : Literal['cum', 'div'], optional
         the format of the computed matrix, by default 'div'
 
     Returns
     -------
-    corr : np.ndarray
+    corr : FloatArray
         2D TPCF
 
     Notes
@@ -922,19 +893,19 @@ def asym_tpcf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]]
         corr = combine_results(corr)
     return corr
 
-def asym_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div', **compute_kwargs) -> np.ndarray: 
+def asym_sf(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div', **compute_kwargs) -> FloatArray: 
     """Compute the 2D SF
 
     Parameters
     ----------
-    data : np.ndarray
+    data : FloatArray
         frame matrix
     result : Literal['cum', 'div'], optional
         the format of the computed matrix, by default 'div'
 
     Returns
     -------
-    corr : np.ndarray
+    corr : FloatArray
         2D SF
 
     Notes
@@ -951,7 +922,29 @@ def asym_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], 
         stfc = combine_results(stfc)
     return stfc
 
-def asym_tpcf_n_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div',zero_cover: bool = False, **compute_kwargs) -> tuple[np.ndarray, np.ndarray]:
+def asym_tpcf_n_sf(data: FloatArray, mask_ends: tuple[tuple[int,int], tuple[int,int]], order: int = 2, result: Literal['cum','div'] = 'div',zero_cover: bool = False, **compute_kwargs) -> tuple[FloatArray, FloatArray]:
+    """Compute both the non-isotropic TPCF and SF
+
+    Parameters
+    ----------
+    data : FloatArray
+        field
+    mask_ends : tuple[tuple[int,int], tuple[int,int]]
+        _description_
+    order : int, optional
+        order of the SF, by default 2
+    result : Literal['cum', 'div'], optional
+        compute, by default 'div'
+    zero_cover : bool, optional
+        if `True` it covers the 0 lag correlation with 0 value, by default False
+
+    Returns
+    -------
+    corr : FloatArray
+        computed TPCF
+    stfc : FloatArray
+        computed SF
+    """
     ydim, xdim = data.shape     #: size of the frame
     if max(ydim,xdim) <= 50:    #: no parallelization
         corr, stfc = sequence_compute(data,mask_ends=mask_ends,mode='all', order=order)
@@ -967,11 +960,37 @@ def asym_tpcf_n_sf(data: np.ndarray, mask_ends: tuple[tuple[int,int], tuple[int,
 
 
 def parallel_convolve_result(dist: float) -> float:
+    """Average over the 4 quadrants at a specific lag
+
+    Parameters
+    ----------
+    dist : float
+        the lag at which to compute the average
+
+    Returns
+    -------
+    avg_value : float
+        mean field at lag `dist`
+    """
     pos = np.asarray(np.where(G_dists==dist)).astype(int)
     return np.sum(G_flat_res[G_c_yy[pos[0],pos[1]],G_c_xx[pos[0],pos[1]]])/(4*pos.shape[1])
 
 
-def convolve_result(res_matrix: np.ndarray,**compute_kwargs) -> tuple[np.ndarray,np.ndarray]:
+def convolve_result(res_matrix: FloatArray,**compute_kwargs) -> tuple[FloatArray,FloatArray]:
+    """Compute 1D TPCF or SF
+
+    Parameters
+    ----------
+    res_matrix : FloatArray
+        TPCF or SF in mode `div`
+
+    Returns
+    -------
+    unq_dist : FloatArray
+        array of distances
+    flat_res : FloatArray
+        TPCF or SF for each distance
+    """
     flat_res = np.sum(res_matrix,axis=2)
     ydim, xdim = flat_res.shape
     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
@@ -994,48 +1013,3 @@ def convolve_result(res_matrix: np.ndarray,**compute_kwargs) -> tuple[np.ndarray
     return unq_dist, flat_res
 
 
-# def cart_delta(distances: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-#     # compute the corresponding coordinates for each distance
-#     delta = np.array([np.arange(0,d+1) for d in distances], dtype='object')
-#     dx_i = np.array([np.arange(0,d+1) for d in distances], dtype='object')
-#     dy_j = np.array([np.sqrt(np.round(d**2,decimals=precision)-i**2) for i,d in zip(dx_i,distances)], dtype='object')
-#     # select integer values only
-#     j_pos = np.array([np.mod(j,1) == 0 for j in dy_j],dtype='object')
-#     rtol = 10**(-precision)     #: the uncertainty for the check
-#     # check the values
-#     check_pos = np.array([ ~np.all(np.isclose(d-np.sqrt(j**2+j[::-1]**2),np.zeros(len(p)),rtol=rtol)) for i,j,d in zip(,tmp_j,distances)],dtype=bool)
-#     while np.any(check_pos):    #: adjust the accuracy
-#         precision -= 1
-#         if precision < 0:
-#             raise ValueError('Precision cannot be negative')
-#         # compute the values again with a lower accuracy
-#         tmp_pxs = np.array([np.sqrt(np.round(d**2,decimals=precision)-np.arange(1,d)**2) for d in tmp_dst], dtype='object')
-#         tmp_pxs = np.array([p[np.mod(p,1) == 0].astype(int) for p in tmp_pxs],dtype='object')
-#         # set the uncertainty and update the check
-#         rtol = 10**(-precision)
-#         check_pos[check_pos] = np.array([ ~np.all(np.isclose(d-np.sqrt(p**2+p[::-1]**2),np.zeros(len(p)),rtol=rtol)) for p,d in zip(tmp_pxs[check_pos],tmp_dst[check_pos])],dtype=bool)
-#     # store the values
-#     pxs = tmp_pxs
-#     return pxs        
-
-
-
-# def iso_map(lag: float, positions: tuple[np.ndarray,np.ndarray], precision: int = 14):
-#     xx_i, yy_j = np.meshgrid(np.arange(0,lag+1),np.arange(0,lag+1))
-#     rtol = 10**-precision
-#     pos = np.isclose(xx_i**2+yy_j**2,lag**2,rtol=rtol)
-#     xx_i = xx_i[pos]
-#     yy_j = yy_j[pos] 
-#     del pos, rtol
-#     map = [ __mapping((i,j),positions=positions) for i,j in zip(xx_i,yy_j)]
-#     return map
-
-# def iso_tpcf(data: np.ndarray, distances: np.ndarray, precision: int = 14):
-#     tmp_data = np.copy(data) - np.mean(data)
-#     ydim, xdim = tmp_data.shape
-#     xx, yy = np.meshgrid(np.arange(xdim),np.arange(ydim))
-#     corr = np.zeros(distance.size)
-#     for i in range(distances.size):
-#         lag = distances[i]
-#         map = iso_map(lag,(xx,yy),precision=precision)
-#         corr[i] = np.sum([])
