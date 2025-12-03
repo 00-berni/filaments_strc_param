@@ -197,7 +197,8 @@ def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dic
                             
 def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] = None, 
                  walls: bool = False, patches: bool = False, mask: Optional[str] = None, 
-                 robustness: bool = False, nthreads: Optional[int] = None, dim: Literal['2D','3D'] = '3D', outdir: str = '.',**runkwargs) -> dict[str, str]:
+                 robustness: bool = False, nthreads: Optional[int] = None, 
+                 dim: Literal['2D','3D'] = '3D', force_loops: bool = True, outdir: str = '.',**runkwargs) -> dict[str, str]:
     """DisPerSE pipeline
     
     Parameters
@@ -209,24 +210,42 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     nsmooth : int
         Smooth the `'field_value'` data field associated with vertices by averaging its value with that of its direct neighbors in the network `nsmooth` times
     cutp : float | None, optional
-        Any persistence pair with persistence lower than the given threshold will be cancelled. Use `nsig` instead of this when the input network was produced with `run_delaunay()`. The cut value should be typically set to the estimated amplitude of the noise. By default `None`
+        Any persistence pair with persistence lower than the given threshold will be cancelled. Use `nsig` instead of this when the input network was produced with `run_delaunay()`. The cut value should be typically set to the estimated amplitude of the noise. 
+        By default `None`
     walls : bool, optional
         If `True` the function dumps walls, that is ascending 1-manifolds (required `dim == '3D'`). By default `False`
     patches : bool, optional
-        If `True` the function dumps voids and nodes' region, that is ascending 1-manifolds and descending n-manifold respectively, where n = 2 for `dim == '2D'` or n = 3 for `dim == '3D'`. By default `False`
+        If `True` the function dumps voids and nodes' region, that is ascending 1-manifolds and descending n-manifold respectively, where n = 2 for `dim == '2D'` or n = 3 for `dim == '3D'`. 
+        By default `False`
     mask : str | None, optional
-        The file must be a 1D array of values of size the number of vertices (or pixels) in the network, in a readable grid format. A value of 0 corresponds to a visible vertex/pixel while any other value masks the vertex/pixel. Adding a trailing `~` to the filename (without space) reverses this behavior, a value of 0 masking the corresponding pixels/vertices. By default `None`
+        The file must be a 1D array of values of size the number of vertices (or pixels) in the network, in a readable grid format. A value of 0 corresponds to a visible vertex/pixel while any other value masks the vertex/pixel. Adding a trailing `~` to the filename (without space) reverses this behavior, a value of 0 masking the corresponding pixels/vertices. 
+        By default `None`
     robustness : bool, optional
-        If `True` it enables the computation of robustness and robustness ratio. It can be costly for very large data sets. When enabled, a robustness value is tagged for each segments and node of the output skeleton files. By default `False`
+        If `True` it enables the computation of robustness and robustness ratio: a robustness value is tagged for each segments and node of the output skeleton files. Robustness is a local measure of how contrasted the critical points and filaments are with respect to their background. In a sense, robustness is a continuous version of persistence which extends to filaments (persistence applies to pairs of critical points only). It can be costly for very large data sets. 
+        By default `False`
     nthreads : int | None, optional
-        The number of threads. If it is `None` it is usually set to the total number of cores available by openMP. By default `None`
+        The number of threads. If it is `None` it is usually set to the total number of cores available by openMP. 
+        By default `None`
     dim : Literal['2D', '3D'], optional
-        Set the dimension of the tasselation, by default '3D'
+        Set the dimension of the tasselation, 
+        by default '3D'
+    force_loops : bool, optional
+        If `True` it forces the simplification of non-cancellable persistence pairs (saddle-saddle pairs in 3D or more that are linked by at least 2 different arcs). When two critical points of critical index difference 1 are linked by 2 or more arcs, they may not be cancelled as this would result in a discrete gradient loop. This is not a problem in 2D as such pairs cannot form persistence pairs but in 3D, saddle-saddle persistence pairs may be linked by 2 or more arcs even though their persistence is low. By default those pairs are skipped in order to preserve the properties of the Morse-smale complex but as a result few non persistent features may remain (such as spurious filaments). Fortunately, there are usually none or only very few of those pairs, and their number is shown in the output of mse, in the Simplifying complex section. If you are only interested in identifying structures (as opposed to doing topology), you should probably use '-forceLoops' to remove those spurious structures (such as small non significant filaments). 
+        By default `True`
+    outdir : str, optional
+        The directory where outputs will be stored, 
+        by default `'.'`
 
     Returns
     -------
     outnames : dict[str,str]
         Dictionary with the names of each output file. See output of `skl_names()`
+
+    Notes
+    -----
+    The pipeline consists in:
+        1. compute the Morse-Smale complex through the command `mse`
+        2. 
     """   
     if cutp:
         nsigstr = "_c{0:.3g}".format(cutp)
@@ -259,6 +278,11 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
         nthreads_opt = []
     else:
         nthreads_opt = ["-nthreads", format(nthreads)] 
+    
+    if force_loops:
+        forceloops = ["-forceLoops"]
+    else:
+        forceloops = []
 
     from os import path
     input_dir, input_name = path.split(filename)
@@ -270,13 +294,13 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     # run mse
     run( ["mse", filename,
           "-outName", outname,
-          "-upSkl", 
-          "-manifolds"] +
-          nsigopt +
+          "-upSkl",                 # save arcs leading to maxima
+          "-manifolds"] +           # compute and store all a./d. manifolds
+          nsigopt +             
           mask_opt +
           nthreads_opt +  
           robustness_opt +
-         ["-forceLoops"],
+          forceloops,               # remove spurious structures
          **runkwargs )
 
     # set the name of NDskl file
@@ -289,8 +313,8 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
               "-outName", outname,
               "-loadMSC", outname + ".MSC"] +
               nsigopt + 
-             ["-dumpManifolds", "J0a",
-              "-forceLoops"],
+             ["-dumpManifolds", "J0a"] +    # store in .NDnet file voids (a. 0-manifolds)
+              forceloops,
               **runkwargs )
 
         # converting voids NDnet file to vtu
@@ -330,8 +354,8 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
               "-outName", outname,
               "-loadMSC", outname + ".MSC"] +
               nsigopt +
-             ["-dumpManifolds", "J1a",
-              "-forceLoops"],
+             ["-dumpManifolds", "J1a"] +
+              forceloops,
               **runkwargs )
     
         # converting and smoothing walls ndnet file to vtu
