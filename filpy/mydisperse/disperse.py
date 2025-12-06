@@ -294,7 +294,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     # run mse
     run( ["mse", filename,
           "-outName", outname,
-          "-upSkl",                 # save arcs leading to maxima
+          "-upSkl",                 # save arcs leading to exactly one maxima
           "-manifolds"] +           # compute and store all a./d. manifolds
           nsigopt +             
           mask_opt +
@@ -308,12 +308,18 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
     skl_name = base_name + ".up.NDskl"
 
     if patches:        
+        """ The option `-dumpManifolds` allows to compute
+            the manifolds set from the CPs of index `i`
+             - `ia` := ascending  `(dim-i)`-manifolds
+             - `id` := descending `i`-manifolds
+        """
         # dump Voids for tagging the galaxies
+        # void is asc. 3-man/2-man
         run( ["mse", filename,
               "-outName", outname,
               "-loadMSC", outname + ".MSC"] +
               nsigopt + 
-             ["-dumpManifolds", "J0a"] +    # store in .NDnet file voids (a. 0-manifolds)
+             ["-dumpManifolds", "J0a"] +   
               forceloops,
               **runkwargs )
 
@@ -326,6 +332,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
         run(netconv_cmd,**runkwargs)
    
         # dump Nodes' region for tagging the galaxies
+        # regions around maxima
         if dim == '3D':
             node_manifold = 'J3d'
         elif dim == '2D':
@@ -350,6 +357,7 @@ def run_disperse(filename: str, nsig: int, nsmooth: int, cutp: Optional[float] =
             
     if walls and dim=='3D':
         # dump Walls
+        # wall is asc/des 2-man so `1a` or `2d` 
         run( ["mse", filename,
               "-outName", outname,
               "-loadMSC", outname + ".MSC"] +
