@@ -1,10 +1,15 @@
 from __future__ import print_function
 
 from .typing import *
-from subprocess import check_call, call
-import numpy as np
+from subprocess import check_call
+# import numpy as np
 
 __all__ = [
+            'py_mse',
+            'py_delaunay',
+            'py_netconv',
+            'py_skelconv',
+            'py_fieldconv'
           ]
 
 
@@ -53,21 +58,32 @@ def _run(cmd: list[str]) -> None:
     print()
     check_call(cmd)
 
-def py_mse(filename: str, nsig: Union[float, Sequence[float]] = 0, cut: Optional[Union[float, Sequence[float]]] = None, *mse_args, **mse_kwargs) -> None:
+MSE_OPTIONS = Literal['manifolds',
+                      'noTags',
+                      'forceLoops',
+                      'robustness',
+                      'no_robustness',
+                      'interArcsGeom',
+                      'no_arcsGeom',
+                      'ppairs',
+                      'upSkl',
+                      'downSkl',
+                      'interSkl',
+                      'vertexAsMinima',
+                      'descendingFiltration',
+                      'no_saveMSC',
+                      'no_gFilter',
+                      'debug'
+                     ]
+
+def py_mse(filename: str, *mse_args: MSE_OPTIONS, **mse_kwargs) -> None:
     """Run `mse` function of DisPerSE
 
     Parameters
     ----------
     filename : str
         The name of a file containing the discrete particle coordinates in a `field` format.
-    nsig : float | Sequence[float], optional
-        sets persistence ratio threshold for DTFE type densities.
-        This sets a limit on persistence ratios in terms of 'n-sigmas'
-        Use this for DTFE densities in delaunay tesselations.
-    cut : float | Sequence[float], optional
-        sets persistence threshold.
-        There will be distinct outputs for each given threshold
-    
+
     Args
     ----
     `'noTags'`
@@ -107,6 +123,13 @@ def py_mse(filename: str, nsig: Union[float, Sequence[float]] = 0, cut: Optional
 
     Kwargs
     ------
+    nsig : float | Sequence[float], optional
+        sets persistence ratio threshold for DTFE type densities.
+        This sets a limit on persistence ratios in terms of 'n-sigmas'
+        Use this for DTFE densities in delaunay tesselations.
+    cut : float | Sequence[float], optional
+        sets persistence threshold.
+        There will be distinct outputs for each given threshold    
     field : str, optional
         may be used to set/replace the function value
     outName : str, optional
@@ -152,25 +175,30 @@ def py_mse(filename: str, nsig: Union[float, Sequence[float]] = 0, cut: Optional
         Loads a given backup .MSC file. This will basically skip the computation of the Morse-smale complex, therefore gaining a lot of time. By default, mse always write a backup .MSC after the MS-complex is computed. See options -manifolds and -interArcsGeom for information on the limitations.
     """
     cmd = ['mse', filename]
-    if cut:
+    if 'cut' in mse_kwargs.keys():
+        cut = mse_kwargs['cut']
         if isinstance(cut,Sequence):
-            cutopt = list(cut)
+            cutopt = [ str(c) for c in cut]
         else:
-            cutopt = [cut]
+            cutopt = [str(cut)]
         cmd += ['-cut'] + cutopt
-    elif nsig != 0:
-        if isinstance(nsig,Sequence):
-            nsigopt = list(nsig)
-        else:
-            nsigopt = [nsigopt]
-        cmd += ['-nsig'] + nsigopt
+        mse_kwargs.pop('cut')
+    elif 'nsig' in mse_kwargs.keys():
+        nsig = mse_kwargs['nsig']
+        if nsig != 0:
+            if isinstance(nsig,Sequence):
+                nsigopt = [ str(s) for s in nsig]
+            else:
+                nsigopt = [str(nsig)]
+            cmd += ['-nsig'] + nsigopt
+        mse_kwargs.pop('nsig')
 
     for val in mse_args:
         val = '-' + val
         cmd += [val]
     for key, val in mse_kwargs.items():
         key = ['-' + key]
-        cmd += key + [val]
+        cmd += key + [str(val)]
     
     _run(cmd)
 
@@ -181,7 +209,7 @@ def py_delaunay(filename: str, dim: Literal['2D', '3D'], *del_args, **del_kwargs
         cmd += [val]
     for key, val in del_kwargs.items():
         key = ['-' + key]
-        cmd += key + [val]
+        cmd += key + [str(val)]
     
     _run(cmd)
 
@@ -192,19 +220,28 @@ def py_netconv(filename: str, output: NETWORK_FORMATS, *net_args, **net_kwargs) 
         cmd += [val]
     for key, val in net_kwargs.items():
         key = ['-' + key]
-        cmd += key + [val]
+        cmd += key + [str(val)]
     cmd += ['-to', output]
     
     _run(cmd)
 
-def py_skelconv(filename: str, output: SKELETON_FORMATS, *skl_args, **skl_kwargs) -> None:
+SKL_OPTIONS = Literal['noTags',
+                      'breakdown',
+                      'rmBoundary', 
+                      'rmOutside', 
+                      'toRaDecZ',
+                      'toRaDecDist',
+                      'info'
+                     ]
+
+def py_skelconv(filename: str, output: SKELETON_FORMATS, *skl_args: SKL_OPTIONS, **skl_kwargs) -> None:
     cmd = ['skelconv', filename]
     for val in skl_args:
         val = '-' + val
         cmd += [val]
     for key, val in skl_kwargs.items():
         key = ['-' + key]
-        cmd += key + [val]  
+        cmd += key + [str(val)]  
     cmd += ['-to', output]
     
     _run(cmd)
