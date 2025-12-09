@@ -132,7 +132,7 @@ def run_delaunay(filename: str, nsmooth: float, density_file: Optional[str] = No
     return SDndnet_fname
 
    
-def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dict[str,str]:
+def skl_names(skl_fname: str, walls: bool = False, patches: bool = False, dim: Literal['2D','3D'] = '3D') -> dict[str,str]:
     """Collects the names of the outputs
 
     Parameters
@@ -152,9 +152,9 @@ def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dic
         * `'skl_brk'` : the .BRK file
         * `'skl_vtp'` : the NDskl file in .vtp format
         * `'segs'`    : the segments file
-        * `'voids'`   : the manifolds J0a file in .vtu format, optional
-        * `'nodes'`   : the manifolds J3d file in .vtu format, optional
-        * `'walls'`   : the manifolds J1a file in .vtu format, optional
+        * `'voids'`   : the asc. 3/2-manifolds `J0a` file in .vtu format, optional
+        * `'nodes'`   : the des. 3/2-manifolds `J3d`/`J2d` file in .vtu format, optional
+        * `'walls'`   : the asc. 2-manifolds `J1a` (3D only) file in .vtu format, optional
 
     Notes
     -----
@@ -184,8 +184,14 @@ def skl_names(skl_fname: str, walls: bool = False, patches: bool = False) -> dic
     outnames['segs'] = basename + persist_ext +".up.NDskl.BRK" + smooth_ext + ".a.segs"        
     if patches:
         outnames['voids'] = basename + persist_ext + "_manifolds_J0a.NDnet" + smooth_ext + ".vtu"
-        outnames['nodes'] = basename + persist_ext + "_manifolds_J3d.NDnet" + smooth_ext + ".vtu"
-    if walls:
+        if dim == '3D':
+            node_manifold = 'J3d'
+        elif dim == '2D':
+            node_manifold = 'J2d'
+        else:
+            raise ValueError("The dim variable can assume only the values '2D' and '3D'")              
+        outnames['nodes'] = basename + persist_ext + "_manifolds_"+ node_manifold + ".NDnet" + smooth_ext + ".vtu"
+    if walls and dim == '3D':
         outnames['walls'] = basename + persist_ext + "_manifolds_J1a.NDnet" + smooth_ext + ".vtu"
     
     return outnames
@@ -310,7 +316,7 @@ def run_disperse(filename: str, nsig: float, nsmooth: int, cutp: Optional[float]
              - `id` := descending `i`-manifolds
         """
         # dump Voids for tagging the galaxies
-        # void is asc. 3-man/2-man
+        # void is an asc. 3-man/2-man
         run( ["mse", filename,
               "-outName", outname,
               "-loadMSC", outname + ".MSC"] +
@@ -416,7 +422,7 @@ def run_disperse(filename: str, nsig: float, nsmooth: int, cutp: Optional[float]
     if walls:
         call(['rm', walls_name ])
     # return the names of each file
-    outnames = skl_names(skl_name + smooth_ext + ".a.NDskl", walls, patches)
+    outnames = skl_names(skl_name + smooth_ext + ".a.NDskl", walls, patches,dim=dim)
     return outnames
 
 
