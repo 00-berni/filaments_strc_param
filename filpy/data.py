@@ -68,6 +68,13 @@ class PathVar():
         """
         return os.path.split(self.PATH)
     
+    def tree(self) -> None:
+        files = os.listdir(self.PATH)
+        print('Files in "' + self.PATH +'"')
+        for i, f in enumerate(files):
+            print(f'{i:2d} - {f}')
+
+
     def dir_list(self, dir: str = '', print_res: bool = False) -> list[str]:
         """List the files in the direct
 
@@ -87,9 +94,15 @@ class PathVar():
         files = os.listdir(path)
         if print_res:
             print('Files in "' + path +'"')
-            for i in range(len(files)):
-                print(f'{i:2d} - {files[i]}')
+            for i, f in enumerate(files):
+                print(f'{i:2d} - {f}')
         return files
+    
+    def collect_files(self, print_res: bool = False) -> 'FileVar':
+        files = self.dir_list(print_res=print_res)
+        collection = FileVar(filename=files, dirpath=self.copy())
+        if print_res: print('Files collected')
+        return collection
 
     def copy(self) -> 'PathVar':
         """Copy the class variable"""
@@ -134,7 +147,19 @@ class PathVar():
     
     def __repr__(self) -> str:
         return 'PathVar: "' + self.PATH + '"'
-    
+
+class _FileIterator():
+    def __init__(self, files: list[str]):
+        self._files = files
+        self._index = 0
+
+    def __next__(self):
+        ''''Returns the next value from team object's lists '''
+        if self._index < len(self._files):
+            self._index += 1
+            return self._files[self._index - 1]
+        # End of Iteration
+        raise StopIteration
 
 class FileVar():
     """Handle the file(s) path(s)
@@ -264,6 +289,18 @@ class FileVar():
     def __repr__(self) -> str:
         return 'FileVar: "' + self.__str__() + '"'
 
+    def __iter__(self) -> '_FileIterator':
+        fpath = self.path()
+        if isinstance(fpath,str): 
+            raise TypeError('Required a list of files')
+        else:
+            return _FileIterator(self.path())
+
+    def __contains__(self, element: str) -> bool:
+        output = element in self.FILE
+        if not output:
+            output = element in self.path()            
+        return output
 
 def dir_files(curr_dir: PathVar, dir: str = '', print_res: bool = False) -> FileVar:
     """Collect all the file in a directory
