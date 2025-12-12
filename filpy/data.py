@@ -1,5 +1,5 @@
 import os
-from pandas import read_csv
+from pandas import DataFrame
 import astropy.units as u
 from .typing import *
 
@@ -259,7 +259,7 @@ class FileVar():
     def file(self) -> None:
         del self._file
 
-
+    @property
     def path(self) -> Union[str, list[str]]:
         """Compute the file(s) path(s)
 
@@ -337,7 +337,7 @@ class FileVar():
         path_i : str
             the chosen path
         """
-        path = self.path()
+        path = self.path
         if isinstance(path,str): 
             return TypeError('Variable is not subscriptable')
         else: 
@@ -359,54 +359,74 @@ class FileVar():
             self.file[key] = item
 
     def __str__(self) -> str:
-        return str(self.path())
+        output = ''
+        path = self.path
+        if isinstance(path,str):
+            output = path
+        elif isinstance(path,list):
+            for i, f in enumerate(path):
+                output = output + f'{i} - {f}\n'
+        return output
     
     def __repr__(self) -> str:
-        return 'FileVar: "' + self.__str__() + '"'
+        return 'FileVar:\n"\n' + self.__str__() + '"'
 
     def __iter__(self) -> '_FileIterator':
-        fpath = self.path()
+        fpath = self.path
         if isinstance(fpath,str): 
             raise TypeError('Required a list of files')
         else:
-            return _FileIterator(self.path())
+            return _FileIterator(self.path)
 
     def __contains__(self, element: str) -> bool:
         output = element in self.file
         if not output:
-            output = element in self.path()            
+            output = element in self.path            
         return output
-
-# def dir_files(curr_dir: PathVar, dir: str = '', print_res: bool = False) -> FileVar:
-#     """Collect all the file in a directory
-
-#     Parameters
-#     ----------
-#     curr_dir : PathVar
-#         the current directory
-#     dir : str, optional
-#         a subdirectory of `curr_dir`, by default `''`
-#     print_res : bool, optional
-#         if `True` the list is printed, by default `False`
-
-#     Returns
-#     -------
-#     file_list : FileVar
-#         the collection of all the file in the directory
-#     """
-#     obj_list = curr_dir.dir_list(dir=dir,print_res=print_res)
-#     return FileVar(obj_list,curr_dir+dir)
 
 
 ## Useful paths for the library
 PKG_DIR = PathVar()
 PROJECT_DIR = PKG_DIR - 1
 MBM40_DIR = PROJECT_DIR + 'MBM40'
+MBM40_IR = MBM40_DIR + 'IR'
+MBM40_CO = MBM40_DIR + 'CO'
+MBM40_HI = MBM40_DIR + 'HI'
+
+def update_database(data_dir: list[PathVar] = [MBM40_IR,MBM40_HI,MBM40_CO], filename: str = 'data', outdir: Union[str, PathVar] = MBM40_DIR) -> None:
+    data_file = FileVar(filename=filename+'.csv',dirpath=outdir) 
+    collection = {}
+    columns = []
+    elements = []
+    n_elem = []
+    for dir in data_dir:
+        column = os.path.split(dir.path)[-1]
+        files_list = dir.dir_list()
+        elements += [files_list]
+        columns += [column]
+        n_elem += [len(files_list)]
+    max_len = max(n_elem)
+    for key, elem, num in zip(columns,elements, n_elem):
+        collection[key] = elem + ['']*(max_len-num)
+    DataFrame(collection,dtype='str').to_csv(data_file.path,index=False,header=True)
+
+update_database()
 DATA_FILE = FileVar(filename='data.csv', dirpath=MBM40_DIR)
-CO_FILES, HI_FILES, IR_FILES = read_csv(DATA_FILE.path()).to_numpy().transpose()
-CO_PATHS = FileVar(CO_FILES, MBM40_DIR + 'CO')
-HI_PATHS = FileVar(HI_FILES, MBM40_DIR + 'HI')
-IR_PATHS = FileVar(IR_FILES, MBM40_DIR + 'IR')
+CO_PATHS = MBM40_CO.files
+HI_PATHS = MBM40_HI.files
+IR_PATHS = MBM40_IR.files
+
+def read_database(datafile: Union[str,FileVar] = DATA_FILE, print_res: bool = True) -> DataFrame:
+    from pandas import read_csv
+    if isinstance(datafile,str):
+        dataframe = read_csv(datafile)
+    elif isinstance(datafile,FileVar):
+        dataframe = read_csv(datafile.path)
+    else:
+        raise TypeError('Only str or FileVare types are allowed')
+    if print_res:
+        print(dataframe.to_string())
+    return dataframe
 
 ## Constants
 U_VEL = u.km / u.s
