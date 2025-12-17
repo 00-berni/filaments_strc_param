@@ -3,6 +3,16 @@ from pandas import DataFrame
 import astropy.units as u
 from .typing import *
 
+def this_dir() -> str:
+    """Compute the current directory
+
+    Returns
+    -------
+    dir_path : str
+        current directory path
+    """
+    return os.path.dirname(os.path.realpath(__file__))
+
 
 class PathVar():
     """Handle the paths
@@ -12,18 +22,8 @@ class PathVar():
     PATH : str
         directory path
     """
-    @staticmethod
-    def this_dir() -> str:
-        """Compute the current directory
 
-        Returns
-        -------
-        dir_path : str
-            current directory path
-        """
-        return os.path.dirname(os.path.realpath(__file__))
-
-    def __init__(self, path: str = '') -> None:
+    def __init__(self, path: str = '', mkdir: bool = True) -> None:
         """Construct the path variable
 
         Parameters
@@ -32,7 +32,10 @@ class PathVar():
             path of the directory. If `path == ''` the current 
             directory path is set, by default ''
         """
-        self._path = path  if path != '' else PathVar.this_dir()
+        self._path = path if path != '' else this_dir()
+        if mkdir and path != '':
+            self.make_dir()
+            
 
     @property
     def path(self) -> str:
@@ -80,11 +83,22 @@ class PathVar():
         """
         return os.path.split(self.path)
     
+    def directories(self) -> list[str]:
+        return self.path.split(os.sep)
+    
+    def join(self, path: Union[str, list[str]]) -> str:
+        if isinstance(path,str):
+            return os.path.join(self.path,path)
+        elif isinstance(path,list):
+            return os.sep.join(path)
+        else:
+            raise TypeError('Only str and list types are allowed')
+
     def tree(self) -> None:
         """List the files in the folder"""
         files = os.listdir(self.path)
         if len(files) != 0:
-            print('Files in "' + self.path +'"')
+            print('\nFiles in "' + self.path +'"')
             for i, f in enumerate(files):
                 print(f'{i:2d} - {f}')
         else:
@@ -113,6 +127,7 @@ class PathVar():
                 print(f'{i:2d} - {f}')
         return files
     
+
     @property
     def files(self) -> 'FileVar':
         """Collect the files in the directory
@@ -133,7 +148,7 @@ class PathVar():
 
     def copy(self) -> 'PathVar':
         """Copy the class variable"""
-        return PathVar(path=self.path)
+        return PathVar(path=self.path,mkdir=False)
     
     def clear(self, verbose: bool = True) -> None:
         """Delete all the files in the folder"""
@@ -159,8 +174,8 @@ class PathVar():
         new_path : PathVar
             joined paths
         """
-        new_path = os.path.join(self.path,path)
-        return PathVar(path=new_path)
+        new_path = self.join(path)
+        return PathVar(path=new_path,mkdir=False)
      
     def __sub__(self, iter: int) -> 'PathVar':
         """Compute the path nth directory back
@@ -175,16 +190,16 @@ class PathVar():
         new_path : PathVar
             computed new_path
         """
-        new_path = self.path
-        for _ in range(iter):
-            new_path = os.path.split(new_path)[0]
-        return PathVar(path=new_path)
+        new_path = self.join(self.directories()[:-iter])
+        # for _ in range(iter):
+        #     new_path = os.path.split(new_path)[0]
+        return PathVar(path=new_path,mkdir=False)
     
     def __str__(self) -> str:
         return self.path 
     
     def __repr__(self) -> str:
-        return 'PathVar: "' + self.path + '"'
+        return self.__class__.__name__ + ': "' + self.path + '"'
 
 class _FileIterator():
     def __init__(self, files: list[str]):
@@ -324,7 +339,7 @@ class FileVar():
             new_filevar.file += [new_file] 
         return new_filevar
 
-    def __getitem__(self, item: int) -> str:
+    def __getitem__(self, item: Union[int, slice, list]) -> str:
         """Select a certain file path from a list of ones
 
         Parameters
@@ -341,9 +356,12 @@ class FileVar():
         if isinstance(path,str): 
             return TypeError('Variable is not subscriptable')
         else: 
-            return path[item]
+            if isinstance(item, list):
+                return [path[i] for i in item]
+            else:
+                return path[item]
     
-    def __setitem__(self, key: int, item: str) -> None:
+    def __setitem__(self, key: Union[int, slice], item: Union[str, list[str]]) -> None:
         """Modify a file name of a list of paths
 
         Parameters
@@ -369,9 +387,9 @@ class FileVar():
         return output
     
     def __repr__(self) -> str:
-        return 'FileVar:\n"\n' + self.__str__() + '"'
+        return self.__class__.__name__ + ':\n"\n' + self.__str__() + '"'
 
-    def __iter__(self) -> '_FileIterator':
+    def __iter__(self) -> _FileIterator:
         fpath = self.path
         if isinstance(fpath,str): 
             raise TypeError('Required a list of files')
@@ -384,14 +402,127 @@ class FileVar():
             output = element in self.path            
         return output
 
+class DataDir(PathVar):
+
+    STD_INC = "# Files Names"
+
+    def __init__(self, path: str = '', mkdir: bool = True):
+        super().__init__(path, mkdir)
+        self._filepath = os.path.join(self.path,'file_names.txt') 
+        self.mk_database()
+    
+    def mk_database(self) -> None:        
+        try:
+            path = self._filepath
+            f = open(path,"x")
+            f.close()
+            dir_list = self.dir_list(print_res=False)
+            self.overwrite(dir_list)
+        except FileExistsError:
+            pass
+
+    def update_database(self) -> None:
+        dir_list = self.dir_list()
+        files_list = self.load_filelist()
+
+        for file in files_list:
+            if file not in dir_list:
+                files_list.remove(file)
+        self.overwrite(files_list)
+
+        new_lines = [dirfile for dirfile in dir_list if dirfile not in files_list]
+        self.add_lines(new_lines)        
+
+
+    def load_filelist(self) -> list[str]:
+        names = self.read()
+        files_list = names.split('\n')[1:]
+        return files_list
+    
+    def read(self) -> str:
+        path = self._filepath
+        with open(path,"r") as f:
+            text = f.read()
+        return text
+    
+    def readlines(self) -> list[str]:
+        path = self._filepath
+        with open(path,"r") as f:
+            lines = f.readlines()
+        return lines
+    
+    def add_lines(self, lines: Union[str,list[str]]) -> None:
+        path = self._filepath
+        if isinstance(lines, str):
+            lines = [lines]
+        with open(path,"a") as f:
+            f.write('\n')
+            f.write('\n'.join(lines))
+    
+    def overwrite(self, new_text: list[str]) -> None:
+        path = self._filepath
+        new_text = [DataDir.STD_INC] + new_text
+        with open(path,"w") as f:
+            f.write('\n'.join(new_text))
+
+    @property
+    def files(self) -> 'DataFile':
+        return DataFile(dirpath=self)
+        
+    def copy(self) -> 'DataDir':
+        return DataDir(self.path,mkdir=False)
+
+    def __add__(self, path: str) -> 'DataDir':
+        new_path = self.join(path)
+        return DataDir(path=new_path,mkdir=False)
+    
+    def __sub__(self, iter: int) -> 'DataDir':
+        new_path = self.join(self.directories()[:-iter])
+        return DataDir(path=new_path,mkdir=False)
+
+class DataFile(FileVar):
+    def __init__(self, dirpath: Union[str,DataDir,PathVar]):
+        if isinstance(dirpath,str):
+            dirpath = DataDir(dirpath)
+        elif isinstance(dirpath, PathVar):
+            dirpath = DataDir(dirpath.path)
+        
+        self._dir = dirpath
+        self._file = dirpath.load_filelist()
+
+    @property
+    def dir(self) -> DataDir:
+        return self._dir
+
+    @dir.setter
+    def dir(self, new_dir: DataDir) -> None:
+        self._dir = new_dir.copy()
+
+    @property
+    def file(self) -> list[str]:
+        return self._file
+
+    @file.setter
+    def file(self, new_list: list[str]) -> None:
+        self._file = [*new_list] 
+
+    def update_file(self) -> None:
+        self.dir.update_database()
+        self.file = self.dir.load_filelist()
+
+    def copy(self) -> 'DataFile':
+        new_var = DataFile(self.dir)
+        if len(new_var) != len(self):
+            new_var.file = self.file
+        return new_var
 
 ## Useful paths for the library
 PKG_DIR = PathVar()
 PROJECT_DIR = PKG_DIR - 1
 MBM40_DIR = PROJECT_DIR + 'MBM40'
-MBM40_IR = MBM40_DIR + 'IR'
-MBM40_CO = MBM40_DIR + 'CO'
-MBM40_HI = MBM40_DIR + 'HI'
+MBM40_IR = DataDir((MBM40_DIR + 'IR').path,mkdir=False)
+MBM40_CO = DataDir((MBM40_DIR + 'CO').path,mkdir=False)
+MBM40_HI = DataDir((MBM40_DIR + 'HI').path,mkdir=False)
 
 def update_database(data_dir: list[PathVar] = [MBM40_IR,MBM40_HI,MBM40_CO], filename: str = 'data', outdir: Union[str, PathVar] = MBM40_DIR) -> None:
     data_file = FileVar(filename=filename+'.csv',dirpath=outdir) 
