@@ -22,7 +22,7 @@ def log_path(file_path: FileVar) -> str:
     log_name = ''.join(file_path.file.split('.')[:-1]+['.log'])
     return file_path.DIR.__add__(log_name).path
 
-def reorganize_index(idxes: Union[tuple[int, ...], IntArray], axis: Optional[int], shape: tuple) -> tuple[IntArray]:
+def reorganize_index(idxes: Union[tuple[int, ...], IntArray], axis: Optional[int], shape: tuple) -> tuple[IntArray, ...]:
     """Convert a 1D positions in a nD positions
 
     Parameters
@@ -46,7 +46,7 @@ def reorganize_index(idxes: Union[tuple[int, ...], IntArray], axis: Optional[int
         axes[axis] = idxes
         return tuple(axes) 
 
-def find_argmax(obj: Sequence, axis: Optional[int] = None) -> IntArrayLike:
+def find_argmax(obj: Sequence, axis: Optional[int] = None) -> Union[int, tuple[IntArray, ...]]:
     """Compute the position of the max in a ndimensional array
 
     Parameters
@@ -87,7 +87,7 @@ def find_max(obj: FloatArray, axis: Optional[int] = None) -> ArrayLike:
     obj = np.asarray(obj)
     return obj[find_argmax(obj,axis=axis)]
 
-def find_argmin(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> ArrayLike:
+def find_argmin(obj: ArrayLike, axis: Optional[ArrayLike] = None) -> Union[int, tuple[IntArray, ...]]:
     """Compute the position of the nin in a ndimensional array
 
     Parameters
