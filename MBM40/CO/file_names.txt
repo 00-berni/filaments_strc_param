@@ -1,0 +1,9 @@
+# Files Names
+MBM40_12CO_xdr.fits
+MBM40_FCRAO_CO_CLEANED.fits
+VEL_FCRAO_CO.fits
+file_names.txt
+AR_FCRAO.fits
+mbm40_CO-FCRAO.fits
+DEC_FCRAO.fits
+MBM40_FCRAO_CO_CLEANED_upheader.fits

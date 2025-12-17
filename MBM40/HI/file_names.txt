@@ -1,0 +1,6 @@
+# Files Names
+GALFA_HI_RA+DEC_244.00+18.35_W.fits
+GALFA_HI_RA_sticked.fits
+file_names.txt
+GALFA_HI_sticked.fits
+GALFA_HI_RA+DEC_244.00+26.35_W.fits
