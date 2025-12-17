@@ -286,9 +286,9 @@ class FileVar():
         filename = self.file 
         dirname = self.dir.copy()
         if isinstance(filename,str): 
-            return (dirname + filename).path
+            return dirname.join(filename)
         else:
-            return [(dirname + name).path for name in filename]
+            return [dirname.join(name) for name in filename]
         
     def update_file(self) -> None:
         """Update the list of files in `self.dir`"""
@@ -404,11 +404,12 @@ class FileVar():
 
 class DataDir(PathVar):
 
+    STD_NAME = 'file_names.txt'
     STD_INC = "# Files Names"
 
     def __init__(self, path: str = '', mkdir: bool = True):
         super().__init__(path, mkdir)
-        self._filepath = os.path.join(self.path,'file_names.txt') 
+        self._filepath = os.path.join(self.path,DataDir.STD_NAME) 
         self.mk_database()
     
     def mk_database(self) -> None:        
@@ -417,6 +418,7 @@ class DataDir(PathVar):
             f = open(path,"x")
             f.close()
             dir_list = self.dir_list(print_res=False)
+            dir_list.remove(DataDir.STD_NAME)
             self.overwrite(dir_list)
         except FileExistsError:
             pass
@@ -430,8 +432,12 @@ class DataDir(PathVar):
                 files_list.remove(file)
         self.overwrite(files_list)
 
-        new_lines = [dirfile for dirfile in dir_list if dirfile not in files_list]
-        self.add_lines(new_lines)        
+        new_lines = []
+        for dirfile in dir_list:
+            if dirfile not in files_list and dirfile != DataDir.STD_NAME:
+                new_lines += [dirfile]
+        if new_lines:
+            self.add_lines(new_lines)        
 
 
     def load_filelist(self) -> list[str]:
@@ -465,20 +471,29 @@ class DataDir(PathVar):
         with open(path,"w") as f:
             f.write('\n'.join(new_text))
 
+    def tree(self):
+        file_list = self.load_filelist()
+        if file_list:
+            print('\nFiles in '+self.path)
+            for i, file in enumerate(file_list):
+                print(f'{i} - {file}')
+        else:
+            print('The directory is EMPTY')
+
     @property
     def files(self) -> 'DataFile':
         return DataFile(dirpath=self)
         
     def copy(self) -> 'DataDir':
-        return DataDir(self.path,mkdir=False)
+        return DataDir(self.path, mkdir=False)
 
     def __add__(self, path: str) -> 'DataDir':
         new_path = self.join(path)
-        return DataDir(path=new_path,mkdir=False)
+        return DataDir(path=new_path, mkdir=False)
     
     def __sub__(self, iter: int) -> 'DataDir':
         new_path = self.join(self.directories()[:-iter])
-        return DataDir(path=new_path,mkdir=False)
+        return DataDir(path=new_path, mkdir=False)
 
 class DataFile(FileVar):
     def __init__(self, dirpath: Union[str,DataDir,PathVar]):
@@ -487,7 +502,8 @@ class DataFile(FileVar):
         elif isinstance(dirpath, PathVar):
             dirpath = DataDir(dirpath.path)
         
-        self._dir = dirpath
+        dirpath.update_database()
+        self._dir = dirpath.copy()
         self._file = dirpath.load_filelist()
 
     @property
@@ -509,6 +525,7 @@ class DataFile(FileVar):
     def update_file(self) -> None:
         self.dir.update_database()
         self.file = self.dir.load_filelist()
+    
 
     def copy(self) -> 'DataFile':
         new_var = DataFile(self.dir)
@@ -520,9 +537,9 @@ class DataFile(FileVar):
 PKG_DIR = PathVar()
 PROJECT_DIR = PKG_DIR - 1
 MBM40_DIR = PROJECT_DIR + 'MBM40'
-MBM40_IR = DataDir((MBM40_DIR + 'IR').path,mkdir=False)
-MBM40_CO = DataDir((MBM40_DIR + 'CO').path,mkdir=False)
-MBM40_HI = DataDir((MBM40_DIR + 'HI').path,mkdir=False)
+MBM40_IR = DataDir((MBM40_DIR + 'IR').path, mkdir=False)
+MBM40_CO = DataDir((MBM40_DIR + 'CO').path, mkdir=False)
+MBM40_HI = DataDir((MBM40_DIR + 'HI').path, mkdir=False)
 
 def update_database(data_dir: list[PathVar] = [MBM40_IR,MBM40_HI,MBM40_CO], filename: str = 'data', outdir: Union[str, PathVar] = MBM40_DIR) -> None:
     data_file = FileVar(filename=filename+'.csv',dirpath=outdir) 
