@@ -37,7 +37,7 @@ def hotpx_remove(data: FloatArray) -> FloatArray:
 
 
 
-def get_data_fit(path: str, lims: list[Optional[int]] = [None,None,None,None], hotpx: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, FloatArray]:
+def get_data_fit(path: str, lims: list[Optional[int]] = [None,None,None,None], hotpx: bool = True, print_header: bool = True, display_plots: bool = True, **imgargs) -> tuple[HDUList, FloatArray]:
     """Open fits file and extract data. 
 
     Parameters
@@ -67,9 +67,10 @@ def get_data_fit(path: str, lims: list[Optional[int]] = [None,None,None,None], h
     hdul.info()
     # print header
     hdr = hdul[0].header
-    print(' - HEADER -')
-    print(hdr.tostring(sep='\n'))
-    print()
+    if print_header:
+        print(' - HEADER -')
+        print(hdr.tostring(sep='\n'))
+        print()
 
     # data extraction
     # format -> data[Y,X]
