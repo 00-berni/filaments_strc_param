@@ -336,15 +336,62 @@ if __name__ == '__main__':
                 if verbose:
                     print('INFO: save filtered data as : '+new_name)
                 
-                y, x = np.where(fdata < 0)
-                fig, ax = filpy.show_image(data,vmax=3)
-                # ax.plot(x,y,'xr',alpha=0.3)
-                ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
-                fig, ax = filpy.show_image(fdata,vmin=0,vmax=3)
-                # ax.plot(x,y,'xr')
-                ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
+                # y, x = np.where(fdata < 0)
+                # fig, ax = filpy.show_image(data,vmax=3)
+                # # ax.plot(x,y,'xr',alpha=0.3)
+                # ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
+                # fig, ax = filpy.show_image(fdata,vmin=0,vmax=3)
+                # # ax.plot(x,y,'xr')
+                # ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
+                # ax.plot(*filpy.find_argmax(fdata)[::-1],'xr')
+                # plt.show()
+
+                ymax, xmax = filpy.find_argmax(fgdata)
+                int_sigma = int(s) if s > 0 else 1
+                shift = int_sigma*4
+                max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                cp_obj  = fdata[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                cpg_obj = fgdata[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                # y,x = np.where(cp_obj < 0)
+                # obj_dist = np.sqrt((x-shift)**2 + (y-shift)**2)
+                # max_dist = np.max(obj_dist)
+                # max_pos = obj_dist==max_dist
+                # xedg = [x[max_pos],cp_obj.shape[0]-x[max_pos]] if x[max_pos] < shift else [cp_obj.shape[0]-x[max_pos],x[max_pos]]
+                # yedg = [y[max_pos],cp_obj.shape[1]-y[max_pos]] if y[max_pos] < shift else [cp_obj.shape[1]-y[max_pos],y[max_pos]]
+                bkg = np.mean(cp_obj[cp_obj>0])
+                print(cp_obj[cp_obj>0])
+                print('BKG:',bkg)
+                cp_obj[cp_obj<=0] = bkg
+                from matplotlib.colors import LogNorm
+                plt.figure()
+                plt.imshow(max_obj,origin='lower',norm=LogNorm())
+                plt.plot(shift,shift,'xr')
+                plt.figure()
+                plt.imshow(np.where(cp_obj<0,0,cp_obj),origin='lower')
+                plt.plot(shift,shift,'xr')
+                plt.figure()
+                plt.imshow(cpg_obj,origin='lower',norm=LogNorm())
+                plt.plot(shift,shift,'xr')
                 plt.show()
-            
+
+                yy, xx = np.meshgrid(np.arange(max_obj.shape[0])-shift,
+                                     np.arange(max_obj.shape[1])-shift
+                                    )
+                dist_mat = np.sqrt(xx**2+yy**2)
+                dists = np.sort(np.unique(dist_mat))
+                avg_profile = np.empty(0)
+                plt.figure()
+                for d in dists:
+                    value = max_obj[dist_mat == d]
+                    avg_profile = np.append(avg_profile,np.mean(value))
+                    plt.plot([d]*len(value),value,'x')
+                plt.plot(dists,avg_profile,'.--')
+                plt.show()
+                
+
+
+
+
 
 
         ########
