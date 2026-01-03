@@ -35,7 +35,15 @@ class Target():
     @property
     def size(self) -> int:
         return self.data.size
-    
+
+    @property
+    def nickname(self) -> str:
+        name_list = self.name.split('_')
+        name = name_list[0]
+        if 'row' in name_list:
+            name = name + '_row'
+        return name
+
     def px_to_coord(self, *sel: IntArrayLike) -> FloatArray:
         coord = self.wcs.pixel_to_world_values(*sel)
         return np.asarray(coord)
@@ -230,17 +238,20 @@ INT_UNIT = 'MJy / sr'
 
 IR_FILES = filpy.IR_PATHS
 
-MY_DIR = filpy.PROJECT_DIR -1 + 'mytest'
-MY_DIR.make_dir()
+MY_DIR = filpy.DataDir(path=(filpy.PROJECT_DIR -1).join('mytest'),mkdir=True)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TestIR',
-                                     description='read and analyze IR data',
+                                     description='Read and analyze IR data',
                                     )
+    ## Commands
     parser.add_argument('-l','--list', action='store_true', help='print the list of file in the data directory')
+    parser.add_argument('-L','--list-results', action='store_true', help='print the list of outputs')
     parser.add_argument('-s','--selection', action='store', type=int, nargs='*', default=None, help='index(ces) of the selected object')
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
+    parser.add_argument('-d','--disperse',action='store_true', help='run disperse')
+    parser.add_argument('-M','--mask', action='store_true', help='mask point sources')
     parser.add_argument('--sigma', action='store', type=float, nargs='*', default=2, help='set the sigma for the Gaussian filter')
 
     parser.add_argument('--nsig', action='store', type=float, nargs='*', default=0.3, help='set the value of nsig')
@@ -250,36 +261,40 @@ if __name__ == '__main__':
 
     parser.add_argument('-u','--update', action='store_true', help='remove all the files in output directory')
     
-    parser.add_argument('--no-log',action='store_false', help='print the output on the bash')
-    parser.add_argument('--no-disperse',action='store_false', help='run the script without disperse')
-    parser.add_argument('--no-hotpx', action='store_false', help='prevent the hot pixels removal')
     parser.add_argument('--no-display', action='store_false', help='pictures are not plotted')
+    parser.add_argument('--no-hotpx', action='store_false', help='prevent the hot pixels removal')
+    parser.add_argument('--no-log',action='store_false', help='print the output on the bash')
+    parser.add_argument('--no-store',action='store_false', help='no save for array data')
     parser.add_argument('--no-verbose', action='store_false', help='light the output information')
 
     args = parser.parse_args()
 
     selection = args.selection
     data_filter = args.filter
+    data_mask = args.mask
 
     verbose = args.no_verbose
     log = args.no_log if not args.list else False
     hotpx = args.no_hotpx
     display_plots = args.no_display
-    disperse = args.no_disperse
+    disperse = args.disperse
+    store = args.no_store
 
     if log:
         import sys
         org = sys.stdout
-        f = open(filpy.FileVar('test_ir.log',dirpath=filpy.PROJECT_DIR-1).path,"w")
+        f = open((filpy.PROJECT_DIR-1).join('test_ir.log'),"w")
         sys.stdout = f
 
     if args.list:
         IR_FILES.tree()
+    elif args.list_results:
+        MY_DIR.tree()
     elif selection is not None:
         if verbose or args.update:
             MY_DIR.tree()
         if args.update:
-            MY_DIR.clear()
+            MY_DIR.clear(exceptions='.npz')
             MY_DIR.tree()
 
         if verbose:
@@ -287,23 +302,20 @@ if __name__ == '__main__':
             if len(selection) != 1: init_string = init_string + 'S'
             print(init_string+':')
 
-        targets = TargetList(file_names=[IR_FILES[i] for i in selection],hotpx=hotpx,verbose=verbose)
-
-
-        if display_plots:
-            targets.plot(show=True)
-
-
         ########
 
         if data_filter:
+            targets = TargetList(file_names=[IR_FILES[i] for i in selection],hotpx=hotpx,verbose=verbose)
+            if display_plots:
+                targets.plot(show=True)
+
             from scipy.ndimage import gaussian_filter
             sigma = args.sigma
             if not isinstance(sigma, Sequence):
                 sigma = [sigma]*len(targets)
 
             filtered_data = [] 
-            for trg, s in zip(targets,sigma):
+            for trg, s, sel in zip(targets, sigma, selection):
                 data = trg.data
                 new_name = trg.name.split('.')[:-1] + ['fits']
                 # gaussian filter
@@ -316,10 +328,29 @@ if __name__ == '__main__':
                 fgdata = sobel_filter(gauss_filt)
                 filtered_data += [fgdata]
 
+                if store:
+                    filt_filename = trg.nickname + f'_{sel:02d}_s{s}_' + 'filtered-data'
+                    filt_filename = MY_DIR.join(filt_filename)
+                    np.savez(filt_filename,
+                             path = trg.path,
+                             data = data,
+                             data_s = fdata,
+                             data_g = gauss_filt,
+                             data_gs = fgdata
+                            )
+                    MY_DIR.update_database()    
+                    if verbose:
+                        print('\nINFO: Store array data in ' + filt_filename + '.npz')
+                        print('\t> path   \t path of the input data')
+                        print('\t> data   \t unfiltered data')
+                        print('\t> data_s \t data after sobel removal')
+                        print('\t> data_g \t gaussian filtered data')
+                        print('\t> data_gs\t gaussian filtered data and sobel removal')
+
                 if display_plots:
                     fig, ax = filpy.show_image([data, fdata, gauss_filt, fgdata],
                                                (2,2),
-                                               subtitles=[trg.name,'filtered','gaussian','gaussian+sobel'],
+                                               subtitles=[trg.nickname,'filtered','gaussian','gaussian+sobel'],
                                                projection=trg.wcs,
                                                colorbar=False,
                                                vmax=3,
@@ -334,7 +365,7 @@ if __name__ == '__main__':
                 hdu = fits.PrimaryHDU(data=fdata,header=trg.header)
                 hdu.writeto(IR_FILES.dir.join(new_name),overwrite=True)
                 if verbose:
-                    print('INFO: save filtered data as : '+new_name)
+                    print('INFO: save filtered data as : ' + new_name)
                 
                 # y, x = np.where(fdata < 0)
                 # fig, ax = filpy.show_image(data,vmax=3)
@@ -346,33 +377,67 @@ if __name__ == '__main__':
                 # ax.plot(*filpy.find_argmax(fdata)[::-1],'xr')
                 # plt.show()
 
-                ymax, xmax = filpy.find_argmax(fgdata)
+        if data_mask:
+            for sel in selection:
+                # load data
+                outputs = MY_DIR.files
+                with np.load(outputs[sel]) as filt_data:
+                    filepath = filt_data['path']
+                    data     = filt_data['data']
+                    data_s   = filt_data['data_s']
+                    data_g   = filt_data['data_g']
+                    data_gs  = filt_data['data_gs']
+                
+                cnts, bins = np.histogram(data.flatten(),data.shape[0])
+                plt.figure()
+                plt.hist(data.flatten(),data.shape[0])
+                plt.show()
+
+                maxpos = np.argmax(cnts)
+                mean_val = (bins[maxpos] + bins[maxpos+1])/2
+                print('MEAN VALUE:',mean_val)
+                print('MEDIAN:',np.median(data))
+
+                s = float(outputs.file[sel].split('_')[-2][1:])
+
+                ymax, xmax = filpy.find_argmax(data_gs)
                 int_sigma = int(s) if s > 0 else 1
-                shift = int_sigma*4
+                shift = int_sigma*5
+                cp_field = data.copy()
                 max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
-                cp_obj  = fdata[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
-                cpg_obj = fgdata[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                cp_obj  = data_s[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                cpg_obj = data_gs[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
                 # y,x = np.where(cp_obj < 0)
                 # obj_dist = np.sqrt((x-shift)**2 + (y-shift)**2)
                 # max_dist = np.max(obj_dist)
                 # max_pos = obj_dist==max_dist
                 # xedg = [x[max_pos],cp_obj.shape[0]-x[max_pos]] if x[max_pos] < shift else [cp_obj.shape[0]-x[max_pos],x[max_pos]]
                 # yedg = [y[max_pos],cp_obj.shape[1]-y[max_pos]] if y[max_pos] < shift else [cp_obj.shape[1]-y[max_pos],y[max_pos]]
-                bkg = np.mean(cp_obj[cp_obj>0])
-                print(cp_obj[cp_obj>0])
+                # bkg = np.mean(cp_obj[cp_obj>0])
+                # bkg = np.mean(cp_obj[cp_obj>0])
+                bkg = np.median(cp_obj[cp_obj>0])
                 print('BKG:',bkg)
+                ypos, xpos = np.where(cp_obj<=0)
                 cp_obj[cp_obj<=0] = bkg
                 from matplotlib.colors import LogNorm
                 plt.figure()
+                plt.title('Original')
                 plt.imshow(max_obj,origin='lower',norm=LogNorm())
                 plt.plot(shift,shift,'xr')
                 plt.figure()
+                plt.title('Sobel')
                 plt.imshow(np.where(cp_obj<0,0,cp_obj),origin='lower')
                 plt.plot(shift,shift,'xr')
                 plt.figure()
+                plt.title('Gaussian + Sobel')
                 plt.imshow(cpg_obj,origin='lower',norm=LogNorm())
                 plt.plot(shift,shift,'xr')
-                plt.show()
+
+                cp_field[ypos+ymax-shift,xpos+xmax-shift] = bkg
+                filpy.show_image(cp_field,show=True)
+                
+                # plt.show()
+
 
                 yy, xx = np.meshgrid(np.arange(max_obj.shape[0])-shift,
                                      np.arange(max_obj.shape[1])-shift
@@ -385,36 +450,50 @@ if __name__ == '__main__':
                     value = max_obj[dist_mat == d]
                     avg_profile = np.append(avg_profile,np.mean(value))
                     plt.plot([d]*len(value),value,'x')
-                plt.plot(dists,avg_profile,'.--')
-                plt.show()
+                plt.plot(dists,avg_profile,'.--',color='black')
+                plt.axhline(bkg,linestyle='dashed',color='green')
+                plt.axhline(np.median(data),linestyle='dashed',color='orange')
+                plt.axhline(mean_val,linestyle='dashed',color='red')
                 
-
-
-
+                grad1 = np.diff(avg_profile)/np.diff(dists)
+                grad2 = np.diff(grad1)/np.diff(np.diff(dists))
+                print(grad1)
+                print(grad2)
+                plt.figure()
+                plt.plot(grad1,'.--',color='red')
+                plt.figure()
+                plt.plot(grad2,'.--',color='green')
+                plt.figure()
+                plt.plot((dists[1:]+dists[:-1])/2, avg_profile[1:]/avg_profile[:-1],'.--')
+                plt.show()
 
 
 
         ########
 
         if disperse:
+            targets = TargetList(file_names=[IR_FILES[i] for i in selection],hotpx=hotpx,verbose=verbose)
+            if display_plots:
+                targets.plot(show=True)
+
             nsig = args.nsig
             ncut = args.ncut
             nsmooth = args.nsmooth
             nthreads = args.ncores
- 
+
             targets.disperse(nsig=nsig,
-                             ncut=ncut,
-                             nsmooth=nsmooth,
-                             nthreads=nthreads,
-                             outdir=MY_DIR.path
+                                ncut=ncut,
+                                nsmooth=nsmooth,
+                                nthreads=nthreads,
+                                outdir=MY_DIR.path
                             )
             
             if verbose: MY_DIR.tree()
 
             targets.plot_network({'vmax':3})
 
-    if log:
-        sys.stdout = org
-        f.close()
+        if log:
+            sys.stdout = org
+            f.close()
 
         
