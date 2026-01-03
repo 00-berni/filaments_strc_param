@@ -150,15 +150,20 @@ class PathVar():
         """Copy the class variable"""
         return PathVar(path=self.path,mkdir=False)
     
-    def clear(self, verbose: bool = True) -> None:
+    def clear(self, verbose: bool = True, exceptions: Optional[Union[str, list[str]]] = None) -> None:
         """Delete all the files in the folder"""
         print('Remove all files in',self.path)
         from subprocess import call
-        for f in self.files:
-            cmd = ['rm',f]
-            if verbose:
-                print(' '.join(cmd))
-            call(cmd)
+        if isinstance(exceptions,str):
+            exceptions = [exceptions]
+        if exceptions is not None and verbose:
+            print('\nINFO: Files with "'+'" "'.join(exceptions)+'" are not removed')
+        for f, names in zip(self.files,self.files.file):
+            if exceptions is None or all([excp not in names for excp in exceptions]):
+                cmd = ['rm',f]
+                if verbose:
+                    print(' '.join(cmd))
+                call(cmd)
         
 
     def __add__(self, path: str) -> 'PathVar':
@@ -471,7 +476,9 @@ class DataDir(PathVar):
         with open(path,"w") as f:
             f.write('\n'.join(new_text))
 
+
     def tree(self):
+        self.update_database()
         file_list = self.load_filelist()
         if file_list:
             print('\nFiles in '+self.path)
@@ -479,6 +486,10 @@ class DataDir(PathVar):
                 print(f'{i} - {file}')
         else:
             print('The directory is EMPTY')
+
+    def clear(self, verbose = True, exceptions = None) -> None:
+        self.update_database()
+        super().clear(verbose, exceptions)
 
     @property
     def files(self) -> 'DataFile':
@@ -537,9 +548,9 @@ class DataFile(FileVar):
 PKG_DIR = PathVar()
 PROJECT_DIR = PKG_DIR - 1
 MBM40_DIR = PROJECT_DIR + 'MBM40'
-MBM40_IR = DataDir((MBM40_DIR + 'IR').path, mkdir=False)
-MBM40_CO = DataDir((MBM40_DIR + 'CO').path, mkdir=False)
-MBM40_HI = DataDir((MBM40_DIR + 'HI').path, mkdir=False)
+MBM40_IR = DataDir(MBM40_DIR.join('IR'), mkdir=False)
+MBM40_CO = DataDir(MBM40_DIR.join('CO'), mkdir=False)
+MBM40_HI = DataDir(MBM40_DIR.join('HI'), mkdir=False)
 
 def update_database(data_dir: list[PathVar] = [MBM40_IR,MBM40_HI,MBM40_CO], filename: str = 'data', outdir: Union[str, PathVar] = MBM40_DIR) -> None:
     data_file = FileVar(filename=filename+'.csv',dirpath=outdir) 
