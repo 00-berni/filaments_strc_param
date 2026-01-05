@@ -247,16 +247,16 @@ if __name__ == '__main__':
                                     )
     ## Commands
     parser.add_argument('-l','--list', action='store_true', help='print the list of file in the data directory')
-    parser.add_argument('-L','--list-results', action='store_true', help='print the list of outputs')
-    parser.add_argument('-s','--selection', action='store', type=int, nargs='*', default=None, help='index(ces) of the selected object')
+    parser.add_argument('-s','--selection', action='store', type=int, nargs='*', default=[], help='index(ces) of the selected object')
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
     parser.add_argument('-d','--disperse',action='store_true', help='run disperse')
-    parser.add_argument('-M','--mask', action='store_true', help='mask point sources')
-    parser.add_argument('--sigma', action='store', type=float, nargs='*', default=2, help='set the sigma for the Gaussian filter')
+    parser.add_argument('-m','--mask', action='store_true', help='mask point sources')
+    parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter')
 
-    parser.add_argument('--nsig', action='store', type=float, nargs='*', default=0.3, help='set the value of nsig')
-    parser.add_argument('--nsmooth', action='store', type=int, nargs='*', default=4, help='set the number of smoothing routines')
-    parser.add_argument('--ncut', action='store', type=float, nargs='*', default=None, help='set the value of ncut')
+    parser.add_argument('--nshift', action='store', type=int, nargs='*', default=[5], help='set the number of sigma from the point source')
+    parser.add_argument('--nsig', action='store', type=float, nargs='*', default=[0.3], help='set the value of nsig')
+    parser.add_argument('--nsmooth', action='store', type=int, nargs='*', default=[4], help='set the number of smoothing routines')
+    parser.add_argument('--ncut', action='store', type=float, nargs='*', default=[], help='set the value of ncut')
     parser.add_argument('--ncores', action='store', type=int, default=11, help='set the number of cores to use')
 
     parser.add_argument('-u','--update', action='store_true', help='remove all the files in output directory')
@@ -286,9 +286,9 @@ if __name__ == '__main__':
         f = open((filpy.PROJECT_DIR-1).join('test_ir.log'),"w")
         sys.stdout = f
 
-    if args.list:
+    if args.list and not data_mask:
         IR_FILES.tree()
-    elif args.list_results:
+    elif args.list and data_mask:
         MY_DIR.tree()
     elif selection is not None:
         if verbose or args.update:
@@ -299,7 +299,8 @@ if __name__ == '__main__':
 
         if verbose:
             init_string = '\n'+'-'*50+'\nSELECTED TARGET'
-            if len(selection) != 1: init_string = init_string + 'S'
+            if len(selection) != 1: 
+                init_string = init_string + 'S'
             print(init_string+':')
 
         ########
@@ -367,21 +368,14 @@ if __name__ == '__main__':
                 if verbose:
                     print('INFO: save filtered data as : ' + new_name)
                 
-                # y, x = np.where(fdata < 0)
-                # fig, ax = filpy.show_image(data,vmax=3)
-                # # ax.plot(x,y,'xr',alpha=0.3)
-                # ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
-                # fig, ax = filpy.show_image(fdata,vmin=0,vmax=3)
-                # # ax.plot(x,y,'xr')
-                # ax.scatter(x,y,c=abs(fdata[y,x]),marker='x')
-                # ax.plot(*filpy.find_argmax(fdata)[::-1],'xr')
-                # plt.show()
-
         if data_mask:
-            for sel in selection:
+            nshifts = args.nshift
+            if len(nshifts) < len(selection):
+                nshifts += [nshifts[-1]]*(len(selection)-len(nshifts))
+            for mask_sel, nshift in zip(selection, nshifts):
                 # load data
                 outputs = MY_DIR.files
-                with np.load(outputs[sel]) as filt_data:
+                with np.load(outputs[mask_sel]) as filt_data:
                     filepath = filt_data['path']
                     data     = filt_data['data']
                     data_s   = filt_data['data_s']
@@ -398,46 +392,52 @@ if __name__ == '__main__':
                 print('MEAN VALUE:',mean_val)
                 print('MEDIAN:',np.median(data))
 
-                s = float(outputs.file[sel].split('_')[-2][1:])
+                sel, s = outputs.file[mask_sel].split('_')[-3:-1]
+                sel = int(sel)
+                s = float(s[1:])
 
                 ymax, xmax = filpy.find_argmax(data_gs)
                 int_sigma = int(s) if s > 0 else 1
-                shift = int_sigma*5
+                shift = int_sigma*nshift
                 cp_field = data.copy()
                 max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
                 cp_obj  = data_s[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
                 cpg_obj = data_gs[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
-                # y,x = np.where(cp_obj < 0)
-                # obj_dist = np.sqrt((x-shift)**2 + (y-shift)**2)
-                # max_dist = np.max(obj_dist)
-                # max_pos = obj_dist==max_dist
-                # xedg = [x[max_pos],cp_obj.shape[0]-x[max_pos]] if x[max_pos] < shift else [cp_obj.shape[0]-x[max_pos],x[max_pos]]
-                # yedg = [y[max_pos],cp_obj.shape[1]-y[max_pos]] if y[max_pos] < shift else [cp_obj.shape[1]-y[max_pos],y[max_pos]]
-                # bkg = np.mean(cp_obj[cp_obj>0])
-                # bkg = np.mean(cp_obj[cp_obj>0])
+
+                ypos, xpos = np.where(cp_obj <= 0)
+                maxdist = max(np.sqrt((xpos-shift)**2+(ypos-shift)**2))
+
                 bkg = np.median(cp_obj[cp_obj>0])
                 print('BKG:',bkg)
                 ypos, xpos = np.where(cp_obj<=0)
                 cp_obj[cp_obj<=0] = bkg
                 from matplotlib.colors import LogNorm
-                plt.figure()
-                plt.title('Original')
-                plt.imshow(max_obj,origin='lower',norm=LogNorm())
-                plt.plot(shift,shift,'xr')
-                plt.figure()
-                plt.title('Sobel')
-                plt.imshow(np.where(cp_obj<0,0,cp_obj),origin='lower')
-                plt.plot(shift,shift,'xr')
-                plt.figure()
-                plt.title('Gaussian + Sobel')
-                plt.imshow(cpg_obj,origin='lower',norm=LogNorm())
-                plt.plot(shift,shift,'xr')
+                fig0, ax0 = filpy.show_image(max_obj, 
+                                             title='Original',
+                                             norm=LogNorm(),
+                                             cmap='viridis')
+                ax0.plot(shift,shift,'xr')
+
+                from matplotlib.patches import Circle
+                fig1, ax1 = filpy.show_image(np.where(cp_obj<0,0,cp_obj),
+                                             title='Sobel',
+                                             norm=LogNorm(),
+                                             cmap='viridis')
+                                             
+                ax1.plot(shift,shift,'xr')
+                ax1.add_patch(Circle((shift,shift),maxdist,fill=False))
+                fig2, ax2 = filpy.show_image(cpg_obj, 
+                                             title='Gaussian + Sobel',
+                                             norm=LogNorm(),
+                                             cmap='viridis')
+                ax2.plot(shift,shift,'xr')
 
                 cp_field[ypos+ymax-shift,xpos+xmax-shift] = bkg
-                filpy.show_image(cp_field,show=True)
-                
+                filpy.show_image(cp_field,
+                                 title='Masked field',
+                                 show=True
+                                )
                 # plt.show()
-
 
                 yy, xx = np.meshgrid(np.arange(max_obj.shape[0])-shift,
                                      np.arange(max_obj.shape[1])-shift
@@ -445,26 +445,34 @@ if __name__ == '__main__':
                 dist_mat = np.sqrt(xx**2+yy**2)
                 dists = np.sort(np.unique(dist_mat))
                 avg_profile = np.empty(0)
-                plt.figure()
+                fig = plt.figure()
+                ax = fig.add_subplot()
                 for d in dists:
                     value = max_obj[dist_mat == d]
                     avg_profile = np.append(avg_profile,np.mean(value))
-                    plt.plot([d]*len(value),value,'x')
-                plt.plot(dists,avg_profile,'.--',color='black')
-                plt.axhline(bkg,linestyle='dashed',color='green')
-                plt.axhline(np.median(data),linestyle='dashed',color='orange')
-                plt.axhline(mean_val,linestyle='dashed',color='red')
-                
+                    ax.plot([d]*len(value),value,'x')
+                ax.plot(dists,avg_profile,'.--',color='black')
+                filpy.h_lines(ax,
+                              [bkg,np.median(data),maxdist],
+                              ['green','orange','red'],
+                              linestyles='dashed')
+                filpy.v_lines(ax,
+                              [maxdist,int_sigma*2,shift],
+                              ['violet','blue'])
+
                 grad1 = np.diff(avg_profile)/np.diff(dists)
                 grad2 = np.diff(grad1)/np.diff(np.diff(dists))
                 print(grad1)
                 print(grad2)
-                plt.figure()
-                plt.plot(grad1,'.--',color='red')
-                plt.figure()
-                plt.plot(grad2,'.--',color='green')
-                plt.figure()
-                plt.plot((dists[1:]+dists[:-1])/2, avg_profile[1:]/avg_profile[:-1],'.--')
+                filpy.quickplot(grad1,
+                                title='Grad 1',
+                                fmt='.--')
+                filpy.quickplot(grad2,
+                                title='Grad 2',
+                                fmt='.--')
+                filpy.quickplot([(dists[1:]+dists[:-1])/2, avg_profile[1:]/avg_profile[:-1]],
+                                title='Ratio',
+                                fmt='.--')
                 plt.show()
 
 
