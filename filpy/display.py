@@ -110,11 +110,8 @@ def myplot(fig: Figure, ax: Axes, data: Union[Sequence[NDArray], NDArray], title
     fig.suptitle(suptitle,fontsize=title_font)
     ax.set_title(title,fontsize=title_font)
     if not isinstance(data,Sequence):
-        data = [data]
-    if (len(data) <= 2) and ('yerr' not in pltkwargs) and ('xerr' not in pltkwargs):
-        ax.plot(*data,**pltkwargs)
-    else:
-        ax.errorbar(*data,**pltkwargs)
+        data = [np.arange(len(data)),data]
+    ax.errorbar(*data,**pltkwargs)
     ax.set_xlabel(xlabel,fontsize=fontsize)
     ax.set_ylabel(ylabel,fontsize=fontsize)
     if grid: 
