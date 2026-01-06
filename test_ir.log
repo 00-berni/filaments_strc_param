@@ -1,0 +1,25 @@
+
+Files in /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest
+0 - IRIS-60_05_s2_filtered-data.npz
+1 - IRIS-100_04_s2_filtered-data.npz
+
+--------------------------------------------------
+SELECTED TARGET:
+/home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest/IRIS-60_05_s2_filtered-data.npz
+MEAN VALUE: 0.884941577911377
+MEDIAN: 0.9146719
+
+
+RUN 0 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BKG: 0.7903261
+AVG VAL: 1.034828133881092
+
+
+RUN 1 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BKG: 0.6235782
+AVG VAL: 1.1329500526189804
+
+
+RUN 2 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+BKG: 0.7682288
+AVG VAL: 1.4305283203721046
