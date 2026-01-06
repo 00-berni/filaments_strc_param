@@ -242,6 +242,102 @@ MY_DIR = filpy.DataDir(path=(filpy.PROJECT_DIR -1).join('mytest'),mkdir=True)
 
 
 if __name__ == '__main__':
+
+    def mask_values(data, data_s, data_gs, cp_field, int_sigma,shift):
+        ymax, xmax = filpy.find_argmax(data_gs)
+        max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+        cp_obj  = data_s[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+        cpg_obj = data_gs[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+
+        figg, axx = filpy.show_image([data,max_obj,cp_obj,cpg_obj],num_plots=(2,2),
+                                     subtitles=['Field','Field obj','Sobel','Gauss+Sobel'],
+                                     cmap='viridis',
+                                     colorbar=False,
+                                     vmax=4)
+        axx[0,0].plot(xmax,ymax,'xr')
+        axx[1,0].plot(*np.where(cp_obj <= 0)[::-1],'.r')
+        plt.show()
+
+        ypos, xpos = np.where(cp_obj <= 0)
+        xpos = xpos[abs(xpos-shift) <= 2*int_sigma]
+        ypos = ypos[abs(ypos-shift) <= 2*int_sigma]
+        min_len = min(len(xpos),len(ypos))
+        maxdist = max(np.sqrt((xpos[:min_len]-shift)**2+(ypos[:min_len]-shift)**2))
+
+        bkg = np.median(cp_obj[cp_obj>0])
+        print('BKG:',bkg)
+        from matplotlib.colors import LogNorm
+        fig0, ax0 = filpy.show_image(max_obj, 
+                                     title='Original',
+                                     norm=LogNorm(),
+                                     cmap='viridis')
+        ax0.plot(shift,shift,'xr')
+        fig2, ax2 = filpy.show_image(cpg_obj, 
+                                     title='Gaussian + Sobel',
+                                     norm=LogNorm(),
+                                     cmap='viridis')
+        ax2.plot(shift,shift,'xr')
+
+        yy, xx = np.meshgrid(np.arange(max_obj.shape[0])-shift,
+                             np.arange(max_obj.shape[1])-shift
+                            )
+        dist_mat = np.sqrt(xx**2+yy**2)
+        dists = np.sort(np.unique(dist_mat))
+        avg_profile = np.empty(0)
+        from scipy.optimize import curve_fit
+        fig = plt.figure()
+        ax = fig.add_subplot()
+        for d in dists:
+            value = max_obj[dist_mat == d]
+            avg_profile = np.append(avg_profile,np.mean(value))
+            ax.plot([d]*len(value),value,'x')
+        ax.plot(dists,avg_profile,'.--',color='black')
+        avg_val = np.mean(avg_profile[dists > maxdist])
+        filpy.h_lines(ax,
+                        [bkg,np.median(data),avg_val],
+                        ['green','orange','red'],
+                        linestyles='dashed')
+        filpy.v_lines(ax,
+                        [maxdist,int_sigma*2,shift],
+                        ['violet','blue'],
+                        linestyles='dotted')
+
+        grad1 = np.diff(avg_profile)/np.diff(dists)
+        print('AVG VAL:',avg_val)
+        filpy.quickplot(grad1,
+                        title='Grad 1',
+                        fmt='.--')
+        filpy.quickplot([(dists[1:]+dists[:-1])/2, avg_profile[1:]/avg_profile[:-1]],
+                        title='Ratio',
+                        fmt='.--')
+        plt.show()
+
+        bkg = avg_val
+        ypos, xpos = np.where(cp_obj<=0)
+        cp_obj[cp_obj<=0] = bkg
+
+        from matplotlib.patches import Circle
+        fig1, ax1 = filpy.show_image(np.where(cp_obj<0,bkg,cp_obj),
+                                        title='Sobel',
+                                        norm=LogNorm(),
+                                        cmap='viridis')
+                                        
+        ax1.plot(shift,shift,'xr')
+        ax1.add_patch(Circle((shift,shift),maxdist,fill=False))
+
+        cp_field[ypos+ymax-shift,xpos+xmax-shift] = bkg
+        fig3, ax3 = filpy.show_image(cp_field,
+                            title='Masked field'
+                        )
+        ax3.plot(xmax,ymax,'xr')
+        maxdist = int(maxdist)
+        data_gs[ymax-maxdist:ymax+maxdist+1,xmax-maxdist:xmax+maxdist+1] = 0
+        _ = filpy.show_image(data_gs,title='Removal')
+        plt.show()
+        return data_gs, cp_field
+
+
+
     parser = argparse.ArgumentParser(prog='TestIR',
                                      description='Read and analyze IR data',
                                     )
@@ -283,7 +379,7 @@ if __name__ == '__main__':
     if log:
         import sys
         org = sys.stdout
-        f = open((filpy.PROJECT_DIR-1).join('test_ir.log'),"w")
+        f = open(filpy.PROJECT_DIR.join('test_ir.log'),"w")
         sys.stdout = f
 
     if args.list and not data_mask:
@@ -375,6 +471,7 @@ if __name__ == '__main__':
             for mask_sel, nshift in zip(selection, nshifts):
                 # load data
                 outputs = MY_DIR.files
+                print(outputs[mask_sel])
                 with np.load(outputs[mask_sel]) as filt_data:
                     filepath = filt_data['path']
                     data     = filt_data['data']
@@ -396,86 +493,17 @@ if __name__ == '__main__':
                 sel = int(sel)
                 s = float(s[1:])
 
-                ymax, xmax = filpy.find_argmax(data_gs)
                 int_sigma = int(s) if s > 0 else 1
                 shift = int_sigma*nshift
                 cp_field = data.copy()
-                max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
-                cp_obj  = data_s[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
-                cpg_obj = data_gs[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
+                cp_filter = data_gs.copy()
 
-                ypos, xpos = np.where(cp_obj <= 0)
-                maxdist = max(np.sqrt((xpos-shift)**2+(ypos-shift)**2))
+                cp_filter[170:211,176:224] = 0
+                cp_filter[160:170,220:249] = 0
 
-                bkg = np.median(cp_obj[cp_obj>0])
-                print('BKG:',bkg)
-                ypos, xpos = np.where(cp_obj<=0)
-                cp_obj[cp_obj<=0] = bkg
-                from matplotlib.colors import LogNorm
-                fig0, ax0 = filpy.show_image(max_obj, 
-                                             title='Original',
-                                             norm=LogNorm(),
-                                             cmap='viridis')
-                ax0.plot(shift,shift,'xr')
-
-                from matplotlib.patches import Circle
-                fig1, ax1 = filpy.show_image(np.where(cp_obj<0,0,cp_obj),
-                                             title='Sobel',
-                                             norm=LogNorm(),
-                                             cmap='viridis')
-                                             
-                ax1.plot(shift,shift,'xr')
-                ax1.add_patch(Circle((shift,shift),maxdist,fill=False))
-                fig2, ax2 = filpy.show_image(cpg_obj, 
-                                             title='Gaussian + Sobel',
-                                             norm=LogNorm(),
-                                             cmap='viridis')
-                ax2.plot(shift,shift,'xr')
-
-                cp_field[ypos+ymax-shift,xpos+xmax-shift] = bkg
-                filpy.show_image(cp_field,
-                                 title='Masked field',
-                                 show=True
-                                )
-                # plt.show()
-
-                yy, xx = np.meshgrid(np.arange(max_obj.shape[0])-shift,
-                                     np.arange(max_obj.shape[1])-shift
-                                    )
-                dist_mat = np.sqrt(xx**2+yy**2)
-                dists = np.sort(np.unique(dist_mat))
-                avg_profile = np.empty(0)
-                fig = plt.figure()
-                ax = fig.add_subplot()
-                for d in dists:
-                    value = max_obj[dist_mat == d]
-                    avg_profile = np.append(avg_profile,np.mean(value))
-                    ax.plot([d]*len(value),value,'x')
-                ax.plot(dists,avg_profile,'.--',color='black')
-                filpy.h_lines(ax,
-                              [bkg,np.median(data),maxdist],
-                              ['green','orange','red'],
-                              linestyles='dashed')
-                filpy.v_lines(ax,
-                              [maxdist,int_sigma*2,shift],
-                              ['violet','blue'])
-
-                grad1 = np.diff(avg_profile)/np.diff(dists)
-                grad2 = np.diff(grad1)/np.diff(np.diff(dists))
-                print(grad1)
-                print(grad2)
-                filpy.quickplot(grad1,
-                                title='Grad 1',
-                                fmt='.--')
-                filpy.quickplot(grad2,
-                                title='Grad 2',
-                                fmt='.--')
-                filpy.quickplot([(dists[1:]+dists[:-1])/2, avg_profile[1:]/avg_profile[:-1]],
-                                title='Ratio',
-                                fmt='.--')
-                plt.show()
-
-
+                for i in range(3):
+                    print('\n\nRUN',i,'~~~~~~~'*10)
+                    cp_filte, cp_field = mask_values(data,data_s,cp_filter,cp_field,int_sigma,shift)
 
         ########
 
