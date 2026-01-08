@@ -243,7 +243,7 @@ MY_DIR = filpy.DataDir(path=(filpy.PROJECT_DIR -1).join('mytest'),mkdir=True)
 
 if __name__ == '__main__':
 
-    def mask_values(data, data_s, data_gs, cp_field, int_sigma,shift):
+    def mask_values(data, data_s, data_gs, cp_field, int_sigma,shift,**pltkwargs):
         ymax, xmax = filpy.find_argmax(data_gs)
         max_obj = data[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
         cp_obj  = data_s[ymax-shift:ymax+shift+1,xmax-shift:xmax+shift+1].copy()
@@ -253,7 +253,7 @@ if __name__ == '__main__':
                                      subtitles=['Field','Field obj','Sobel','Gauss+Sobel'],
                                      cmap='viridis',
                                      colorbar=False,
-                                     vmax=4)
+                                     **pltkwargs)
         axx[0,0].plot(xmax,ymax,'xr')
         axx[1,0].plot(*np.where(cp_obj <= 0)[::-1],'.r')
         plt.show()
@@ -294,13 +294,13 @@ if __name__ == '__main__':
         ax.plot(dists,avg_profile,'.--',color='black')
         avg_val = np.mean(avg_profile[dists > maxdist])
         filpy.h_lines(ax,
-                        [bkg,np.median(data),avg_val],
-                        ['green','orange','red'],
-                        linestyles='dashed')
+                      [bkg,np.median(data),avg_val],
+                      ['green','orange','red'],
+                      linestyles='dashed')
         filpy.v_lines(ax,
-                        [maxdist,int_sigma*2,shift],
-                        ['violet','blue'],
-                        linestyles='dotted')
+                      [maxdist,int_sigma*2,shift],
+                      ['violet','blue'],
+                      linestyles='dotted')
 
         grad1 = np.diff(avg_profile)/np.diff(dists)
         print('AVG VAL:',avg_val)
@@ -318,21 +318,20 @@ if __name__ == '__main__':
 
         from matplotlib.patches import Circle
         fig1, ax1 = filpy.show_image(np.where(cp_obj<0,bkg,cp_obj),
-                                        title='Sobel',
-                                        norm=LogNorm(),
-                                        cmap='viridis')
-                                        
+                                     title='Sobel',
+                                     norm=LogNorm(),
+                                     cmap='viridis')
         ax1.plot(shift,shift,'xr')
         ax1.add_patch(Circle((shift,shift),maxdist,fill=False))
 
         cp_field[ypos+ymax-shift,xpos+xmax-shift] = bkg
         fig3, ax3 = filpy.show_image(cp_field,
-                            title='Masked field'
-                        )
+                                     title='Masked field',
+                                     **pltkwargs)
         ax3.plot(xmax,ymax,'xr')
         maxdist = int(maxdist)
         data_gs[ymax-maxdist:ymax+maxdist+1,xmax-maxdist:xmax+maxdist+1] = 0
-        _ = filpy.show_image(data_gs,title='Removal')
+        _ = filpy.show_image(data_gs,title='Removal',**pltkwargs)
         plt.show()
         return data_gs, cp_field
 
@@ -343,20 +342,24 @@ if __name__ == '__main__':
                                     )
     ## Commands
     parser.add_argument('-l','--list', action='store_true', help='print the list of file in the data directory')
-    parser.add_argument('-s','--selection', action='store', type=int, nargs='*', default=[], help='index(ces) of the selected object')
+    parser.add_argument('-s','--selections', action='store', type=int, nargs='*', default=[], help='index(ces) of the selected object(s)')
+    # filtering commands
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
-    parser.add_argument('-d','--disperse',action='store_true', help='run disperse')
-    parser.add_argument('-m','--mask', action='store_true', help='mask point sources')
     parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter')
-
+    # masking commands
+    parser.add_argument('-m','--mask', action='store_true', help='mask point sources')
     parser.add_argument('--nshift', action='store', type=int, nargs='*', default=[5], help='set the number of sigma from the point source')
+    # DisPerSe commands
+    parser.add_argument('-d','--disperse',action='store_true', help='run disperse')
     parser.add_argument('--nsig', action='store', type=float, nargs='*', default=[0.3], help='set the value of nsig')
     parser.add_argument('--nsmooth', action='store', type=int, nargs='*', default=[4], help='set the number of smoothing routines')
     parser.add_argument('--ncut', action='store', type=float, nargs='*', default=[], help='set the value of ncut')
     parser.add_argument('--ncores', action='store', type=int, default=11, help='set the number of cores to use')
-
+    # stuff
     parser.add_argument('-u','--update', action='store_true', help='remove all the files in output directory')
-    
+    parser.add_argument('--vmax', action='store',nargs='*',type=float,default=[],help='set the max value to display in images')
+    parser.add_argument('--vmin', action='store',nargs='*',type=float,default=[],help='set the min value to display in images')
+    # turn off property
     parser.add_argument('--no-display', action='store_false', help='pictures are not plotted')
     parser.add_argument('--no-hotpx', action='store_false', help='prevent the hot pixels removal')
     parser.add_argument('--no-log',action='store_false', help='print the output on the bash')
@@ -365,7 +368,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    selection = args.selection
+    selections = args.selections
     data_filter = args.filter
     data_mask = args.mask
 
@@ -375,6 +378,9 @@ if __name__ == '__main__':
     display_plots = args.no_display
     disperse = args.disperse
     store = args.no_store
+
+    vmaxs = args.vmax
+    vmins = args.vmin
 
     if log:
         import sys
@@ -386,7 +392,7 @@ if __name__ == '__main__':
         IR_FILES.tree()
     elif args.list and data_mask:
         MY_DIR.tree()
-    elif selection is not None:
+    elif selections is not None:
         if verbose or args.update:
             MY_DIR.tree()
         if args.update:
@@ -395,14 +401,27 @@ if __name__ == '__main__':
 
         if verbose:
             init_string = '\n'+'-'*50+'\nSELECTED TARGET'
-            if len(selection) != 1: 
+            if len(selections) != 1: 
                 init_string = init_string + 'S'
             print(init_string+':')
+
+        if display_plots:
+            if len(vmaxs) == 0:
+                vmaxs = [None]*len(selections)
+            elif len(vmaxs) < len(selections):
+                vmaxs += [vmaxs[-1]]*(len(selections)-len(vmaxs))
+            if len(vmins) == 0:
+                vmins = [None]*len(selections)
+            elif len(vmaxs) < len(selections):
+                vmins += [vmins[-1]]*(len(selections)-len(vmins))
+
+            displ_kwargs = [{'vmax': vmax, 
+                             'vmin': vmin} for vmax, vmin in zip(vmaxs, vmins)]
 
         ########
 
         if data_filter:
-            targets = TargetList(file_names=[IR_FILES[i] for i in selection],hotpx=hotpx,verbose=verbose)
+            targets = TargetList(file_names=[IR_FILES[i] for i in selections],hotpx=hotpx,verbose=verbose)
             if display_plots:
                 targets.plot(show=True)
 
@@ -412,7 +431,11 @@ if __name__ == '__main__':
                 sigma = [sigma]*len(targets)
 
             filtered_data = [] 
-            for trg, s, sel in zip(targets, sigma, selection):
+            for id, sel in enumerate(selections):
+                trg = targets[id]
+                s = sigma[id]
+                pltkwargs = displ_kwargs[id]
+
                 data = trg.data
                 new_name = trg.name.split('.')[:-1] + ['fits']
                 # gaussian filter
@@ -450,8 +473,7 @@ if __name__ == '__main__':
                                                subtitles=[trg.nickname,'filtered','gaussian','gaussian+sobel'],
                                                projection=trg.wcs,
                                                colorbar=False,
-                                               vmax=3,
-                                               vmin=0
+                                               **pltkwargs
                                               )
                     # ax[1].plot(*filpy.find_argmax(fdata)[::-1],'xr')
                     plt.show()
@@ -466,9 +488,12 @@ if __name__ == '__main__':
                 
         if data_mask:
             nshifts = args.nshift
-            if len(nshifts) < len(selection):
-                nshifts += [nshifts[-1]]*(len(selection)-len(nshifts))
-            for mask_sel, nshift in zip(selection, nshifts):
+            if len(nshifts) < len(selections):
+                nshifts += [nshifts[-1]]*(len(selections)-len(nshifts))
+            for id, mask_sel in enumerate(selections):
+                nshift = nshifts[id]
+                pltkwargs = displ_kwargs[id]
+
                 # load data
                 outputs = MY_DIR.files
                 print(outputs[mask_sel])
@@ -486,12 +511,24 @@ if __name__ == '__main__':
 
                 maxpos = np.argmax(cnts)
                 mean_val = (bins[maxpos] + bins[maxpos+1])/2
-                print('MEAN VALUE:',mean_val)
+                print('HIST VALUE:',mean_val)
                 print('MEDIAN:',np.median(data))
 
                 sel, s = outputs.file[mask_sel].split('_')[-3:-1]
                 sel = int(sel)
                 s = float(s[1:])
+
+                ymin, xmin = filpy.find_argmin(data_s)
+                ymax, xmax = filpy.find_argmax(data_s)
+                _, axs = filpy.show_image([data,data_s],num_plots=(1,2),
+                                         subtitles=['Data','Sobel'],
+                                         colorbar = False,
+                                         **pltkwargs)
+                for ax in axs:
+                    ax.plot(xmin,ymin,'xr')
+                    ax.plot(xmax,ymax,'xg')
+                plt.show()
+                exit()
 
                 int_sigma = int(s) if s > 0 else 1
                 shift = int_sigma*nshift
@@ -503,12 +540,12 @@ if __name__ == '__main__':
 
                 for i in range(3):
                     print('\n\nRUN',i,'~~~~~~~'*10)
-                    cp_filte, cp_field = mask_values(data,data_s,cp_filter,cp_field,int_sigma,shift)
+                    cp_filte, cp_field = mask_values(data,data_s,cp_filter,cp_field,int_sigma,shift,**pltkwargs)
 
         ########
 
         if disperse:
-            targets = TargetList(file_names=[IR_FILES[i] for i in selection],hotpx=hotpx,verbose=verbose)
+            targets = TargetList(file_names=[IR_FILES[i] for i in selections],hotpx=hotpx,verbose=verbose)
             if display_plots:
                 targets.plot(show=True)
 
