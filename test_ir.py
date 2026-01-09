@@ -48,8 +48,6 @@ class Target():
         coord = self.wcs.pixel_to_world_values(*sel)
         return np.asarray(coord)
 
-
-
     def plot(self, **figargs):
         if 'barlabel' not in figargs.keys():
             figargs['barlabel'] = INT_UNIT
@@ -74,16 +72,15 @@ class Target():
             self.fil_pos = np.append(self.fil_pos,fil.points.T,axis=1)
 
     def plot_network(self,**figargs):
-        if 'skl' not in self.__dict__.keys():
-            raise AttributeError('To run self.disperse() or self.skel() is required')
-
         figargs['colorbar'] = False
         figargs['show'] = False
-        
-        fig, ax = self.plot(**figargs)
-        ax.plot(*self.fil_pos,'.b',alpha=0.7)
-        return fig, ax
-
+        try:        
+            fig, ax = self.plot(**figargs)
+            ax.plot(*self.fil_pos,'.b',alpha=0.7)
+            return fig, ax
+        except AttributeError:
+            Warning('To run self.plot_network, self.disperse() or self.skel() is required')
+            pass
 
     def __getitem__(self, sel: Union[int,slice,list,tuple]) -> FloatArrayLike:
         return self.data[sel]
@@ -187,6 +184,7 @@ class TargetList():
                          patches=patches,
                          outdir=outdir,
                          skl_sel=skl_sel)
+            print('TARGET',trg.skl)
             self.skl_names += [trg.skl_name]
             self.skls += [trg.skl]
             self.fils += [trg.fil_pos]
@@ -222,6 +220,15 @@ class TargetList():
 
     def __iter__(self) -> TargetIterator:
         return TargetIterator(self.targets)
+    
+    def __str__(self) -> str:
+        intro = 'List of Target'
+        if len(self) > 1: intro = intro + 's'
+        intro = intro +':\n' + '\n'.join(self.names)
+        return intro
+
+    def __repr__(self) -> str:
+        return 'TargetList object\n'+self.__str__()
 
 def sobel_filter(data: FloatArray, remove_neg: bool = True) -> FloatArray:
     from scipy.ndimage import sobel
@@ -345,14 +352,14 @@ if __name__ == '__main__':
     parser.add_argument('-s','--selections', action='store', type=int, nargs='*', default=[], help='index(ces) of the selected object(s)')
     # filtering commands
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
-    parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter')
+    parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter. By default `2`')
     # masking commands
     parser.add_argument('-m','--mask', action='store_true', help='mask point sources')
-    parser.add_argument('--nshift', action='store', type=int, nargs='*', default=[5], help='set the number of sigma from the point source')
+    parser.add_argument('--nshift', action='store', type=int, nargs='*', default=[5], help='set the number of sigma from the point source. By default `5`')
     # DisPerSe commands
     parser.add_argument('-d','--disperse',action='store_true', help='run disperse')
-    parser.add_argument('--nsig', action='store', type=float, nargs='*', default=[0.3], help='set the value of nsig')
-    parser.add_argument('--nsmooth', action='store', type=int, nargs='*', default=[4], help='set the number of smoothing routines')
+    parser.add_argument('--nsig', action='store', type=float, nargs='*', default=[0.3], help='set the value of nsig. By default `0.3`')
+    parser.add_argument('--nsmooth', action='store', type=int, nargs='*', default=[4], help='set the number of smoothing routines. By default `4`')
     parser.add_argument('--ncut', action='store', type=float, nargs='*', default=[], help='set the value of ncut')
     parser.add_argument('--ncores', action='store', type=int, default=11, help='set the number of cores to use')
     # stuff
@@ -518,8 +525,33 @@ if __name__ == '__main__':
                 sel = int(sel)
                 s = float(s[1:])
 
+                # # #
+
+                from astropy.stats import sigma_clipped_stats
+                from photutils.detection import DAOStarFinder
+                mean, median, std = sigma_clipped_stats(data, sigma=3.0)
+                print('ASTRO:',np.array((mean, median, std)))
+                daofind = DAOStarFinder(fwhm=3.0, threshold=2.*std)
+                sources = daofind(data - median)
+                from astropy.visualization import SqrtStretch
+                from astropy.visualization.mpl_normalize import ImageNormalize
+                from photutils.aperture import CircularAperture
+                positions = np.transpose((sources['xcentroid'], sources['ycentroid']))
+                apertures = CircularAperture(positions, r=4.0)
+                norm = ImageNormalize(stretch=SqrtStretch())
+                plt.imshow(data, cmap='Greys_r', origin='lower',**pltkwargs)
+                apertures.plot(color='blue', lw=1.5, alpha=0.5)
+
+                # plt.figure()
+                # plt.imshow(data,cmap='Greys_r',origin='lower',**pltkwargs)
+                plt.show()
+
+
                 ymin, xmin = filpy.find_argmin(data_s)
                 ymax, xmax = filpy.find_argmax(data_s)
+
+                max_pos = [[xmax],[ymax]]
+                min_pos = [[xmin],[ymin]]
                 _, axs = filpy.show_image([data,data_s],num_plots=(1,2),
                                          subtitles=['Data','Sobel'],
                                          colorbar = False,
@@ -528,6 +560,70 @@ if __name__ == '__main__':
                     ax.plot(xmin,ymin,'xr')
                     ax.plot(xmax,ymax,'xg')
                 plt.show()
+
+                cp_data = data_s.copy()
+                print('MIN:',cp_data[ymin,xmin])
+                print('MAX:',cp_data[ymax,xmax])
+
+                mv_i = np.arange(2,8)
+                lowdx = np.where(cp_data[ymin,xmin+mv_i]>0)[0].min()+1
+                lowsx = np.where(cp_data[ymin,xmin-mv_i]>0)[0].min()+1
+                lownt = np.where(cp_data[ymin+mv_i,xmin]>0)[0].min()+1
+                lowst = np.where(cp_data[ymin-mv_i,xmin]>0)[0].min()+1
+                updx = np.where(cp_data[ymax,xmax+mv_i]>0)[0].min()+1
+                upsx = np.where(cp_data[ymax,xmax-mv_i]>0)[0].min()+1
+                upnt = np.where(cp_data[ymax+mv_i,xmax]>0)[0].min()+1
+                upst = np.where(cp_data[ymax-mv_i,xmax]>0)[0].min()+1
+
+                low_shift = max(lowdx,lowsx,lownt,lowst)
+                up_shift = max(updx,upsx,upnt,upst)
+
+                print('LOWS:\n\t',lowdx,lowsx,lownt,lowst)
+                print('LOW:\t',low_shift)
+                print('UPS:\n\t',updx,upsx,upnt,upst)
+                print('UP:\t',up_shift)
+
+                miniobj_max = cp_data[ymax-up_shift:ymax+up_shift+1,xmax-up_shift:xmax+up_shift+1]
+                miniobj_min = cp_data[ymin-low_shift:ymin+low_shift+1,xmin-low_shift:xmin+low_shift+1]
+
+                _, axs = filpy.show_image([miniobj_max,miniobj_min],
+                                  num_plots=(1,2),
+                                  colorbar=False,
+                                  **pltkwargs)
+                axs[0].plot(*np.where(miniobj_max<=0)[::-1],'.r')
+                axs[0].plot([up_shift+updx,up_shift-upsx,up_shift,up_shift],
+                            [up_shift,up_shift,up_shift+upnt,up_shift-upst],'xg')
+                axs[1].plot(*np.where(miniobj_min<=0)[::-1],'.r')
+                axs[1].plot([low_shift+lowdx,low_shift-lowsx,low_shift,low_shift],
+                            [low_shift,low_shift,low_shift+lownt,low_shift-lowst],'xg')
+                plt.show()
+
+                quad = slice(up_shift-1,up_shift+2)
+                miniobj_max[quad,quad] = -1
+
+                low_ypos, low_xpos = np.where(miniobj_min<=0)
+                up_ypos, up_xpos = np.where(miniobj_max<=0)
+
+
+                print('LOW MEAN:',np.mean(miniobj_min[miniobj_min>0]))
+                cp_data[up_ypos+ymax-up_shift,up_xpos+xmax-up_shift] = np.mean(miniobj_max[miniobj_max>0])
+                cp_data[low_ypos+ymin-low_shift,low_xpos+xmin-low_shift] = np.mean(miniobj_min[miniobj_min>0])
+
+                ymin, xmin = filpy.find_argmin(cp_data)
+                ymax, xmax = filpy.find_argmax(cp_data)
+                print('MIN:',cp_data[ymin,xmin])
+                print('MAX:',cp_data[ymax,xmax])
+                _, axs = filpy.show_image([data,cp_data],num_plots=(1,2),
+                                         subtitles=['Data','Sobel'],
+                                         colorbar = False,
+                                         **pltkwargs)
+                for ax in axs:
+                    ax.plot(*max_pos,'.r')
+                    ax.plot(*min_pos,'.g')
+                    ax.plot(xmin,ymin,'xr')
+                    ax.plot(xmax,ymax,'xg')
+                plt.show()
+
                 exit()
 
                 int_sigma = int(s) if s > 0 else 1
@@ -555,15 +651,17 @@ if __name__ == '__main__':
             nthreads = args.ncores
 
             targets.disperse(nsig=nsig,
-                                ncut=ncut,
-                                nsmooth=nsmooth,
-                                nthreads=nthreads,
-                                outdir=MY_DIR.path
+                             ncut=ncut,
+                             nsmooth=nsmooth,
+                             nthreads=nthreads,
+                             outdir=MY_DIR.path
                             )
+            
+            print('HEY',targets.skls)
             
             if verbose: MY_DIR.tree()
 
-            targets.plot_network({'vmax':3})
+            targets.plot_network(*displ_kwargs)
 
         if log:
             sys.stdout = org
