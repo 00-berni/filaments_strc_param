@@ -5,6 +5,152 @@ Files in /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest
 
 --------------------------------------------------
 SELECTED TARGET:
-/home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest/IRIS-60_05_s2_filtered-data.npz
-HIST VALUE: 0.884941577911377
-MEDIAN: 0.9146719
+Filename: /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/filaments_strc_param/MBM40/IR/IRIS-60_RA+DEC_242.64+21.822_skv2402830853177_1.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU     138   (400, 400)   float32   
+ - HEADER -
+SIMPLE  =                    T / Written by SkyView Mon Dec 15 05:19:28 EST 2025
+BITPIX  =                  -32 / 4 byte floating point                          
+NAXIS   =                    2 / Two dimensional image                          
+NAXIS1  =                  400 / Width of image                                 
+NAXIS2  =                  400 / Height of image                                
+CRVAL1  =   242.64166666666668 / Reference longitude                            
+CRVAL2  =   21.821666666666665 / Reference latitude                             
+RADESYS = 'FK5     '           / Coordinate system                              
+EQUINOX =               2000.0 / Epoch of the equinox                           
+CTYPE1  = 'RA---TAN'           / Coordinates -- projection                      
+CTYPE2  = 'DEC--TAN'           / Coordinates -- projection                      
+CRPIX1  =                200.5 / X reference pixel                              
+CRPIX2  =                200.5 / Y reference pixel                              
+CDELT1  =               -0.025 / X scale                                        
+CDELT2  =                0.025 / Y scale                                        
+COMMENT                                                                         
+COMMENT SkyView Survey metadata                                                 
+COMMENT                                                                         
+COMMENT info:        query coordinates guaranteed to return data for this surv  
+COMMENT          ey                                                             
+COMMENT ra:          0                                                          
+COMMENT dec:         0                                                          
+COMMENT radius:      1                                                          
+COMMENT Provenance:  Original IRAS data: NASA/JPL IPAC,      IRIS Reprocessing  
+COMMENT          : Canadian Institute for Theoretical Astrophysics/Institut     
+COMMENT             d'Astrophysique Spatiale     See the       IRIS website.    
+COMMENT Copyright:   Public                                                     
+COMMENT Regime:      Infrared                                                   
+COMMENT NSurvey:     4                                                          
+COMMENT Frequency:   5 THz                                                      
+COMMENT Bandpass:    3.75-6.5 THz                                               
+COMMENT Coverage:    All-sky                                                    
+COMMENT PixelScale:  0.025 deg/pix                                              
+COMMENT Units:       MJy/sr                                                     
+COMMENT Resolution:  2'                                                         
+COMMENT Coordinates: Equatorial                                                 
+COMMENT Projection:  Gnomonic(TAN)                                              
+COMMENT Equinox:     1950                                                       
+COMMENT Epoch:       1983                                                       
+COMMENT Reference:        M. Miville-Deschenes and G. Lagache, IRIS: A New Gen  
+COMMENT          eration of IRAS Maps,     Ap.J.Supplement 157, 302, 2005       
+COMMENT                                                                         
+COMMENT Survey specific cards                                                   
+COMMENT                                                                         
+SURVEY  = 'IRIS 60 micron'                                                      
+BUNIT   = 'MJY/SR  '           / INTENSITY                                      
+TELESCOP= 'IRAS    '                                                            
+INSTRUME= 'IRIS    '           / Improved Reprocessing of the IRAS Survey       
+AUTHORS = 'Marc-Antoine Miville-Deschenes & Guilaine Lagache'                   
+COMMENT   = 'IRIS is a reprocessing of the ISSA plates' /                       
+AUTODEGL=                    T / Automatic deglitching                          
+DESTRIPE=                    T / Wavelet/Fourier Destriping                     
+COR-GAIN=                    T / Scale and brightness dependant gain correction 
+COR-OFFS=                    T / Offset correction based on DIRBE data          
+HISTORY                                                                         
+HISTORY Settings used in processing:                                            
+HISTORY                                                                         
+HISTORY cache = /data/cache/surveys/                                            
+HISTORY coordinates = J2000.0                                                   
+HISTORY descriptionxslt = cgifiles/description.xsl                              
+HISTORY dft_cache = ./skycache/                                                 
+HISTORY dummy                                                                   
+HISTORY equinox = 2000                                                          
+HISTORY finalpostprocessor = skyview.ij.IJProcessor,skyview.data.BoxSmoother,sky
+HISTORY float = on                                                              
+HISTORY footertemplate = cgifiles/skyfooter.html                                
+HISTORY gallerydir = /userimages                                                
+HISTORY galleryxslt = cgifiles/gallerymultipage.xsl                             
+HISTORY geometrytwin = IRIS12,IRIS25,IRIS60,IRIS100                             
+HISTORY headertemplate = cgifiles/skyheader.html                                
+HISTORY htmlwriter = skyview.request.HTMLWriter                                 
+HISTORY imagefactory = skyview.survey.CachingImageFactory                       
+HISTORY imagesize = 12.5                                                        
+HISTORY imscale =                                                               
+HISTORY localurl = https://skyview.gsfc.nasa.gov/surveys,/skyview/htdocs/surveys
+HISTORY lut = colortables/b-w-linear.bin                                        
+HISTORY lutcbarpath = ../images/colorbars/                                      
+HISTORY mosaicker = skyview.process.Mosaicker                                   
+HISTORY name = Improved Reprocessing of the IRAS Survey: 60                     
+HISTORY noexit =                                                                
+HISTORY nullimagedir = ../images/nodata                                         
+HISTORY nwindow = on                                                            
+HISTORY output = ../../tempspace/fits/skv2721285236631_1                        
+HISTORY outputroot = ../../tempspace/fits                                       
+HISTORY pixels = 400                                                            
+HISTORY position = 16 10 34.0, +21 49 18                                        
+HISTORY postprocessor = skyview.ij.IJProcessor,skyview.request.HTMLWriter       
+HISTORY projection = Tan                                                        
+HISTORY quicklook = jpeg                                                        
+HISTORY requested_coords = 242.64166666666668, 21.821666666666665               
+HISTORY reqxpos = 242.64166666666668                                            
+HISTORY reqypos = 21.821666666666665                                            
+HISTORY resolver = SIMBAD-NED                                                   
+HISTORY rgbtemplate = cgifiles/skyrgb.html                                      
+HISTORY rgbwriter = skyview.request.RGBWriter                                   
+HISTORY sampler = Default                                                       
+HISTORY savebysurvey                                                            
+HISTORY scale = 0.025                                                           
+HISTORY scaling = Log                                                           
+HISTORY settingsupdaters = BatchCompatibility,SettingsFixer,skyview.request.Toas
+HISTORY shortname = IRIS60, IRIS 60 micron,IRIS 60, IRIS  60                    
+HISTORY sia_header = ./sia.header                                               
+HISTORY siabase = https://skyview.gsfc.nasa.gov/cgi-bin/images?                 
+HISTORY siaimagetimeout = 300000                                                
+HISTORY size = 10.0,10.0                                                        
+HISTORY spellprefix = https://skyview.gsfc.nasa.gov/surveys/iris60/             
+HISTORY spellsuffix = ,Tan,B1950.00,500,500,0.025,0.025                         
+HISTORY survey = IRIS 60,IRIS 100                                               
+HISTORY surveyfinder = skyview.survey.XMLSurveyFinder                           
+HISTORY surveymanifest = surveys/survey.manifest                                
+HISTORY surveyregimes = Radio,Millimeter,Infrared,Optical,Ultraviolet,X-ray,Gamm
+HISTORY surveysheader = cgifiles/survey.header                                  
+HISTORY surveytemplate = cgifiles/skysurvey.html                                
+HISTORY url.heasarcbase = https://heasarc.gsfc.nasa.gov/xamin/vo/cone?showoffset
+HISTORY url.ned = http://nedwww.ipac.caltech.edu/cgi-bin/nph-NEDobjsearch?search
+HISTORY url.simbad = http://simbad.u-strasbg.fr/simbad-conesearch.pl?           
+HISTORY url.vizierbase = http://vizier.u-strasbg.fr/viz-bin/votable/-dtd/-A?-out
+HISTORY urllocalhelp = https://skyview.gsfc.nasa.gov/help/help.html             
+HISTORY version = 3.5.7                                                         
+HISTORY webrootpath = /skyview/htdocs                                           
+HISTORY xmlurlprefix = https://skyview.gsfc.nasa.gov/current/jar/               
+HISTORY                                                                         
+HISTORY Map generated at: Mon Dec 15 05:19:28 EST 2025                          
+HISTORY                                                                         
+HISTORY Resampler used: NNSampler                                               
+HISTORY                                                                         
+HISTORY                                                                         
+HISTORY Image mosaicking usingskyview.process.Mosaicker                         
+HISTORY                                                                         
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I327B3H0.fits                
+HISTORY       Pixels:1100                                                       
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I294B3H0.fits                
+HISTORY       Pixels:8570                                                       
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I293B3H0.fits                
+HISTORY       Pixels:120699                                                     
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I326B3H0.fits                
+HISTORY       Pixels:29631                                                      
+HISTORY                                                                         
+END                                                                                                                                                                                                                                                                                                                                                   
+
+HEY []
+
+Files in /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest
+0 - IRIS-60_05_s2_filtered-data.npz
+1 - IRIS-100_04_s2_filtered-data.npz
