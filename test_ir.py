@@ -412,18 +412,18 @@ if __name__ == '__main__':
                 init_string = init_string + 'S'
             print(init_string+':')
 
-        if display_plots:
-            if len(vmaxs) == 0:
-                vmaxs = [None]*len(selections)
-            elif len(vmaxs) < len(selections):
-                vmaxs += [vmaxs[-1]]*(len(selections)-len(vmaxs))
-            if len(vmins) == 0:
-                vmins = [None]*len(selections)
-            elif len(vmaxs) < len(selections):
-                vmins += [vmins[-1]]*(len(selections)-len(vmins))
+        # if display_plots:
+        if len(vmaxs) == 0:
+            vmaxs = [None]*len(selections)
+        elif len(vmaxs) < len(selections):
+            vmaxs += [vmaxs[-1]]*(len(selections)-len(vmaxs))
+        if len(vmins) == 0:
+            vmins = [None]*len(selections)
+        elif len(vmaxs) < len(selections):
+            vmins += [vmins[-1]]*(len(selections)-len(vmins))
 
-            displ_kwargs = [{'vmax': vmax, 
-                             'vmin': vmin} for vmax, vmin in zip(vmaxs, vmins)]
+        displ_kwargs = [{'vmax': vmax, 
+                            'vmin': vmin} for vmax, vmin in zip(vmaxs, vmins)]
 
         ########
 
@@ -455,6 +455,22 @@ if __name__ == '__main__':
                 fgdata = sobel_filter(gauss_filt)
                 filtered_data += [fgdata]
 
+                from scipy.ndimage import maximum_filter
+                from photutils.detection import find_peaks
+                maxf_data = maximum_filter(data,size=(3,3))
+                fmaxf_data = sobel_filter(maxf_data)
+                peaks = find_peaks(data,np.median(data),box_size=20)
+                print(peaks['x_peak'].quantity)
+                xpeaks = peaks['x_peak'].quantity
+                ypeaks = peaks['y_peak'].quantity
+                _, axs = filpy.show_image([data,maxf_data,fmaxf_data],num_plots=(1,3),
+                                 subtitles=['data','Max filter','Sobel'],
+                                 colorbar=False,
+                                 **pltkwargs)
+                axs[0].plot(xpeaks,ypeaks,'xr')
+                axs[2].plot(xpeaks,ypeaks,'xr')
+                plt.show()
+                exit()
                 if store:
                     filt_filename = trg.nickname + f'_{sel:02d}_s{s}_' + 'filtered-data'
                     filt_filename = MY_DIR.join(filt_filename)
@@ -538,14 +554,26 @@ if __name__ == '__main__':
                 from photutils.aperture import CircularAperture
                 positions = np.transpose((sources['xcentroid'], sources['ycentroid']))
                 apertures = CircularAperture(positions, r=4.0)
-                norm = ImageNormalize(stretch=SqrtStretch())
+                plt.figure()
+                # norm = ImageNormalize(stretch=SqrtStretch())
+                ax1 = plt.subplot(121)
                 plt.imshow(data, cmap='Greys_r', origin='lower',**pltkwargs)
                 apertures.plot(color='blue', lw=1.5, alpha=0.5)
+                plt.xlim(-0.5,data.shape[1]-0.5)
+                plt.ylim(-0.5,data.shape[0]-0.5)
 
-                # plt.figure()
-                # plt.imshow(data,cmap='Greys_r',origin='lower',**pltkwargs)
+                plt.subplot(122,sharey=ax1,sharex=ax1)
+                plt.title('Sobel')
+                plt.imshow(data_s,cmap='Greys_r',origin='lower',**pltkwargs)
+                apertures.plot(color='blue', lw=1.5, alpha=0.5)
+                plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
+
+                plt.figure()
+                plt.imshow(data-data_s,cmap='Greys_r',origin='lower',**pltkwargs)
+                plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
                 plt.show()
 
+                exit()
 
                 ymin, xmin = filpy.find_argmin(data_s)
                 ymax, xmax = filpy.find_argmax(data_s)
