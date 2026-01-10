@@ -149,8 +149,5 @@ HISTORY       Pixels:29631
 HISTORY                                                                         
 END                                                                                                                                                                                                                                                                                                                                                   
 
-HEY []
-
-Files in /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest
-0 - IRIS-60_05_s2_filtered-data.npz
-1 - IRIS-100_04_s2_filtered-data.npz
+[(  0,   0, 1.0440804 ) (  5,   0, 1.5911529 ) ( 11,   0, 1.5092472 ) ...
+ (302, 399, 1.0570403 ) (305, 399, 1.0440325 ) (372, 399, 0.91950524)]
