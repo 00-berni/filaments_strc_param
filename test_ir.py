@@ -549,18 +549,24 @@ if __name__ == '__main__':
                 print('ASTRO:',np.array((mean, median, std)))
                 daofind = DAOStarFinder(fwhm=3.0, threshold=2.*std)
                 sources = daofind(data - median)
+                print(sources.colnames)
+                print('\t'.join(['x', 'y', 'sharpness', 'roundness1', 'roundness2']))
+                for source in sources:
+                    print('\t'.join(['{:.0f}','{:.0f}','{:f}','{:f}','{:f}']).format(source['xcentroid'], source['ycentroid'], source['sharpness'], source['roundness1'], source['roundness2']))
+                    
                 from astropy.visualization import SqrtStretch
                 from astropy.visualization.mpl_normalize import ImageNormalize
                 from photutils.aperture import CircularAperture
                 positions = np.transpose((sources['xcentroid'], sources['ycentroid']))
                 apertures = CircularAperture(positions, r=4.0)
                 plt.figure()
-                # norm = ImageNormalize(stretch=SqrtStretch())
                 ax1 = plt.subplot(121)
                 plt.imshow(data, cmap='Greys_r', origin='lower',**pltkwargs)
                 apertures.plot(color='blue', lw=1.5, alpha=0.5)
                 plt.xlim(-0.5,data.shape[1]-0.5)
                 plt.ylim(-0.5,data.shape[0]-0.5)
+                del_pos = sources['roundness1'] > 0
+                plt.plot(sources['xcentroid'][del_pos],sources['ycentroid'][del_pos],'+g')
 
                 plt.subplot(122,sharey=ax1,sharex=ax1)
                 plt.title('Sobel')
@@ -569,8 +575,42 @@ if __name__ == '__main__':
                 plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
 
                 plt.figure()
-                plt.imshow(data-data_s,cmap='Greys_r',origin='lower',**pltkwargs)
+                plt.imshow(data_s,cmap='Greys_r',origin='lower',**pltkwargs)
                 plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
+                plt.show()
+
+                print('\nSOBEL TRIAL')
+                tmp_data = abs(data+abs(data_s))
+                mean, median, std = sigma_clipped_stats(tmp_data, sigma=3.0)
+                print('ASTRO:',np.array((mean, median, std)))
+                daofind = DAOStarFinder(fwhm=3., threshold=5.*std)
+                sources = daofind(tmp_data-median)
+                print('\t'.join(['x', 'y', 'sharpness', 'roundness1', 'roundness2']))
+                for source in sources:
+                    print('\t'.join(['{:.0f}','{:.0f}','{:f}','{:f}','{:f}']).format(source['xcentroid'], source['ycentroid'], source['sharpness'], source['roundness1'], source['roundness2']))
+                xpos, ypos = sources['xcentroid'], sources['ycentroid']
+                new_pos = np.empty((2,0))
+                for x,y in zip(xpos,ypos):
+                    dist = np.sqrt((x-xpos)**2 + (y-ypos)**2)
+                    near_pnts = dist <= 5
+                    new_pos = np.append(new_pos,[[np.mean(xpos[near_pnts])],[np.mean(ypos[near_pnts])]],axis=1)
+                xpos, ypos = new_pos
+                positions = np.transpose((xpos,ypos))
+                apertures = CircularAperture(positions, r=4.0)
+                plt.figure()
+                ax1 = plt.subplot(121)
+                plt.imshow(tmp_data- median, cmap='Greys_r', origin='lower',**pltkwargs)
+                apertures.plot(color='blue', lw=1.5, alpha=0.5)
+                plt.plot(xpos,ypos,'xr')
+                plt.xlim(-0.5,data.shape[1]-0.5)
+                plt.ylim(-0.5,data.shape[0]-0.5)
+
+                plt.subplot(122,sharey=ax1,sharex=ax1)
+                plt.title('Sobel')
+                plt.imshow(data,cmap='Greys_r',origin='lower',**pltkwargs)
+                apertures.plot(color='blue', lw=1.5, alpha=0.5)
+                plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
+
                 plt.show()
 
                 exit()
