@@ -1,6 +1,6 @@
-from typing import Literal, Sequence, Optional, Union
+from typing import Literal, Sequence, Optional, Union, Any
 from numpy.typing import NDArray, ArrayLike
-from numpy import int_, float64, bool_
+from numpy import int_, float64, bool_, ndarray
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from astropy.io.fits import HDUList
@@ -10,6 +10,8 @@ FloatArray = NDArray[float64]
 BoolArray  = NDArray[bool_]
 FloatArrayLike = Union[float, FloatArray]
 IntArrayLike = Union[int, IntArray]
+
+AxesArray = ndarray[Any, Axes]
 
 __all__ = [
            'Literal',
