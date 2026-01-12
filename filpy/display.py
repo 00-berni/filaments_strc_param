@@ -229,7 +229,7 @@ def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar
 
 
 ##*
-def show_image(data: Union[NDArray, list[Optional[NDArray]]], num_plots: tuple[int,int] = (1,1), dim: tuple[float,float] = (10,10), title: str = '',subtitles: Union[list[str],str] = '', show: bool = False, fignum: Optional[int] = None, projection: Union[Optional[str],list[Optional[str]]] = None, **figkwargs) ->  Optional[tuple[Figure, Union[Axes, AxesArray]]]:
+def show_image(data: Union[NDArray, list[Optional[NDArray]]], num_plots: tuple[int,int] = (1,1), dim: tuple[float,float] = (10,10), title: str = '',subtitles: Union[list[str],str] = '', show: bool = False, fignum: Optional[int] = None, projection: Union[Optional[str],list[Optional[str]]] = None, sharex: Union[list[int],int] = -1, sharey: Union[list[int],int] = -1, **figkwargs) ->  Optional[tuple[Figure, Union[Axes, AxesArray]]]:
     """To plot quickly one or a set of 2D pictures
     
     Parameters
@@ -289,16 +289,22 @@ def show_image(data: Union[NDArray, list[Optional[NDArray]]], num_plots: tuple[i
         elif len_plots > len(subtitles):
             subtitles += ['']*(len_plots - len(subtitles))
 
+        if isinstance(sharex,int): sharex = [sharex]*len_plots
+        if isinstance(sharey,int): sharey = [sharey]*len_plots
+
         fig.suptitle(title, fontsize=20)
-        axs = np.array([None]*len_plots,dtype='object')
+        axs = [None]*len_plots
         for i, elem in enumerate(data):
             if elem is not None:
-                ax = fig.add_subplot(*num_plots,i,projection=projection[i])
+                shx = axs[sharex[i]] 
+                shy = axs[sharey[i]]                     
+                ax = fig.add_subplot(*num_plots,i+1,projection=projection[i],sharex=shx,sharey=shy)
                 axs[i] = ax
                 sub = subtitles[i]
                 elem_kwargs = { key: val[i] for key, val in figkwargs.items()}
+                print(elem_kwargs)
                 plot_image(fig,ax,elem,subtitle=sub,**elem_kwargs)
-        axs = axs.reshape(*num_plots)
+        axs = np.asarray(axs).reshape(*num_plots)
     else: 
         if subtitles == '' and title != '':
             subtitles = title
