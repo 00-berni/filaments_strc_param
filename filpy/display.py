@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from .typing import * 
-from .typing import Axes, Figure
+from .typing import Axes, Figure, AxesArray
 
 __all__ = [
             'myplot',
@@ -163,7 +163,7 @@ def quickplot(data: Union[Sequence[NDArray], NDArray], numfig: Optional[int] = N
     if output:
         return fig, ax
 
-def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar: bool = True, **figargs) -> None:
+def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar: bool = True, **figkwargs) -> None:
     """To plot fits images
 
     Parameters
@@ -178,38 +178,38 @@ def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar
         subtitle, by default `''`
     colobar : bool, optional
         if `True` the colorbar is displayed too
-    **figargs
+    **figkwargs
         parameters of `matplotlib.pyplot.imshow()`
     """
-    if 'cmap' not in figargs.keys():
-        figargs['cmap'] = 'gray'
-    if 'origin' not in figargs.keys():
-        figargs['origin'] = 'lower'
-    if 'fontsize' not in figargs.keys():
-        figargs['fontsize'] = 18
-    font_size = figargs['fontsize']
-    figargs.pop('fontsize')
-    if 'colorbar_pos' not in figargs.keys():
-        figargs['colorbar_pos'] = 'bottom'
-    colorbar_pos = figargs['colorbar_pos']
-    figargs.pop('colorbar_pos')
+    if 'cmap' not in figkwargs.keys():
+        figkwargs['cmap'] = 'gray'
+    if 'origin' not in figkwargs.keys():
+        figkwargs['origin'] = 'lower'
+    if 'fontsize' not in figkwargs.keys():
+        figkwargs['fontsize'] = 18
+    font_size = figkwargs['fontsize']
+    figkwargs.pop('fontsize')
+    if 'colorbar_pos' not in figkwargs.keys():
+        figkwargs['colorbar_pos'] = 'bottom'
+    colorbar_pos = figkwargs['colorbar_pos']
+    figkwargs.pop('colorbar_pos')
 
-    # if 'xlabel' not in figargs.keys():
-    #     figargs['xlabel'] = True
-    # if 'ylabel' not in figargs.keys():
-    #     figargs['ylabel'] = True
-    # if figargs['xlabel']: ax.set_xlabel('x [px]', fontsize=font_size)
-    # if figargs['ylabel']: ax.set_ylabel('y [px]', fontsize=font_size)
-    # figargs.pop('xlabel')
-    # figargs.pop('ylabel')
+    # if 'xlabel' not in figkwargs.keys():
+    #     figkwargs['xlabel'] = True
+    # if 'ylabel' not in figkwargs.keys():
+    #     figkwargs['ylabel'] = True
+    # if figkwargs['xlabel']: ax.set_xlabel('x [px]', fontsize=font_size)
+    # if figkwargs['ylabel']: ax.set_ylabel('y [px]', fontsize=font_size)
+    # figkwargs.pop('xlabel')
+    # figkwargs.pop('ylabel')
     ax.set_title(subtitle, fontsize=font_size)
-    if 'aspect' not in figargs.keys():
-        figargs['aspect'] = 'equal'
-    if 'barlabel' not in figargs.keys():
-        figargs['barlabel'] = 'intensity [a.u.]'
-    bar_label = figargs['barlabel']
-    figargs.pop('barlabel')
-    image = ax.imshow(data,**figargs)
+    if 'aspect' not in figkwargs.keys():
+        figkwargs['aspect'] = 'equal'
+    if 'barlabel' not in figkwargs.keys():
+        figkwargs['barlabel'] = 'intensity [a.u.]'
+    bar_label = figkwargs['barlabel']
+    figkwargs.pop('barlabel')
+    image = ax.imshow(data,**figkwargs)
     # cbar = fig.colorbar(image, ax=ax, cmap=color, orientation=orientation)
     # cbar.set_label(bar_label,fontsize=font_size)
 
@@ -220,55 +220,91 @@ def plot_image(fig: Figure, ax: Axes, data: NDArray, subtitle: str = '',colorbar
             divider = make_axes_locatable(ax)
             colorbar_axes = divider.append_axes("right", size="10%", pad=0.1)  
             # generating the colorbar
-            cbar = fig.colorbar(image, ax=ax, cmap=figargs['cmap'], cax=colorbar_axes)
+            cbar = fig.colorbar(image, ax=ax, cmap=figkwargs['cmap'], cax=colorbar_axes)
         elif colorbar_pos == 'bottom':
             fig.subplots_adjust(bottom=0.2)
             cbar_ax = fig.add_axes([0.25, 0.07, 0.5, 0.05])
-            cbar = fig.colorbar(image,cax=cbar_ax, cmap=figargs['cmap'], orientation='horizontal')
+            cbar = fig.colorbar(image,cax=cbar_ax, cmap=figkwargs['cmap'], orientation='horizontal')
         cbar.set_label(bar_label,fontsize=font_size)
 
 
 ##*
-def show_image(data: Union[NDArray, list[NDArray]], num_plots: Sequence[int] = (1,1), dim: Sequence[int] = (10,10), title: str = '',subtitles: Optional[list[str]] = None, show: bool = False, projection: Optional[str] = None, **figargs) ->  Optional[tuple[Figure, Union[Axes, NDArray]]]:
-    """To plot quickly one or a set of fits pictures
+def show_image(data: Union[NDArray, list[Optional[NDArray]]], num_plots: tuple[int,int] = (1,1), dim: tuple[float,float] = (10,10), title: str = '',subtitles: Union[list[str],str] = '', show: bool = False, fignum: Optional[int] = None, projection: Union[Optional[str],list[Optional[str]]] = None, **figkwargs) ->  Optional[tuple[Figure, Union[Axes, AxesArray]]]:
+    """To plot quickly one or a set of 2D pictures
     
     Parameters
     ----------
-    data : NDArray | list[NDArray]
-        target(s)
-    num_plots : Sequence[int], optional
-        shape of grid of plots, by default `(1,1)`
-    dim : Sequence[int], optional
-        figure size, by default `(10,7)`
-    title : str, optional
-        title of the image, by default `''`
     show : bool, optional
         if `True` it displays the figure and the function returns `None`, by default `False`
     projection : str | None, optional
-        the projection of each subplot
-    **figargs
+    **figkwargs
         parameters of `plot_image()` and `matplotlib.pyplot.imshow()`
     
     Returns
     -------
+
+
+    Parameters
+    ----------
+    data : NDArray | list[NDArray | None]
+        target(s). If an element is `None` then that space remains empty
+    num_plots : tuple[int,int], optional
+        shape of grid of plots, by default `(1,1)`
+    dim : tuple[int,int], optional
+        figure size, by default `(10,7)`
+    title : str, optional
+        the title of the image, by default `''`
+    subtitles : list[str] | str, optional
+        the title of each subplot, by default `''`
+    show : bool, optional
+        if `True` it displays the figure and the function returns `None`, by default `False`
+    projection : str | list[str | None] | None, optional
+        the projection of each subplot, 
+    **figkwargs
+        parameters of `plot_image()` and `matplotlib.pyplot.imshow()`
+
+    Returns
+    -------
     fig : Figure
         figure if `show` is `False`
-    axs : Axes | NDArray
+    axs : Axes | AxesArray
         axes if `show` is `False`
     """
-    fig, axs = plt.subplots(*num_plots, figsize=dim, subplot_kw={'projection': projection}) 
+    fig = plt.figure(num=fignum,figsize=dim)
     if num_plots != (1,1): 
-        if subtitles is None:
-            subtitles = ['']*len(data)
+        len_plots = sum(num_plots)
+        if len(data) != len_plots:
+            data += [None]*(len_plots-len(data))
+        if isinstance(projection,str) or (projection is None):
+            projection = [projection]*len_plots
+        elif len_plots > len(projection):
+            projection += [None]*(len_plots - len(projection)) 
+        for key, val in figkwargs.items():
+            if not isinstance(val,list):
+                figkwargs[key] = [val]*len_plots
+            elif len_plots > len(val):
+                figkwargs[key] += [None]*(len_plots - len(val))
+        if isinstance(subtitles,str):
+            subtitles = [subtitles]*len_plots
+        elif len_plots > len(subtitles):
+            subtitles += ['']*(len_plots - len(subtitles))
+
         fig.suptitle(title, fontsize=20)
-        for (ax,elem,sub) in zip(axs.flatten(),data,subtitles):
-            plot_image(fig,ax,elem,subtitle=sub,**figargs)
+        axs = np.array([None]*len_plots,dtype='object')
+        for i, elem in enumerate(data):
+            if elem is not None:
+                ax = fig.add_subplot(*num_plots,i,projection=projection[i])
+                axs[i] = ax
+                sub = subtitles[i]
+                elem_kwargs = { key: val[i] for key, val in figkwargs.items()}
+                plot_image(fig,ax,elem,subtitle=sub,**elem_kwargs)
+        axs = axs.reshape(*num_plots)
     else: 
-        if subtitles is None:
+        if subtitles == '' and title != '':
             subtitles = title
         else:
             fig.suptitle(title, fontsize=20)
-            subtitles = subtitles[0]
-        plot_image(fig,axs,data,subtitle=subtitles,**figargs)
+        axs = fig.add_subplot(1,1,1,projection=projection) 
+        plot_image(fig,axs,data,subtitle=subtitles,**figkwargs)
     if show: plt.show()
     else: return fig, axs
