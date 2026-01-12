@@ -423,7 +423,7 @@ if __name__ == '__main__':
             vmins += [vmins[-1]]*(len(selections)-len(vmins))
 
         displ_kwargs = [{'vmax': vmax, 
-                            'vmin': vmin} for vmax, vmin in zip(vmaxs, vmins)]
+                         'vmin': vmin} for vmax, vmin in zip(vmaxs, vmins)]
 
         ########
 
@@ -566,7 +566,7 @@ if __name__ == '__main__':
                 plt.xlim(-0.5,data.shape[1]-0.5)
                 plt.ylim(-0.5,data.shape[0]-0.5)
                 del_pos = sources['roundness1'] > 0
-                plt.plot(sources['xcentroid'][del_pos],sources['ycentroid'][del_pos],'+g')
+                # plt.plot(sources['xcentroid'][del_pos],sources['ycentroid'][del_pos],'+g')
 
                 plt.subplot(122,sharey=ax1,sharex=ax1)
                 plt.title('Sobel')
@@ -581,6 +581,20 @@ if __name__ == '__main__':
 
                 print('\nSOBEL TRIAL')
                 tmp_data = abs(data+abs(data_s))
+                tmp_kwargs = {key: val for key, val in pltkwargs.items()}
+                tmp_kwargs.pop('vmax')
+                filpy.show_image(data=[data,data_s,abs(data_s),tmp_data],num_plots=(2,2),
+                                 subtitles=['Data','Sobel','Abs Sobel','Summed'],
+                                 show=True,
+                                 sharex=0,
+                                 sharey=0,
+                                 vmax=[4,4,4,4],
+                                 aspect='auto',
+                                 colorbar_pos = 'right',
+                                 barlabel = '',
+                                 **tmp_kwargs)
+                del tmp_kwargs
+
                 mean, median, std = sigma_clipped_stats(tmp_data, sigma=3.0)
                 print('ASTRO:',np.array((mean, median, std)))
                 daofind = DAOStarFinder(fwhm=3., threshold=5.*std)
@@ -590,18 +604,23 @@ if __name__ == '__main__':
                     print('\t'.join(['{:.0f}','{:.0f}','{:f}','{:f}','{:f}']).format(source['xcentroid'], source['ycentroid'], source['sharpness'], source['roundness1'], source['roundness2']))
                 xpos, ypos = sources['xcentroid'], sources['ycentroid']
                 new_pos = np.empty((2,0))
+                near_pnts = np.zeros(xpos.shape).astype(bool)
                 for x,y in zip(xpos,ypos):
-                    dist = np.sqrt((x-xpos)**2 + (y-ypos)**2)
-                    near_pnts = dist <= 5
-                    new_pos = np.append(new_pos,[[np.mean(xpos[near_pnts])],[np.mean(ypos[near_pnts])]],axis=1)
+                    if (x not in xpos[near_pnts]) or (y not in ypos[near_pnts]):
+                        dist = np.sqrt((x-xpos)**2 + (y-ypos)**2)
+                        near_pnts = dist <= 5
+                        px = (ypos[near_pnts].astype(int),xpos[near_pnts].astype(int))
+                        mean_y = np.average(ypos[near_pnts],weights=data[px[0],px[1]])
+                        mean_x = np.average(xpos[near_pnts],weights=data[px[0],px[1]])
+                        new_pos = np.append(new_pos,[[mean_x],[mean_y]],axis=1)
                 xpos, ypos = new_pos
                 positions = np.transpose((xpos,ypos))
                 apertures = CircularAperture(positions, r=4.0)
                 plt.figure()
                 ax1 = plt.subplot(121)
-                plt.imshow(tmp_data- median, cmap='Greys_r', origin='lower',**pltkwargs)
+                plt.imshow(tmp_data - median, cmap='Greys_r', origin='lower',**pltkwargs)
                 apertures.plot(color='blue', lw=1.5, alpha=0.5)
-                plt.plot(xpos,ypos,'xr')
+                plt.plot(xpos,ypos,'.g')
                 plt.xlim(-0.5,data.shape[1]-0.5)
                 plt.ylim(-0.5,data.shape[0]-0.5)
 
@@ -610,8 +629,27 @@ if __name__ == '__main__':
                 plt.imshow(data,cmap='Greys_r',origin='lower',**pltkwargs)
                 apertures.plot(color='blue', lw=1.5, alpha=0.5)
                 plt.plot(sources['xcentroid'], sources['ycentroid'],'xr')
+                plt.plot(xpos,ypos,'.g')
 
                 plt.show()
+                exit()
+                tmp_field = data.copy()
+                length = 7
+                for x, y in zip(xpos.astype(int),ypos.astype(int)):
+                    print('CEN VAL:',x,y,'\t',data[y,x],tmp_data[y,x])
+                    mini_obj = tmp_data[y-length:y+length+1,x-length:x+length+1]
+                    _, ax = filpy.show_image(mini_obj)
+                    ax.plot(length,length,'or')
+                    yarr = np.arange(mini_obj.shape[0]) - length
+                    xarr = np.arange(mini_obj.shape[1]) - length
+                    yy, xx = np.meshgrid(yarr,xarr)
+                    dist = np.sqrt(xx**2+yy**2)
+                    unq_dist = np.sort(np.unique(dist))
+                    d_pos = [dist == d for d in unq_dist]
+                    avg_profile = np.array([ np.mean(data[yy[d],xx[d]]) for d in d_pos])
+                    filpy.quickplot(avg_profile,fmt='.--')
+                    plt.show()
+
 
                 exit()
 
@@ -682,9 +720,9 @@ if __name__ == '__main__':
                 print('MIN:',cp_data[ymin,xmin])
                 print('MAX:',cp_data[ymax,xmax])
                 _, axs = filpy.show_image([data,cp_data],num_plots=(1,2),
-                                         subtitles=['Data','Sobel'],
-                                         colorbar = False,
-                                         **pltkwargs)
+                                          subtitles=['Data','Sobel'],
+                                          colorbar = False,
+                                          **pltkwargs)
                 for ax in axs:
                     ax.plot(*max_pos,'.r')
                     ax.plot(*min_pos,'.g')
