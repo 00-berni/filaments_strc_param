@@ -7,7 +7,7 @@ import logging
 import psutil
 from numpy.typing import ArrayLike
 
-TEST_DIR = filpy.PROJECT_DIR + 'tests' 
+TEST_dir = filpy.PROJECT_dir + 'tests' 
 
 __all__ = ['filpy',
            'tracemalloc',
@@ -17,7 +17,7 @@ __all__ = ['filpy',
            'display_top', 
            'log_path',
            'ram_usage',
-           'TEST_DIR'
+           'TEST_dir'
            ]
 
 def distance(p1: tuple[int,int] | np.ndarray, p2: tuple[int,int] | np.ndarray) -> float | np.ndarray:
@@ -51,8 +51,8 @@ def log_path(file_path: filpy.FileVar) -> str:
     log_path : str
         log path
     """
-    log_name = ''.join(file_path.FILE.split('.')[:-1]+['.log'])
-    return file_path.DIR.__add__(log_name).PATH
+    log_name = ''.join(file_path.file.split('.')[:-1]+['.log'])
+    return file_path.dir.__add__(log_name).path
 
 def ram_usage() -> float:
     process = psutil.Process()
