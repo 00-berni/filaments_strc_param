@@ -13,6 +13,21 @@ def this_dir() -> str:
     """
     return os.path.dirname(os.path.realpath(__file__))
 
+def file_name(file_path: str) -> str:
+    """Return the name of the current file
+
+    Parameters
+    ----------
+    file_path : str
+        the path of the file
+
+    Returns
+    -------
+    filename : str
+        the name of the file
+    """
+    return os.path.split(file_path)[-1]
+
 
 class PathVar():
     """Handle the paths
