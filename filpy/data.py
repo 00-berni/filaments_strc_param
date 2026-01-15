@@ -605,3 +605,120 @@ def read_database(datafile: Union[str,FileVar] = DATA_FILE, print_res: bool = Tr
 ## Constants
 U_VEL = u.km / u.s
 u.add_enabled_units(u.def_unit(['K (Tb)'], represents=u.K))
+
+
+"""
+~~~~ IRAS DATA ~~~~
+Byte-per-byte Description of file: main.dat
+--------------------------------------------------------------------------------
+   Bytes Format  Units   Label    Explanations
+--------------------------------------------------------------------------------
+   1- 11  A11    ---     IRAS     IRAS source name
+  12- 13  I2     h       RAh      Hours RA, equinox 1950.0, epoch 1983.5
+  14- 15  I2     min     RAm      Minutes RA, equinox 1950.0, epoch 1983.5
+  16- 18  I3     ds      RAds     Seconds RA, equinox 1950.0, epoch 1983.5
+      19  A1     ---     DE-      Sign Dec, equinox 1950.0, epoch 1983.5
+  20- 21  I2     deg     DEd      Degrees Dec, equinox 1950.0, epoch 1983.5
+  22- 23  I2     arcmin  DEm      Minutes Dec, equinox 1950.0, epoch 1983.5
+  24- 25  I2     arcsec  DEs      Seconds Dec, equinox 1950.0, epoch 1983.5
+  26- 28  I3     arcsec  Major    Uncertainty ellipse major axis
+  29- 31  I3     arcsec  Minor    Uncertainty ellipse minor axis
+  32- 34  I3     deg     PosAng   Uncertainty ellipse position angle (1)
+  35- 36  I2     ---     NHcon    Number of times observed
+  37- 45  E9.3   Jy      Fnu_12   Average non-color corrected flux density,
+                                    12um (5)
+  46- 54  E9.3   Jy      Fnu_25   Average non-color corrected flux density,
+                                    25um (5)
+  55- 63  E9.3   Jy      Fnu_60   Average non-color corrected flux density,
+                                    60um (5)
+  64- 72  E9.3   Jy      Fnu_100  Average non-color corrected flux density,
+                                    100um (5)
+      73  I1     ---   q_Fnu_12   [1,3] Flux density quality, 12um (3)
+      74  I1     ---   q_Fnu_25   [1,3] Flux density quality, 25um (3)
+      75  I1     ---   q_Fnu_60   [1,3] Flux density quality, 60um (3)
+      76  I1     ---   q_Fnu_100  [1,3] Flux density quality, 100um (3)
+  77- 78  I2     ---     NLRS     Number of significant LRS spectra (4)
+  79- 80  A2     ---     LRSChar  Characterization of averaged LRS spectrum (4)
+  81- 83  I3     %     e_Fnu_12   Percent relative flux den. uncertainty, 12um
+  84- 86  I3     %     e_Fnu_25   Percent relative flux den. uncertainty, 25um
+  87- 89  I3     %     e_Fnu_60   Percent relative flux den. uncertainty, 60um
+  90- 92  I3     %     e_Fnu_100  Percent relative flux den. uncertainty, 100um
+  93- 97  I5     ---     TSNR_12  10x minimum signal-to-noise ratio, 12um
+  98-102  I5     ---     TSNR_25  10x minimum signal-to-noise ratio, 25um
+ 103-107  I5     ---     TSNR_60  10x minimum signal-to-noise ratio, 60um
+ 108-112  I5     ---     TSNR_100 10x minimum signal-to-noise ratio, 100um
+     113  A1     ---     CC_12    Point source correlation coeff., 12um (8)
+     114  A1     ---     CC_25    Point source correlation coeff., 25um (8)
+     115  A1     ---     CC_60    Point source correlation coeff., 60um (8)
+     116  A1     ---     CC_100   Point source correlation coeff., 100um (8)
+ 117-118  I2     %       Var      Percent likelihood of variability
+     119  A1     ---     Disc     Discrepant fluxes flag, 1 per band,
+                                    hex encoded (6)
+     120  A1     ---     Confuse  Confusion flags, 1 per band, hex encoded (6)
+     121  I1     ---     PNearH   Number of nearby hours-confirmed point sources
+     122  I1     ---     PNearW   Number of nearby weeks-confirmed point sources
+     123  I1     ---     SES1_12  Nearby seconds-confirmed small ext., 12um (7)
+     124  I1     ---     SES1_25  Nearby seconds-confirmed small ext., 25um (7)
+     125  I1     ---     SES1_60  Nearby seconds-confirmed small ext., 60um (7)
+     126  I1     ---     SES1_100 Nearby seconds-confirmed small ext., 100um (7)
+     127  I1     ---     SES2_12  Nearby weeks-confirmed small ext., 12um (7)
+     128  I1     ---     SES2_25  Nearby weeks-confirmed small ext., 25um (7)
+     129  I1     ---     SES2_60  Nearby weeks-confirmed small ext., 60um (7)
+     130  I1     ---     SES2_100 Nearby weeks-confirmed small ext., 100um (7)
+     131  A1     ---     HSDFlag  High source density bin flag, hex encoded (6)
+     132  I1     ---     Cirr1    Number of nearby 100 micron only WSDB sources
+     133  I1     ---     Cirr2    100 micron sky brightness ratio to flux den.
+                                    (2)
+ 134-136  I3     MJy/sr  Cirr3    Total 100 micron sky surface brightness
+ 137-138  I2     ---     NID      Number of positional associations
+     139  I1     ---     IDType   [1,4] Type of association (9)
+ 140-141  I2     ---     MHcon    ? Possible number of HCONs
+ 142-145  I4     10-3    FCor_12  ? Flux correction factor applied (5)
+ 146-149  I4     10-3    FCor_25  ? Flux correction factor applied (5)
+ 150-153  I4     10-3    FCor_60  ? Flux correction factor applied (5)
+ 154-157  I4     10-3    FCor_100 ? Flux correction factor applied (5)
+--------------------------------------------------------------------------------
+"""
+def _read_iras_row(row: str) -> tuple:
+    name = row[:11].split(' ')[0]
+    # ra in hours
+    ra = float(row[11:13]) + \
+         float(row[13:15])/60 + \
+         float(row[15:18])/3600
+    # dec in deg
+    dec = -1 if row[18] == '-' else 1
+    dec *= (float(row[19:21]) + \
+            float(row[21:23])/60 + \
+            float(row[23:25])/3600
+    )
+    # unc ellipse major axis
+    unc_maj =  float(row[25:28]) 
+    # unc ellipse minor axis 
+    unc_min =  float(row[28:31])
+    # pos angle
+    pos_ang = float(row[31:34])
+    # numb of times observed
+    nh_con = int(row[34:36])
+    # avg non-color corrected flux density
+    f_nu_12 = float(row[36:45]) #: 12 um
+    f_nu_25 = float(row[45:54]) #: 25 um
+    f_nu_60 = float(row[54:63]) #: 60 um
+    f_nu_100 = float(row[62:72]) #: 100 um
+    # flux density quality
+    q_fnu_12 = int(row[72]) #: 12 um
+    q_fnu_25 = int(row[73]) #: 25 um
+    q_fnu_60 = int(row[74]) #: 60 um
+    q_fnu_100 = int(row[75]) #: 100 um
+    return name, ra, dec, \
+           unc_maj, unc_min, pos_ang, \
+           nh_con, \
+           f_nu_12, f_nu_25, f_nu_60, f_nu_100, \
+           q_fnu_12, q_fnu_25, q_fnu_60, q_fnu_100
+
+def read_iras_data(data_file: str,*, store_data: bool = True):
+    import numpy as np
+    with open(data_file,'r') as file:
+        rows = file.readlines()
+    data = np.array([_read_iras_row(row) for row in rows]).transpose()
+    columns = ['name','ra','dec','unc_maj','unc_min','pos_ang','nh_con', 'f_nu_12', 'f_nu_25', 'f_nu_60', 'f_nu_100','q_fnu_12', 'q_fnu_25', 'q_fnu_60', 'q_fnu_100']   
+    return
