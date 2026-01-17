@@ -15,29 +15,28 @@ logger_name = __name__
 logger = logging.getLogger(logger_name)
 logger.setLevel('DEBUG')
 
-GAUSS_KWARGS = {'sigma': float,
-                'order': int}
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TestIR_PSF',
                                      description='Make simulation to see distortion after Sobel filtering',
                                     )
-    
     # parameters
-    parser.add_argument('-d','--dim',help='set the size of the image. By default `11`',type=int,action='store',nargs='*',default=[11])
-    parser.add_argument('-v','--maxval',help='set a value of the point-like source. By default `1` %',type=float,action='store',default=1)
-    parser.add_argument('-b','--bkg',help='set a value of the background as percent of the maximum value. By default `30` %',type=float,action='store',default=30)
-    parser.add_argument('-B','--bkg-mode',help='choose the mode of background. Default by `"constant"`',type=str,choices=['constant','uniform','normal'],default='constant')
+    field_parser = parser.add_argument_group('field parameter')
+    field_parser.add_argument('-d','--dim',help='set the size of the image. By default `11`',type=int,action='store',nargs='*',default=[11])
+    field_parser.add_argument('-v','--maxval',help='set a value of the point-like source. By default `1` perc',type=float,action='store',default=1)
+    field_parser.add_argument('-b','--bkg',help='set a value of the background as percent of the maximum value. By default `30` perc',type=float,action='store',default=30)
+    field_parser.add_argument('-B','--bkg-mode',help='choose the mode of background. Default by `"constant"`',type=str,choices=['constant','uniform','normal'],default='constant')
     parser.add_argument('-k','--kernel',help='set the kernel of the PSF. By default `"Gaussian"`',type=str,action='store',choices=['Gaussian'],default='Gaussian')
-    parser.add_argument('-K','--kernel-param',help='set the parameters for the kernel. By default `[]`',type=str,action='store',nargs='*',default=['sigma'])
+    parser.add_argument('-p','--kernel-param',help='set the parameters for the kernel. By default `[]`',type=str,action='store',nargs='*',default=['sigma'])
     # log stuff
-    parser.add_argument('--log-out',help='set log output. By default `"file"`',nargs='*',type=str,action='store',choices=['file','bash','all'],default=['file'])
-    parser.add_argument('--log-lv',help='set level of log output. By default `"DEBUG"`',nargs='*',type=str,action='store',choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL'],default=['DEBUG'])
-    parser.add_argument('--log-mode', help='mode of the log. By default `"w"`',type=str, action='store',choices=['w','a'],default='w')
-    parser.add_argument('--no-log',help='disable the log',action='store_false')
+    log_parser = parser.add_argument_group('logging')
+    log_parser.add_argument('--log-out',help='set log output. By default `"file"`',nargs='*',type=str,action='store',choices=['file','bash','all'],default=['file'])
+    log_parser.add_argument('--log-lv',help='set level of log output. By default `"DEBUG"`',nargs='*',type=str,action='store',choices=['DEBUG','INFO','WARNING','ERROR','CRITICAL'],default=['DEBUG'])
+    log_parser.add_argument('--log-mode', help='mode of the log. By default `"w"`',type=str, action='store',choices=['w','a'],default='w')
+    log_parser.add_argument('--no-log',help='disable the log',action='store_false')
     # stuff
-    parser.add_argument('-l','--list',help='list the kernel options',action='store_true')
-    parser.add_argument('--no-display', action='store_false', help='pictures are not plotted')
+    stuff_parser = parser.add_argument_group('stuff')
+    stuff_parser.add_argument('-l','--list',help='list the kernel options',action='store_true')
+    stuff_parser.add_argument('--no-display', action='store_false', help='pictures are not plotted')
 
     args = parser.parse_args()
 
@@ -75,7 +74,7 @@ if __name__ == '__main__':
         logger.info(f'Print the info about the {kernel} kernel')
         print('SELECTED KERNEL:', kernel.upper())
         if kernel == 'Gaussian':
-            names_list = 'Variable names:\n\t- '+ '\n\t- '.join(gaussian_filter.__code__.co_varnames[1:])
+            names_list = 'Variable names:\n\t- ' + '\n\t- '.join(gaussian_filter.__code__.co_varnames[1:])
             print(names_list)
     else:
         if len(dim) == 1: dim = dim*2
