@@ -692,11 +692,11 @@ def _read_iras_row(row: str) -> tuple:
             float(row[23:25])/3600
     )
     # unc ellipse major axis
-    unc_maj =  float(row[25:28]) 
+    unc_maj =  int(row[25:28]) 
     # unc ellipse minor axis 
-    unc_min =  float(row[28:31])
+    unc_min =  int(row[28:31])
     # pos angle
-    pos_ang = float(row[31:34])
+    pos_ang = int(row[31:34])
     # numb of times observed
     nh_con = int(row[34:36])
     # avg non-color corrected flux density
@@ -715,10 +715,19 @@ def _read_iras_row(row: str) -> tuple:
            f_nu_12, f_nu_25, f_nu_60, f_nu_100, \
            q_fnu_12, q_fnu_25, q_fnu_60, q_fnu_100
 
-def read_iras_data(data_file: str,*, store_data: bool = True):
+from pandas import DataFrame    
+def read_iras_data(data_file: str,*, store_data: bool = True) -> DataFrame:
     import numpy as np
     with open(data_file,'r') as file:
         rows = file.readlines()
-    data = np.array([_read_iras_row(row) for row in rows]).transpose()
     columns = ['name','ra','dec','unc_maj','unc_min','pos_ang','nh_con', 'f_nu_12', 'f_nu_25', 'f_nu_60', 'f_nu_100','q_fnu_12', 'q_fnu_25', 'q_fnu_60', 'q_fnu_100']   
-    return
+    data_frame = DataFrame(data=[_read_iras_row(row) for row in rows],columns=columns)
+    data = data_frame.to_numpy().transpose()
+    if store_data:
+        storing_dir = FileVar(filename=data_file,path=True).dir
+        storing_file = storing_dir.split()[-1].lower()
+        np.savez(storing_dir.join(storing_file),
+                 columns=columns, 
+                 data=data
+                )
+    return data_frame
