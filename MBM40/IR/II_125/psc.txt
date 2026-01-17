@@ -1,0 +1,1091 @@
+
+
+
+
+
+
+
+
+                     INFRARED ASTRONOMICAL SATELLITE (IRAS)
+
+
+
+
+                              CATALOGS AND ATLASES
+
+
+
+
+                             Explanatory Supplement
+
+
+
+
+
+
+
+
+                     prepared under the supervision of the
+
+
+
+
+                    Joint IRAS Science Working Group (JISWG)
+
+
+
+ Notes about this computer-readable documentation:
+
+    The following text is an  excerpt from the original printed  documentation,
+ including Chapter I  "Introduction", Parts A.1,  A.2, and A.3,  Chapter X "The
+ Formats of the IRAS  Catalogs and Atlases", Parts  A, B, and B.1,  and Chapter
+ XII "Errata and Revisions as of 1987", Part A.
+
+    The text for Chapters X and XII were kindly supplied to the Astronomical
+Data Center in the form of WordStar word processing files by Ms. Rosanne
+Hernandez, IPAC Librarian.  The text for Chapter I was keyed-in at the
+Astronomical Data Center (ADC).  The text makes references to other chapters in
+the printed documentation.  These references are in the form:  XX.XX.XX, for
+chapter, section and subsection, respectively.  For example, V.H.6 refers to
+chapter IV, section H, subsection 6. The reader is directed to the printed
+version of the IRAS documentation for these references.
+
+    Because of  the restrictions  of the  ASCII character  set, some notational
+ differences  appear  between  the  printed  documentation and this text.  When
+ appropriate, greek letters are written out as their english names, except  the
+ word "micron" appears  instead of the  term "Mu-meters" or  "um".  In general,
+ subscripts appear  in parentheses,  for example,  flux per  unit frequency, "f
+ subscript Nu",  appears as  f(Nu) and  can be  pronounced, "f  sub Nu".  Terms
+ given in italics in the original text are enclosed in double quotation marks.
+
+    The description of the logical record format of the catalog (Chapter X) was
+changed to reflect the version distributed by the ADC.  At the end of this
+computer-readable text is a discussion of the catalog as it appears in
+FITS-table format.  This was authored at the ADC, and does not appear in the
+original documentation.
+
+
+    Please direct any  reports of typographical  errors to:
+
+    Lee Brotzman
+    Code 930.3
+    NASA/GSFC
+    Greenbelt, MD 20771
+    (301) 286-6953
+    BITNET:   ZMLEB@SCFVM
+    SPAN:     CHAMP::BROTZMAN
+    Internet: zmleb@scfvm.gsfc.nasa.gov
+              or  zmleb%scfvm@dftsrv.gsfc.nasa.gov
+
+
+
+
+ I. INTRODUCTION
+
+
+ A. General Overview
+
+
+ A.1 The IRAS Mission
+
+    The primary mission  of the Infrared  Astronomical Satellite (IRAS)  was to
+ conduct a sensitive and  unbiased survey of the  sky in four wavelength  bands
+ centered at 12, 25, 60, and 100 microns.  The project was initiated in 1975 as
+ a joint program of the United States, the Netherlands, and the United Kingdom.
+ Launched in January 1983, IRAS ceased operations in November 1983 after having
+ successfully surveyed more than 96% of the sky.
+
+    The results of several portions of the IRAS mission are given in a  catalog
+ of infrared point sources, in a  catalog of extended sources smaller than  8',
+ in a catalog of  low-resolution spectra, and in  an atlas of absolute  surface
+ brightness  images  of  the  entire  infrared  sky.   These  catalogs give the
+ characteristics  of  some  250,000  point  sources  and  20,000 small extended
+ sources down to  a limiting flux  density, away from  confused regions of  the
+ sky, of about 0.5 Jy at 12, 25 and 60 microns and about 1.5 Jy at 100  microns
+ for point sources, and  about a factor of  three brighter than this  for small
+ extended sources.   The angular  resolution of  the instrument  varied between
+ about 0.5' at 12 microns to about 2' at 100 microns.  The positional  accuracy
+ of sources  detected by  IRAS depends  on their  size, brightness and spectral
+ energy distribution but is usually  better than 20".  Approximately 5000  8-22
+ micron spectra of survey sources brighter than 10 Jy at 12 and 25 microns  are
+ available.
+
+
+ A.2 The Explanatory Supplement
+
+    This Explanatory Supplement is intended to be a complete and self-contained
+ description of the IRAS mission in relation to the products of the survey.  In
+ Chapter II, the IRAS satellite, telescope and focal plane instrumentation  are
+ reviewed.  The elements of the mission profile -- the constraints, the  design
+ features, and the in-flight modifications  to that design -- are  described in
+ Chapter III and are accompanied by a chronology of the events of the  mission.
+ In-flight tests of those aspects of the performance of the instrument directly
+ associated with the  survey are presented  in Chapter IV.   Chapters V and  VI
+ describe the processing performed on the data; the summaries that precede  the
+ detailed  discussions  should  be  sufficient  to  acquaint  the user with the
+ contents of the  catalogs.  Since the  flux reconstruction and  calibration of
+ the instrument probably  hold intrinsic interest  for many readers,  these are
+ described separately in Chapter VI.
+
+    A  preliminary  analysis  of  some  of  the  statistical  properties of the
+ catalogs is given in Chapter  VII.  Emphasis is placed on  general statistics,
+ such  as  positional  and  photometric  accuracy  and on easily derived number
+ counts.  A preliminary  analysis of sky  coverage and of  the completeness and
+ reliability  of  the  catalog  is  given  in Chapter VIII.  The low-resolution
+ spectrometer and the analysis of its measurements are described in Chapter IX.
+ Chapter  X  explains  the  format  and  meaning  of each of the entries in the
+ catalogs.  Each printed volume of the catalogs repeats the description of  the
+ formats of that catalog.
+
+
+
+
+    In  order  to  produce  the  catalogs  in a timely fashion, some processing
+ errors and anomalies  could not be  fixed; those which  were discovered before
+ the release  of the  data in  November 1984  are described  in Chapter  XI.  A
+ compilation of the names  of people who worked  on the IRAS project  comprises
+ Chapter XII.  The last chapter provides  a series of plots giving the  details
+ of the coverage of the sky by the IRAS survey.
+
+    Each chapter of  the Supplement was  written by those  members of the  IRAS
+ team  whose  names  are  appended  to  that  chapter.   The work described was
+ obviously the result of efforts by many individuals and should not be ascribed
+ to the authors alone.
+
+
+ A.3 Cautionary Notes
+
+    While it is  unlikely that all  aspects of the  instrumental performance or
+ the data processing will  be of interest to  all readers, even casual  readers
+ should  familiarize  themselves  with  the  various  caveats  described in the
+ chapters appropriate to the type of  data in question.  All users of  the IRAS
+ data should be cognizant of the following crucial facts:
+
+    a)  The  sky  at  100  microns  is  dominated by filaments termed "infrared
+ cirrus"  which,  although  concentrated  in  the  Galactic plane, can be found
+ almost all the way up to the Galactic poles.  The primary, deleterious effects
+ of the cirrus are that it can generate well-confirmed point and small extended
+ sources  that  are  actually  pieces  of  degree-sized  structures rather than
+ isolated,  discrete  objects  and  that   it  can  corrupt  100  micron,   and
+ occasionally 60 micron,  measurements of true  point sources (Sections  V.H.4,
+ VIII.D.2).
+
+    b) The spectral bandwidths of the detectors were sufficiently wide that the
+ quoted flux densities depend on the assumed energy distribution of the source.
+ For the catalogs, the energy distribution was taken to be constant in the flux
+ per logarithmic  frequency interval.   If the  source has  a different  energy
+ distribution  than  this,  a  "color  correction",  as large as 50% in extreme
+ cases, must be applied to the quoted flux densities (Section VI.C.3).
+
+    c) The survey is clearly "confusion limited" within about 10 degrees of the
+ Galactic plane  and in  several areas  of the  sky such  as the  Ophiuchus and
+ Orion-Taurus regions.  Considerable effort has been made to select only highly
+ reliable sources  in such  areas, at  the expense  of completeness.  The flags
+ associated with  sources with  possible confusion-related  problems should  be
+ examined very carefully (Sections V.D.8, V.H.6, VIII.C, VIII.D and X.B).
+
+    d)  The  algorithm  used  to  estimate  the  detector noise suffered from a
+ significant  lag.   This  caused  an  under-estimate  of  the  true noise when
+ approaching regions of rapidly changing noise and an overestimate of the noise
+ when leaving such  areas.  Regions with  large and rapidly  varying numbers of
+ sources, such  as the  Galactic plane,  also produced  this effect.  Since the
+ source detection algorithm (Section V.C) thresholded on signal to noise ratio,
+ the overestimated noise level resulted in a dearth of sources, or a  "shadow",
+ in the areas observed just after passage across the Galactic plane.  At 60 and
+ 100 microns, where the effect is worst, a "coverage hole" can extend as far as
+ 2 degrees from the plane.  The density of detected sources can differ, totally
+ artificially, by as much as a factor of ten from one side of the plane to  the
+ other due to this shadowing (Section VIII.D).
+
+
+
+
+    e) While great pains  were taken to confirm  the reality of sources  in the
+ point and small extended source catalogs, no such attempt was made for the sky
+ brightness  images.   Instead,  separate  images  of  the  sky  taken at times
+ differing from weeks  to months are  given.  It is  the responsibility of  the
+ user  to  ensure  that  sources  seen  in  the images are not due to transient
+ sources such as asteroids.
+
+ Authors:
+
+ G. Neugebauer and C. A. Beichman.
+
+
+
+
+  X. THE FORMATS OF THE IRAS CATALOGS AND ATLASES
+
+
+  A. Introduction
+
+    This chapter describes the formats  of the point source and  small extended
+ source catalogs, the total intensity images and the low-resolution spectra  in
+ their printed  and machine-readable  forms.  A  brief description  is given of
+ each entry in the catalogs; tables describe each column of the catalog in more
+ detail and give, for the machine  readable versions, the logical type of  each
+ variable  and  its  length  in  bytes.
+
+    IRAS images  are presented  in the  FITS format  (Wells, Greisen and Harten
+ 1981).  Sample headers are  given for the sky  plates, the Galactic plane  map
+ and the all-sky map.  The format of the 1/2 degree beam zodiacal history  file
+ is  described  in  this  chapter.   The  format of the extragalactic specialty
+ catalog is described at the beginning of that catalog.
+
+    IRAS data products discussed in this chapter include:
+
+    Point Sources:
+    Machine-readable version of the Catalog (Section X.B.1)
+    Printed version of the Catalog (Section X.B.2)
+    Machine-readable version of the Working Survey Data Base (Section X.B.3)
+    Small Extended Sources:
+    Machine-readable version of the Catalog (Section X.C.1)
+    Printed version of Catalog (Section X.C.2)
+    Extended Emission Images:
+    16.5 degree Images (photographic representation - Section X.D.3a)
+    16.5 degree Images (machine readable format - Section X.D.3b)
+    Galactic Plane Images (all formats - Section X.D.4)
+    Low-Resolution Maps (all formats - Section X.D.5)
+    Zodiacal History File (machine readable - Section X.D.6)
+    Low-Resolution IRAS Spectra:
+    Catalog of spectra (machine readable - Section X.E)
+
+
+ B. Point Sources
+
+    The information  about infrared  point sources  is presented  in increasing
+ detail,  progressing  from  the  printed  volumes  to  the tape version of the
+ catalog  to  the  detailed  description  of  the  observational and processing
+ history of each source in a file known as the Working Survey Data Base  (WSDB)
+ augmented  by  its  ancillary  file.   The  printed version (Section X.B.2) is
+ intended for users  at the telescope  or at institutions  without computerized
+ information retrieval systems.  The catalog tape (Section X.B. 1) is  intended
+ for astronomers desiring to make statistical studies and to search the catalog
+ for large numbers of sources.  The WSDB and ancillary file (Section X.B.3) are
+ meant to give the sophisticated researcher all the available data on any given
+ source such as its brightness on each hours-confirmed sighting, the  detectors
+ involved  and  the  details  of  the  data  reduction  such  as confusion with
+ neighboring sources.
+
+    Another catalog  available only  in machine  readable form  lists the  WSDB
+ entries  for  all  sources  that  failed  one  or more of the confirmation and
+ confusion criteria  and were  not, thus,  included in  the main catalog.  This
+ file  of  REJECTED  sources  includes  spurious objects, including: processing
+ failures, space debris, asteroids and comets, and celestial sources that,  due
+ to incompleteness  at faint  levels or  to variability,  failed to achieve the
+ minimum criterion of two hours-confirmed sightings.  In regions of high source
+ density the  file includes  sources rejected  by the  more severe criteria for
+ reliability applied there (Section V.H.6).  Caveat emptor.
+
+ B.1 The Machine Readable Version of the Point Source Catalog
+
+    The machine readable version of the catalog is divided into two files.  The
+ first is a 160 byte file containing the 252,889 sources arranged in order of
+ increasing right ascension.  The second is a 58 byte file containing 142,228
+ positional associations.
+
+
+
+
+    Tables X.B.1 and X.B.1a describe each entry in the catalog files.  Those
+ columns that are also included in the printed version are marked.  In the
+ table the column "Format" refers to the length and type of the (FORTRAN)
+ character field used to read or write each entry.  Figure X.B.1 describes the
+ format of the printed version of the catalog.
+
+    In  general,  for  quantities  that  have  a value in each wavelength band,
+ subscripts or array indices range from 1 to 4 and refer, respectively, to  12,
+ 25, 60 and 100 microns.  A number of the flags discussed below have values  in
+ each of the four wavelength bands.   For compactness these are encoded into  a
+ single base-16 (Hex) digit (values 0-F) in the following manner (Table X.B.2).
+ The four bits of that hex  digit correspond to the four wavelength  bands with
+ bit 0 (Least Significant Bit) for 12 microns, bit 1 for 25 microns, bit 2  for
+ 60 microns and bit  3 for 100 microns.   The presence of a  flag in a band  is
+ denoted by setting its  bit to 1. Thus  a source with a  particular flag, e.g.
+ CONFUSE, set at 12 and  25 microns would have CONFUSE  = 0011 = 3 (Hex)  while
+ one confused in 25, 60 and 100 microns would have CONFUSE = 1110 = E (Hex).  A
+ flag encoded in this manner will be referred to as "hex-encoded by band".
+
+    The remainder of this section discusses individual entries in the  catalog.
+ At the end of the section a  few remarks relevant only to the printed  version
+ of the catalog are given.
+
+
+
+
+              Table X.B.1 Format of Point Source Catalog Data File
+
+ Start
+ Byte    Name                  Description               Units         Format
+
+ 00    NAME [1]          Source Name                     ---           11A1
+ 11    HOURS             Right Ascension 1950.           Hours           I2
+ 13    MINUTE            Right Ascension 1950.           Minutes         I2
+ 15    SECOND [1]        Right Ascension 1950.           deci-Seconds    I3
+ 18    DSIGN [1]         Declination Sign                +/-             A1
+ 19    DECDEG            Declination 1950.               Arc Deg         I2
+ 21    DECMIN            Declination 1950.               Arc Min         I2
+ 23    DECSEC [1]        Declination 1950.               Arc Sec         I2
+ 25    MAJOR [1]         Uncertainty ellipse             Arc Sec         I3
+                         major axis
+ 28    MINOR [1]         Uncertainty ellipse             Arc Sec         I3
+                         minor axis
+ 31    POSANG [1]        Uncertainty ellipse             Degree          I3
+                         position angle                  (East of
+                                                          North)
+ 34    NHCON [1]         Number of times observed         ---            I2
+       (<25)
+ 36    FLUX [1]          Averaged non-color corrected    Jansky         4E9.3
+                         flux densities (1 value per     (1.0E-26 W/m**2/Hz)
+                         band)
+ 72    FQUAL [1]         flux density quality.           ---            4I1
+                         (1 value per band)
+ 76    NLRS              Number of significant LRS       ---             I2
+                         spectra
+ 78    LRSCHAR [1]       Characterization of averaged    ---            2A1
+                         LRS spectrum.
+
+ 80    RELUNC [1]        percent relative flux density   ---            4I3
+                         uncertainties (1 value
+                         per band).
+ 92    TSNR              ten times the minimum signal-   ---            4I5
+                         to-noise ratio in each band
+ 112   CC [1]            point source correlation        ---            4A1
+                         coefficient (1 value
+                         per band).
+ 116   VAR [1]           percent Likelihood of                           I2
+                         Variability
+ 118   DISC              Discrepant Fluxes flag          ---             A1
+                         (one per band, hex-encoded)
+ 119   CONFUSE [1]       Confusion flag (1 flag          ---             A1
+                         per band, hex-encoded)
+ 120   PNEARH [1]        Number of nearby hours-         ---             I1
+                         confirmed point sources
+ 121   PNEARW [1]        Number of nearby weeks-         ---             I1
+                         confirmed point sources
+
+
+        Table X.B.1 Format of Point Source Catalog Data File (Continued)
+
+
+ Start
+ Byte      Name                    Description                Units     Format
+
+ 122       SES1 [1]      Number of seconds-confirmed nearby   ---       4I1
+                         small extended sources.
+                         (1 value per band)
+ 126       SES2 [1]      Number of nearby weeks-              ---       4I1
+                         confirmed small extended
+                         sources.
+                         (1 value per band)
+ 130       HSDFLAG [1]   Source is located in high            ---        A1
+                         source density bin.
+                         (1 value per band, hex-encoded)
+ 131       CIRR1 [1]     Number of nearby 100 micron          ---        I1
+                         only WSDB sources
+ 132       CIRR2 [1]     Spatially filtered 100 micron        ---        I1
+                         sky brightness ratio to flux
+                         density of point source
+                         (see text)
+ 133       CIRR3         Total 100 micron sky                 MJy/sr     I3
+                         surface brightness
+ 136       NID [1]       Number of positional                 ---        I2
+           (<25)         associations.
+ 138       IDTYPE        Type of Object                       ---        I1
+ 140       MHCON         Possible number of HCON              ---        I2
+ 142       FCOR          Flux correction factor (times 1000)  ---       4I4
+                         (1 value per band)
+ 158       SPARE         3 Spare blanks                       ---       3A1
+
+
+             Table X.B.1a Format of Point Source Associations File
+
+
+ Start
+ Byte      Name                    Description                Units     Format
+
+ 00        NAME          IRAS source name                     ---       A11
+ 11        RECNO         Record Number of source in data file ---        I6
+ 18        CATNO [1]     Catalog number                       ---        I2
+ 20        SOURCE [1]    Source ID                            ---      15A1
+ 35        TYPE [1]      Source Type/Spectral Class           ---       5A1
+ 40        RADIUS1       Radius Vector from IRAS              Arc Sec    I3
+                         Source to Association
+ 43        POS           Position Angle from IRAS             Degree E   I3
+                         Source to Association                of N.
+ 46        FIELD1 [2]    object field #1                      catalog    I4
+                         (magnitude/other)                    dependent
+ 50        FIELD2 [2]    object field #2                      catalog    I4
+                         (magnitude/other)                    dependent
+ 54        FIELD3        object field #3                      catalog    I4
+                         (size/other)                         dependent
+
+    [1] Quantities listed in printed version of catalog.
+    [2] FIELD1 is listed in printed  version of catalog, except for catalogs  2
+ and 19, where FIELD2 is listed.
+
+
+
+                Table X.B.2 Meaning of Hex Encoded Flags
+
+      Flag Set in A Particular Band (microns)    Resultant Value
+   100        60        25         12            of Encoded Flag
+ (Bit 3)    (Bit 2)   (Bit 1)    (Bit 0)         xxxx = HEX = Decimal
+
+    0          0         0          0              0000 = 0 =  0
+    0          0         0          1              0001 = 1 =  1
+    0          0         1          0              0010 = 2 =  2
+    0          0         1          1              0011 = 3 =  3
+    0          1         0          0              0100 = 4 =  4
+    0          1         0          1              0101 = 5 =  5
+    0          1         1          0              0110 = 6 =  6
+    0          1         1          1              0111 = 7 =  7
+    1          0         0          0              1000 = 8 =  8
+    1          0         0          1              1001 = 9 =  9
+    1          0         1          0              1010 = A = 10
+    1          0         1          1              1011 = B = 11
+    1          1         0          0              1100 = C = 12
+    1          1         0          1              1101 = D = 13
+    1          1         1          0              1110 = E = 14
+    1          1         1          1              1111 = F = 15
+
+
+    Source Name: NAME
+    -----------------
+
+    The IRAS source name is derived  from its position by combining the  hours,
+ minutes and tenths  of minutes of  right ascension and  the sign, degrees  and
+ minutes of the declination.  In  obtaining the minutes of right  ascension and
+ declination  for  the  name,  the  positions  were  truncated.   The   letters
+ 'A','B','C', etc. are appended to names of sources so close together that they
+ would otherwise  have had  identical names.   Names were  uniquely assigned to
+ both catalog and reject file  sources, with catalog sources receiving  letters
+ first.
+
+
+    Position: (HOURS,MINUTE,SECOND,DSIGN,DECDEG,DECMIN,DECSEC)
+    ----------------------------------------------------------
+
+    Positions  are  given  for  the  equinox  1950.0,  and epoch 1983.5.  Hours
+ (HOURS) and minutes  (MINUTE) of right  ascension are given  as integers while
+ seconds (SECOND) are rounded to integer deciseconds.  The declination is given
+ as a character  sign (DSIGN) followed  by integer values  of degrees (DECDEG),
+ minutes (DECMIN) and  seconds (DECSEC).  Values  of 60 seconds  are given when
+ the truncated minutes  (given here) disagree  with the minutes  in the rounded
+ position.
+
+
+    Position Uncertainty: MAJOR, MINOR, POSANG
+    ------------------------------------------
+
+    As discussed  in Section  VII.B.2, the  uncertainty in  the position  for a
+ source depends  on its  brightness in  the various  wavelength bands, its path
+ across the  focal plane  and the  number of  sightings.  The final uncertainty
+ after position refinement is expressed as a 95% confidence uncertainty ellipse
+
+
+
+
+ (see Section V.D.9) whose semi-major  (MAJOR) and semi-minor (MINOR) axes  are
+ given in seconds of arc.  The  orientation (POSANG) of the ellipse on  the sky
+ is expressed in terms of the angle  between the major axis of the ellipse  and
+ the local equatorial meridian.  It is expressed in degrees east of north.
+
+
+    Number of Sightings: NHCON
+    --------------------------
+
+    The  number  of  hour-confirmed  sightings  is  given.  This number of flux
+ entries will be found in the WSDB.
+
+
+    Flux Density: FLUX(4)
+    ---------------------
+
+    Each of  the four  wavelengths has  a non-color-corrected  flux density  in
+ units of Janskys, (1 Jy = 1.0E-26 W/m**2/Hz).  The quoted value is an  average
+ of all the hours-confirmed sightings as obtained by the prescription described
+ in Section V.H.5.   The quality of  each flux density  is designated by  FQUAL
+ (see below).
+
+    The flux densities have been calculated assuming an intrinsic source energy
+ distribution  such  that  the  flux  density  f(Nu)  is  proportional to 1/Nu.
+ Corrections to other spectral shapes can be made by consulting Section VI.C.
+
+    The  flux  densities  for  sources  so  bright  that  they  saturated   the
+ analog-to-digital converter on  every sighting are  lower limits based  on the
+ brightest value recorded.  The uncertainties are given as ten times the quoted
+ flux  density  and  a  flag  is  set indicating saturation has occurred (Table
+ X.B.7a).
+
+
+    Signal-to-Noise Ratio: TSNR(4)
+    ------------------------------
+
+    The signal-to-noise ratio given for an individual hours-confirmed  sighting
+ is  the  highest  value  of  the  detections comprising that sighting (Section
+ V.C.2).  The values quoted  in the catalog are  ten (10) times the  minimum of
+ the signal-to-noise ratios for the various sightings (HCONs) of the source.  A
+ value  is  given  for  each  wavelength  band  with a high or moderate quality
+ measurement and for  those upper limits  coming from a  non- seconds-confirmed
+ detection.  Values of TSNR greater than 30,000 are given as 30,000.
+
+    Source Variability: VAR
+    -----------------------
+
+    VAR is the percent probability (0-99) that a source is variable based on an
+ analysis of the 12 and 25  micron flux densities and their uncertainties  (see
+ Section V.H.5).  The value  "-1 " indicates that  the source was not  examined
+ for variability.
+
+
+
+
+    Discrepant Fluxes: DISC(4)
+    --------------------------
+
+    The DISC  flag indicates  whether any  one of  the fluxes  in a  given band
+ disagrees with others in that band, hex-encoded by band (Section V.H.5).
+
+
+    Flux Density Quality: FQUAL(4)
+    ------------------------------
+
+    As described  in Section  V.H.5, a  flux density  measurement can be either
+ high  quality  (FQUAL=3),  moderate  quality  (FQUAL=2)  or  an  upper   limit
+ (FQUAL=1).
+
+
+    Low-Resolution Spectra: NLRS,LRSCHAR
+    ------------------------------------
+
+    The Low-Resolution Spectrometer obtained  8-22 micron spectra of  bright 12
+ and 25 micron  sources (Chapter IX).   NLRS gives the  number of statistically
+ meaningful  spectra  available  for   the  source.   LRSCHAR  gives   a  short
+ characterization of the nature of the spectrum (Table IX.D.1).  All of the LRS
+ spectra are available  in tape and  printed forms (Astronomy  and Astrophysics
+ Supplement, 1985) as described below (Section X.E) and in Chapter IX.
+
+
+    Flux Density Uncertainties: RELUNC (4)
+    --------------------------------------
+
+    Each flux density measurement other  than an upper limit has  an associated
+ uncertainty expressed as a 1 Sigma value in units of 100 x [Delta f(Nu)/f(Nu)]
+ Uncertainties are discussed in Sections V.H.5. and VII.D.2.
+
+
+    Point Source Correlation: CC(4)
+    -------------------------------
+
+    As described in Section V.C.4, the point source correlation coefficient can
+ have values between 87-100%.  These are encoded as alphabetic characters  with
+ A=100, B=99...N=87, one value per band.   The value quoted is for the  highest
+ correlation coefficient seen for that source on any sighting.
+
+
+    Confusion: CONFUSE,PNEARN,PNEARW,HSDFLAG
+    ----------------------------------------
+
+    As described in  Section V.D.2, a  great deal of  care went into  trying to
+ untangle instances of confusion between neighboring sources.  In parts of  the
+ sky where the source density  is low, confusion processing was  sometimes able
+ to separate sources that are quite close together.  The CONFUSE flag is set if
+ two or more sightings of the source in a given band had confusion status  bits
+ set  indicating  confusion  in  the  seconds-confirmation  or  band-merging
+ processes.  This flag is hex-encoded by band.
+
+    Other indicators of possible confusion are given by PNEARN and PNEARW which
+ are, respectively,  the numbers  of hours-confirmed  and weeks-confirmed point
+
+
+
+
+ sources located within a 4.5'  cross-scan and 6' in-scan (half-widths)  window
+ centered on the source.  Values larger than 9 are given as 9.
+
+    Regions of high source density  received special processing to improve  the
+ reliability  of  the  quoted  sources  (see  Section  V.H.6).  The regions are
+ band-dependent.  If  a particular  band of  a given  source went  through high
+ source density processing, then the  appropriate bit in HSDFLAG (Table  X.B.7)
+ is set.  HSDFLAG is hex encoded by band.
+
+
+    Small Extended Sources: SES1(4),SES2(4)
+    -----------------------------------------
+
+    SES1 is the number  of seconds-confirmed, small extended  source detections
+ in a given band found within a window centered on the source.  The size of the
+ window  is  6'  in-scan  x  4.5'  cross-scan  (half-widths).   As described in
+ Sections V.H.3-4 and VII.H.1, values of SES1 greater than 1 should caution the
+ reader that significant  extended structure may  exist in the  region and that
+ the source in question may be a point-source like piece of a complex field.
+
+    SES2 is  the number  of weeks-confirmed  small extended  sources in a given
+ band,  located  within  a  6'  in-scan  x  4.5' cross-scan window (half-width)
+ centered on the source.  SES2 greater than 0 means that the point source  flux
+ measurement should be treated with caution  as the source in question may,  in
+ fact, be extended.  The flux quoted  in the catalog of small extended  sources
+ may provide a better value for the source.
+
+
+    Cirrus Indicators: CIRR1,CIRR2,CIRR3
+    --------------------------------------
+
+    Over a large range of Galactic latitudes the infrared sky at 100 microns is
+ characterized by emission  from interstellar dust  on a wide  range of angular
+ scales.   The  so-called  "infrared  cirrus"  can  seriously hamper efforts to
+ extract  point  source  detections  from  the  data.   To  aid  the  user   in
+ interpreting the  quoted 100  micron measurements  three quantities  have been
+ established (Section V.H.4 and VII.H).
+
+    CIRR1 gives the number of 100 micron-only WSDB sources located within a 1/2
+ degree x 1/2 degree box in  ecliptic coordinates centered on the source.   The
+ sources included in this count  are the weeks-confirmed sources prior  to high
+ source  density   region  processing   (if  applicable)   plus  those  sources
+ hours-confirmed but not weeks-confirmed.  Values  of CIRR1 greater than 3  may
+ indicate  contamination  by  cirrus  with  structure  on the point source size
+ scale.
+
+    CIRR2 gives a cirrus indication on a larger scale than CIRR1 and compares a
+ "cirrus flux" with the source flux at 100 microns (see (Eq.  V.H.2)).   Values
+ larger than  4-5 indicate  the presence  of considerable  structure in the 100
+ micron emission on  a 1/2 degree  scale.  A value  of 0 indicates  that no 1/2
+ degree data were available for the source in question.
+
+    CIRR3 is the total surface brightness of the sky surrounding the source  in
+ a 1/2 degree beam at 100  microns, clipped to exclude values greater  than 254
+ MJy/sr.  Values of  CIRR3 greater than  30 MJy/sr indicate  emission from dust
+ with an appreciable column density.  A value of CIRR3 = 255 means that no data
+ were available.
+
+
+
+    Positional Associations: NID,IDTYPE,CATNO,SOURCE,TYPE,RADIUS,POS,FIELD1-3
+    -------------------------------------------------------------------------
+
+    Much of  the utility  of the  IRAS catalog  comes from  the association  of
+ infrared objects with sources known to exist from other astronomical catalogs.
+ As described in Section V.H.9, a  large number of catalogs have been  searched
+ for positional matches.  The  total number of matches  found is given by  NID.
+ Each match results in a forty-character description (2 per record).
+
+    IDTYPE ranges from 1 to 4 and states whether an association was found in an
+ extragalactic  catalog  (1),  a  stellar  catalog  (2), other catalogs (3), or
+ matches in multiple types of catalogs (4).  CATNO is the number of the catalog
+ in which the match was found (Tables V.H.1, X.B.4).
+
+    SOURCE is the name of the object in that catalog and TYPE its character  or
+ spectral type, if available.  A vector is drawn from the IRAS position to  the
+ associated object.  RADIUS is the length  of that vector in arc seconds.   POS
+ is the angle between the vector and the local equatorial meridian expressed in
+ degrees east of north.  Three  fields (FIELD1-3) have values depending  on the
+ catalog  in  question  (Table  X.B.4).   Typically FlELD1,2 are magnitudes (in
+ decimag) and FIELD3 a size.
+
+
+
+
+               Table X.B.4 Meaning of the Source Association Fields
+
+ Catalog             Field and Meaning*
+
+ 1 GCVS             Type             Blank
+
+                    Field1 =         Code gives meaning for Fields 2-3
+                    if Field1 = 1    Field2 and Field3 are B mag [decimag] at
+                                        max,min
+                              = 2    Field2 and Field3 are V mag [decimag] at
+                                        max,min
+                              = 3    Field2 and Field3 are photographic mag
+                                        [decimag] at max,min
+                              = 4    Field2 and Field3 are estimated V mag
+                                        [decimag] at max,min
+                              = 5    Field2 is 999 and Field3 is 0
+ ------------------------------------------------------------------------------
+ 2 Dearborn         Type             Blank
+   Obs.
+                    Field1           Code for Field2 (1,2)
+                    Field2           if Field1 is 1, Field2 is red magnitude
+                                        [decimag]*
+                                     if Field1 is 2, Field2 is 999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 3 Revised          Type             Blank
+   AFGL
+                    Field1           Magnitude at 4.2 microns [decimag]
+                    Field2           Magnitude at 11 microns [decimag]
+                    Field3           Magnitude at 27 microns [decimag]
+ ------------------------------------------------------------------------------
+ 4 2-Micron         Type             Blank
+   Sky Survey
+                    Field1           K magnitude [decimag]
+                    Field2           I magnitude [decimag]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 5 Globules         Type             Blank
+   (Wesselius)
+                    Field1           999
+                    Field2           Minimum diameter [arcsec]
+                    Field3           Maximum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 6 R C 2            Type             Blank
+
+                    Field1           Harvard V magnitude [decimag]
+                    Field2           B(T) [decimag]
+                    Field3           D(0) [arcsec]
+ ------------------------------------------------------------------------------
+ 7 Stars with       Type             Blank
+   em. lines
+                    Field1           V magnitude [decimag]
+                    Field2           999
+                    Field3           0
+
+
+
+
+      Table X.B.4 Meaning of the Source Association Fields (Continued)
+
+ Catalog                     Field and Meaning *
+
+ 8 Equatorial       Type                  Blank
+   IR Cat.
+                    Field1           Flux density [1.0E-16 W/cm**2/micron]
+                                        at 2.7 microns
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 9 UGC              Type             Blank
+                    Field1           Zwicky magnitude [decimag]
+                    Field2           Minimum diameter [arcsec] in B
+                    Field3           Maximum diameter [arcsec] in B
+ ------------------------------------------------------------------------------
+ 10 MCG             Type             Blank
+
+                    Field1           999
+                    Field2           Minimum diameter [arcsec] in B
+                    Field3           Maximum diameter [arcsec] in B
+ ------------------------------------------------------------------------------
+ 11 Strasbourg      Type             Blank
+ Planetary Nebulae
+                    Field1           V magnitude of Nebula [decimag]
+                    Field2           B magnitude of Center Star [decimag]
+                    Field3           Minimum diameter of Nebula [arcsec]
+ ------------------------------------------------------------------------------
+ 12 Zwicky          Type             Blank
+
+                    Field1           Zwicky magnitude [decimag]
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 13 SAO             Type             Spectral Type
+
+                    Field1           V magnitude [decimag]
+                    Field2           p(g) magnitude [decimag]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 14 ESO/            Type             First 3 characters of object type
+ Uppsala
+                    Field1           B magnitude [decimag]
+                    Field2           Maximum diameter [arcsec]
+                    Field3           Minimum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 15 Bright          Type             Spectral Type
+ Stars
+                    Field1           V magnitude [decimag]
+                    Field2           B-V [centimag]
+                    Field3           U-B [centimag]
+
+
+
+
+         Table X.B.4 Meaning of the Source Association Fields (Continued)
+
+ Catalog            Field and Meaning *
+
+ 16 Suspected       Type             Spectral Information
+ Var.
+                    Field1           V magnitude at maximum [decimag]
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 17 Carbon          Type             Spectral Type (May be truncated)
+ Stars
+                    Field1           p(g) magnitude [decimag]
+                    Field2           V magnitude [decimag]
+                    Field3           I magnitude [decimag]
+ ------------------------------------------------------------------------------
+ 18 Gliese          Type             Spectral Type (May be truncated)
+
+                    Field1           V magnitude [decimag]
+                    Field2           B-V magnitude [millimag]
+                    Field3           U-B magnitude [millimag]
+ ------------------------------------------------------------------------------
+ 19 S Stars         Type             Blank
+
+                    Field1           p(g) magnitude [millimag]
+                    Field2           V magnitude [decimag]
+                    Field3           I magnitude [decimag]
+ ------------------------------------------------------------------------------
+ 20 Parkes HII      Type             Blank
+ Survey
+                    Field1           999
+                    Field2           Minimum diameter [arcsec]
+                    Field3           Maximum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 21 Bonn HII        Type             Blank
+ Survey
+                    Field1           Flux density at 4.875 GHz (Jy)
+                    Field2           Diameter [arcsec]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 22 Blitz           Type             Blank
+
+                    Field1           Diameter [arcsec]
+                    Field2           V(co) [Km/s]
+                    Field3           Peak T(A) [degrees K]
+ ------------------------------------------------------------------------------
+ 23 OSU             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           Diameter [arcsec]
+
+
+
+
+        Table X.B.4 Meaning of the Source Association Fields (Continued)
+
+ Catalog                Field and Meaning *
+
+ 24 IRC             Type             C if 2.2 micron sources are possibly
+                                        confused, w/good pos. blank otherwise
+
+                    Field1           Right ascension difference (IRC-IRAS)
+                                        [deciseconds of time]
+                    Field2           Declination difference (IRC-IRAS)
+                                        [seconds of arc]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 25 DDO             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 26 Arp             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field            0
+ ------------------------------------------------------------------------------
+ 27 Markarian       Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 28 Strong          Type             Object type (GAL or QSO)
+ 5 GHz
+                    Field1           V magnitude [decimag]
+                    Field2           5 GHz flux density [deciJy]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 29 Veron-          Type             Object classification
+ Veron
+                    Field1           V magnitude [decimag]
+                    Field2           Redshift x 1000
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 30 Zwicky          Type             Blank
+ 8 Lists
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 31 VV              Type             Blank
+
+                    Field1           Special flag, (see below) 999 otherwise
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ * In the printed version FIELD1 is listed if present except for catalogs  2
+ and 19, where FIELD2 is given.
+
+
+
+                  VV Catalog Flags (Catalog 31)
+
+ FIELD1         Explanation
+
+ 10             VV 10 has the same coordinates  as VV 29 in the VV  Atlas.  The
+                UGC was used to confirm  that the coordinate is correct  for VV
+                29 and erroneous for VV 10.   The UGC position for VV 10  = UGC
+                10814 was adopted.
+
+ 11             The  VV  position  is  substantially  different  (>400")   from
+                positions for the  object in other  catalogs.  The VV  position
+                has  been  assumed  to  be  in  error because two or more other
+                catalogs agree on a  different position.  The UGC  position has
+                been adopted.
+
+ 12             Same as for 11, but the OSU position has been adopted.
+
+ 13             The position in the VV  Atlas, and the position listed  for the
+                VV object in  the OSU are  in disagreement.  The  true position
+                has been established to be close to that of the OSU by the  use
+                of overlay  transparencies on  the POSS.  The OSU  position has
+                been adopted.
+
+ 14             Same as for 13, but the  OSU position is not very good  either,
+                so a new position has been measured (accurate to about 1').
+
+
+
+
+    XII.  ERRATA AND REVISIONS AS OF 1987
+
+    The second release of some portions  of the IRAS data reflects a  number of
+ changes, corrections and improvements to  the data.  This chapter, written  in
+ late 1986-early  1987, describes  changes to  each of  the major  datasets and
+ records a  number of  changes to  the formats  of the  data which  will be  of
+ importance to people using the various products.  The history of the  releases
+ of the IRAS data is described in Table XII.A.1.
+
+
+    A. Version 2.0 of the Point Source Catalog
+
+    The most important difference between the first and second versions of  the
+ IRAS  Point  Source  Catalog  (hereafter  denoted  PSC-1  and  PSC-2)  is  the
+ application of a  statistical correction to  reduce the overestimation  of the
+ flux  densities  of  sources  near  the  detection  threshold (see XI.J. for a
+ discussion of the effect); changes of as much as a factor of two were made for
+ some weak sources.
+
+    A number of other, less significant changes were also made.  Flux densities
+ for almost all sources changed by a few percent due to refined calculations of
+ certain  calibration  factors;  a  few  sources  changed  by  as  much as 10%.
+ Corrections  to  errors  in  some  calibration  and confused source processing
+ algorithms resulted in the loss of 6  sources from and the addition of 56  new
+ objects for  a revised  total of  245,889 individual  sources in PSC-2.  Table
+ XII.A.5 lists 12 sources which were omitted from both PSC-1 and PSC-2 due to a
+ software  error,  but  which  are  of  sufficient  quality  to  be  noted  for
+ completeness.   A  number  of  new  catalogs  were  added to the list used for
+ associations.  Finally, a  number of minor  errors in calculations  of some of
+ the quantities associated with point  sources, e.g. the number of  neighboring
+ sources, were corrected.
+
+        The format of the Catalog tape has been revised to incorporate these
+ new  quantities.  Table  XII.A.3 lists the changes to the  original  format
+ (Table X.B.1, page X-4).
+
+
+          Table XII.A.3     Revised Portion of Catalog Tape Format
+                              (see Table X.B.1)
+ Start
+ Byte     Name           Description             Units         Format
+
+ 139    MHCON        Possible number of HCONs    ---            12
+ 141    FCOR         Flux Correction Factors
+                     Applied (x 1000)
+                     (1 value per band)          ---            4I4
+ 149    SPARE        3 Spare bytes               ---           3A1
+
+
+
+
+                   Table XII.A.4 New or Deleted Point Sources
+
+                               New Sources
+
+ 01241-7332           05265-6840            08220-4404           18373-0918
+ 04531-6708           05299-6830            08573-4718           19514+4306
+ 04532-6710           05303-6951            09040-7402           21097+4953
+ 04534-6657           05305-6952            09101-5100           21099+4954
+ 05044-7012           05341-6632            09179-7034           21314+5805
+ 05046-7014           05371-6944            09215-7028           21329+5126
+ 05122-6829           05374-6946            09437-6034           21345+5706
+ 05150-6629           05375-6650            10075-5747           21445+5653
+ 05150-6631           05392-6847            10075-5824           21446+5655
+ 05207-6636           05393-6930            10182-5742           21478+5649
+ 05236-6702           05448-6720            12376-6122           22126+6905
+ 05239-6939           05486-7001            13191-6245           22299+6440
+ 05242-6940           08003-5012            18092+4419           22510+7138
+ 05264-6730           08005-5013            18285-0830           22512+7140
+
+                                Deleted Sources
+
+ 04526-6951           13046-6222             20250+4316          21503+5105
+ 04538-6952           15574-0052
+
+
+
+                                 Table XII.A.5
+
+   Bright Sources Missing from the Point Source Catalog with |b| > 10 Degrees
+
+ -- Name --                Gal          -Flux Density in Janskys-
+   (1950)      R.A. Dec.  Coord           (Not Color-Corrected)
+ HHMMT DDMM     (s) (")    l b    NH   12um    25um     60um    100um
+
+ 00125-0723    33.5  10   98-68   2    .25L     .44L    1.46     4.62
+ 11434+2042    26.3  50  234+74   2    .25L     .46:    3.19:    6.45
+ 12337+2616    47.4  51  230+86   2    .52:     .53     4.50    23.31
+ 21492+3716    13.4   1   88-12   2    .36:     .25L     .48     2.95
+ 22261+8025     9.1  59  117+20   2   1.01      .28L     .40L    1.63L
+ 22308+4105    50.3  26   97-14   2   2.05      .54      .40L    6.60L
+ 22324+4024    28.4  35   97-15   2   4.43    18.49    29.10    64.39
+ 22325+4054    32.0  25   97-15   2    .25L     .26L    1.08     7.01
+ 22326+4031    37.8   9   97-15   2    .41L     .25L    1.10     7.33L
+ 22376+2426    36.8   3   89-29   2    .29L     .25L    1.05     2.68
+ 23019+3405    57.7  32   99-23   2    .25L     .25L    1.45     2.50
+ 23132+2449    14.4  12   97-33   2    .25L     .25L     .48     1.35
+
+ -- Name --              N  C   -Association-
+   (1950)       C  P  S  I  A   -Name & Type MAG
+ HHMMT DDMM     1  W  2  D  T
+
+ 00125-0723     0        1  10  M-01-01-060  999
+ 11434+2042     1        2  10  M+04-28-050  999
+ 12337+2616     0  1  7  6   9  U07772       103
+ 21492+3716    15     4  1   2  D0 20951       1
+ 22261+8025     7        1  13  3746   K0     67
+ 22308+4105     3        2  13  52130  K0     77
+ 22324+4024    12        2  27  MKN 914      999
+ 22325+4054     8  1  4  1  32  X2232+408      4
+ 22326+4031     9        1  23  DG 187       999
+ 22376+2426     0
+ 23019+3405     0
+ 23132+2449     4        3   9  U12460       155
+
+
+
+
+
+ FITS-Table-Formatted Version of the IRAS/PSC Catalog
+
+    The IRAS Point Source Catalog, as described above, is not in a format  that
+ translates easily  into FITS  Tables format  (see Harten,  R.H., Grosbol,  P.,
+ Greisen, E.W. and Wells,  D.C. 1988, A. &  A. Suppl. 73, 365).   The number of
+ association  fields  varies  for  each  object,  and  this runs counter to the
+ stipulation that all  records in a  FITS table be  of fixed length  and have a
+ single uniform format.
+
+    In order to process  the IRAS/PSC into FITS  format, the first two  80-byte
+ records which always appear for each source were contatenated to form a single
+ 160-byte record with a uniform format (in other words, NAXIS1=160 for the main
+ data table).  Then, the  associations were removed from  the main body of  the
+ catalog and written to  a second file in  a uniform format.  Each  association
+ record was  prefixed with  (a) the  IRAS/PSC source  name, and  (b) the record
+ number in the  main data file  where that PSC  source could be  found.  If the
+ FITS table  formatted version  of the  catalog were  loaded into some database
+ managagement system, a join operation should be applied to "re-associate"  the
+ associations with  the records  of the  main data  file, either  by using  the
+ source name as a key, or the main data file record numbers.
+
+    Please note that the separation of the association fields from the main
+ data file is only for the purposes of placing the catalog in FITS tables
+ format.  The original, multi-record format is preserved in copies of the
+ catalog that are not FITS formatted.
+
+ -- Lee E. Brotzman, Astronomical Data Center

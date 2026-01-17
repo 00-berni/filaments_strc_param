@@ -1,0 +1,294 @@
+XTENSION= 'TABLE   '           / Table extension
+BITPIX  =                    8 / Character data
+NAXIS   =                    2 / Simple 2-D matrix
+NAXIS1  =                  160 / Number of characters per record
+NAXIS2  =               245889 / Number of records in the table
+PCOUNT  =                    0 / No "random" parameters
+GCOUNT  =                    1 / Only one group
+TFIELDS =                   58 / Number of data fields per record
+EXTNAME = 'PSC_Data'           / IRAS Point Source Catalog - main data file
+AUTHOR  = 'IPAC    '
+REFERENC= '1987, March, Version 2.0'
+DATE    = '01/08/91'           / Date FITS table verified (dd/mm/yy)
+EQUINOX =               1950.0 / Equinox of coordinates
+
+COMMENT This table contains only the primary data for each IRAS point source,
+COMMENT i.e. the data listed within the first two 80-byte records for each
+COMMENT source in the IRAS PSC.  The point source associations have been
+COMMENT separated from the main data records and placed in table PSC_Assoc.
+COMMENT If field NID is not zero, then positional source associations for that
+COMMENT object can be found in table PSC_Assoc.  The associations table may be
+COMMENT searched by the PSC source name or by the sequential record number of
+COMMENT the PSC source in this table.  See table PSC_ASSOC for more details.
+COMMENT
+COMMENT Field names are chosen to be identical with the field names given in the
+COMMENT IRAS Explanatory Supplement.  Names which refer to each of the four IRAS
+COMMENT bands of 12, 25, 60 and 100 microns are suffixed with the strings '_12',
+COMMENT '_25', '_60', and '_100', respectively.  For example, Fnu_12 refers to
+COMMENT the measured flux density at 12 microns, and CC_25 refers to the point
+COMMENT source correlation coefficient at 25 microns.
+COMMENT
+
+TTYPE1  = 'PSCName '           / IRAS source name
+TBCOL1  =                    1 / Start column
+TFORM1  = 'A11     '           / Fortran format
+
+TTYPE2  = 'RAH     '           / Hours RA, equinox 1950.0, epoch 1983.5
+TBCOL2  =                   12 / Start column
+TFORM2  = 'I2      '           / Fortran format
+TUNIT2  = 'h       '           / Units are hours
+
+TTYPE3  = 'RAM     '           / Minutes RA, equinox 1950.0, epoch 1983.5
+TBCOL3  =                   14 / Start column
+TFORM3  = 'I2      '           / Fortran format
+TUNIT3  = 'min     '           / Units are minutes of time
+
+TTYPE4  = 'RAS     '           / Seconds RA, equinox 1950.0, epoch 1983.5
+TBCOL4  =                   16 / Start column
+TFORM4  = 'I3      '           / Fortran format
+TUNIT4  = 's       '           / Units are seconds of time
+TSCAL4  =                  0.1 / Scale factor
+
+TTYPE5  = 'DecSign '           / Sign Dec, equinox 1950.0, epoch 1983.5
+TBCOL5  =                   19 / Start column
+TFORM5  = 'A1      '           / Fortran format
+
+TTYPE6  = 'DecD    '           / Degrees Dec, equinox 1950.0, epoch 1983.5
+TBCOL6  =                   20 / Start column
+TFORM6  = 'I2      '           / Fortran format
+TUNIT6  = 'deg     '           / Units are degrees
+
+TTYPE7  = 'DecM    '           / Minutes Dec, equinox 1950.0, epoch 1983.5
+TBCOL7  =                   22 / Start column
+TFORM7  = 'I2      '           / Fortran format
+TUNIT7  = 'arcmin  '           / Units are minutes of arc
+
+TTYPE8  = 'DecS    '           / Seconds Dec, equinox 1950.0, epoch 1983.5
+TBCOL8  =                   24 / Start column
+TFORM8  = 'I2      '           / Fortran format
+TUNIT8  = 'arcsec  '           / Units are seconds of arc
+
+TTYPE9  = 'Major   '           / Uncertainty ellipse major axis
+TBCOL9  =                   26 / Start column
+TFORM9  = 'I3      '           / Fortran format
+TUNIT9  = 'arcsec  '           / Units are seconds of arc
+
+TTYPE10 = 'Minor   '           / Uncertainty ellipse minor axis
+TBCOL10 =                   29 / Start column
+TFORM10 = 'I3      '           / Fortran format
+TUNIT10 = 'arcsec  '           / Units are seconds of arc
+
+TTYPE11 = 'PosAng  '           / Uncertainty ellipse position angle
+TBCOL11 =                   32 / Start column
+TFORM11 = 'I3      '           / Fortran format
+TUNIT11 = 'deg     '           / Units are degrees
+COMMENT PosAng: Measured in degrees east of north between the major axis of the
+COMMENT PosAng: ellipse and the local equatorial meridian.
+
+TTYPE12 = 'NHcon   '           / Number of times observed
+TBCOL12 =                   35 / Start column
+TFORM12 = 'I2      '           / Fortran format
+
+TTYPE13 = 'Fnu_12  '           / Average non-color corrected flux density, 12um
+TBCOL13 =                   37 / Start column
+TFORM13 = 'E9.3    '           / Fortran format
+TUNIT13 = 'Jy      '           / Units are Janskys
+
+TTYPE14 = 'Fnu_25  '           / Average non-color corrected flux density, 25um
+TBCOL14 =                   46 / Start column
+TFORM14 = 'E9.3    '           / Fortran format
+TUNIT14 = 'Jy      '           / Units are Janskys
+
+TTYPE15 = 'Fnu_60  '           / Average non-color corrected flux density, 60um
+TBCOL15 =                   55 / Start column
+TFORM15 = 'E9.3    '           / Fortran format
+TUNIT15 = 'Jy      '           / Units are Janskys
+
+TTYPE16 = 'Fnu_100 '           / Average non-color corrected flux density, 100um
+TBCOL16 =                   64 / Start column
+TFORM16 = 'E9.3    '           / Fortran format
+TUNIT16 = 'Jy      '           / Units are Janskys
+
+TTYPE17 = 'FQual_12'           / Flux density quality, 12um
+TBCOL17 =                   73 / Start column
+TFORM17 = 'I1      '           / Fortran format
+
+TTYPE18 = 'FQual_25'           / Flux density quality, 25um
+TBCOL18 =                   74 / Start column
+TFORM18 = 'I1      '           / Fortran format
+
+TTYPE19 = 'FQual_60'           / Flux density quality, 60um
+TBCOL19 =                   75 / Start column
+TFORM19 = 'I1      '           / Fortran format
+
+TTYPE20 = 'FQual_100'          / Flux density quality, 100um
+TBCOL20 =                   76 / Start column
+TFORM20 = 'I1      '           / Fortran format
+
+TTYPE21 = 'NLRS    '           / Number of significant LRS spectra
+TBCOL21 =                   77 / Start column
+TFORM21 = 'I2      '           / Fortran format
+
+TTYPE22 = 'LRSChar '           / Characterization of averaged LRS spectrum
+TBCOL22 =                   79 / Start column
+TFORM22 = 'A2      '           / Fortran format
+TNULL22 = '        '           / Null value
+
+TTYPE23 = 'Relunc_12'          / Percent relative flux den. uncertainty, 12um
+TBCOL23 =                   81 / Start column
+TFORM23 = 'I3      '           / Fortran format
+
+TTYPE24 = 'Relunc_25'          / Percent relative flux den. uncertainty, 25um
+TBCOL24 =                   84 / Start column
+TFORM24 = 'I3      '           / Fortran format
+
+TTYPE25 = 'Relunc_60'          / Percent relative flux den. uncertainty, 60um
+TBCOL25 =                   87 / Start column
+TFORM25 = 'I3      '           / Fortran format
+
+TTYPE26 = 'Relunc_100'         / Percent relative flux den. uncertainty, 100um
+TBCOL26 =                   90 / Start column
+TFORM26 = 'I3      '           / Fortran format
+
+TTYPE27 = 'TSNR_12 '           / 10x minimum signal-to-noise ratio, 12um
+TBCOL27 =                   93 / Start column
+TFORM27 = 'I5      '           / Fortran format
+
+TTYPE28 = 'TSNR_25 '           / 10x minimum signal-to-noise ratio, 25um
+TBCOL28 =                   98 / Start column
+TFORM28 = 'I5      '           / Fortran format
+
+TTYPE29 = 'TSNR_60 '           / 10x minimum signal-to-noise ratio, 60um
+TBCOL29 =                  103 / Start column
+TFORM29 = 'I5      '           / Fortran format
+
+TTYPE30 = 'TSNR_100'           / 10x minimum signal-to-noise ratio, 100um
+TBCOL30 =                  108 / Start column
+TFORM30 = 'I5      '           / Fortran format
+
+TTYPE31 = 'CC_12   '           / Point source correlation coefficient, 12um
+TBCOL31 =                  113 / Start column
+TFORM31 = 'A1      '           / Fortran format
+TNULL31 = '        '           / Null value
+
+TTYPE32 = 'CC_25   '           / Point source correlation coefficient, 25um
+TBCOL32 =                  114 / Start column
+TFORM32 = 'A1      '           / Fortran format
+TNULL32 = '        '           / Null value
+
+TTYPE33 = 'CC_60   '           / Point source correlation coefficient, 60um
+TBCOL33 =                  115 / Start column
+TFORM33 = 'A1      '           / Fortran format
+TNULL33 = '        '           / Null value
+
+TTYPE34 = 'CC_100  '           / Point source correlation coefficient, 100um
+TBCOL34 =                  116 / Start column
+TFORM34 = 'A1      '           / Fortran format
+TNULL34 = '        '           / Null value
+
+TTYPE35 = 'Var     '           / Percent likelihood of variability
+TBCOL35 =                  117 / Start column
+TFORM35 = 'I2      '           / Fortran format
+TNULL35 = '-1      '           / Null value
+
+TTYPE36 = 'Disc    '           / Discrepant fluxes flag, 1 per band, hex encoded
+TBCOL36 =                  119 / Start column
+TFORM36 = 'A1      '           / Fortran format
+
+TTYPE37 = 'Confuse '           / Confusion flags, 1 per band, hex encoded
+TBCOL37 =                  120 / Start column
+TFORM37 = 'A1      '           / Fortran format
+
+TTYPE38 = 'PNearH  '           / Number of nearby hours-confirmed point sources
+TBCOL38 =                  121 / Start column
+TFORM38 = 'I1      '           / Fortran format
+
+TTYPE39 = 'PNearW  '           / Number of nearby weeks-confirmed point sources
+TBCOL39 =                  122 / Start column
+TFORM39 = 'I1      '           / Fortran format
+
+TTYPE40 = 'SES1_12 '           / Nearby seconds-confirmed small ext. src., 12um
+TBCOL40 =                  123 / Start column
+TFORM40 = 'I1      '           / Fortran format
+
+TTYPE41 = 'SES1_25 '           / Nearby seconds-confirmed small ext. src., 25um
+TBCOL41 =                  124 / Start column
+TFORM41 = 'I1      '           / Fortran format
+
+TTYPE42 = 'SES1_60 '           / Nearby seconds-confirmed small ext. src., 60um
+TBCOL42 =                  125 / Start column
+TFORM42 = 'I1      '           / Fortran format
+
+TTYPE43 = 'SES1_100'           / Nearby seconds-confirmed small ext. src., 100um
+TBCOL43 =                  126 / Start column
+TFORM43 = 'I1      '           / Fortran format
+
+TTYPE44 = 'SES2_12 '           / Nearby weeks-confirmed small ext. src., 12um
+TBCOL44 =                  127 / Start column
+TFORM44 = 'I1      '           / Fortran format
+
+TTYPE45 = 'SES2_25 '           / Nearby weeks-confirmed small ext. src., 25um
+TBCOL45 =                  128 / Start column
+TFORM45 = 'I1      '           / Fortran format
+
+TTYPE46 = 'SES2_60 '           / Nearby weeks-confirmed small ext. src., 60um
+TBCOL46 =                  129 / Start column
+TFORM46 = 'I1      '           / Fortran format
+
+TTYPE47 = 'SES2_100'           / Nearby weeks-confirmed small ext. src., 100um
+TBCOL47 =                  130 / Start column
+TFORM47 = 'I1      '           / Fortran format
+
+TTYPE48 = 'HSDFlag '           / High source density bin flag, hex encoded
+TBCOL48 =                  131 / Start column
+TFORM48 = 'A1      '           / Fortran format
+
+TTYPE49 = 'Cirr1   '           / Number of nearby 100 micron only WSDB sources
+TBCOL49 =                  132 / Start column
+TFORM49 = 'I1      '           / Fortran format
+
+TTYPE50 = 'Cirr2   '           / 100 micron sky brightness ratio to flux den.
+TBCOL50 =                  133 / Start column
+TFORM50 = 'I1      '           / Fortran format
+COMMENT Cirr2: The spatially filtered 100 micron sky brightness ratio to flux
+COMMENT Cirr2: density of point source (see Explanatory Supplement)
+
+TTYPE51 = 'Cirr3   '           / Total 100 micron sky surface brightness
+TBCOL51 =                  134 / Start column
+TFORM51 = 'I3      '           / Fortran format
+TUNIT51 = 'MJy/sr  '           / Units are MegaJanskys per steradian
+
+TTYPE52 = 'NID     '           / Number of positional associations
+TBCOL52 =                  137 / Start column
+TFORM52 = 'I2      '           / Fortran format
+
+TTYPE53 = 'IDType  '           / Type of object
+TBCOL53 =                  139 / Start column
+TFORM53 = 'I1      '           / Fortran format
+
+TTYPE54 = 'MHcon   '           / Possible number of HCONs
+TBCOL54 =                  140 / Start column
+TFORM54 = 'I2      '           / Fortran format
+TNULL54 = '        '           / Null value
+
+TTYPE55 = 'FCor_12 '           / Flux correction factor applied (times 1000)
+TBCOL55 =                  142 / Start column
+TFORM55 = 'I4      '           / Fortran format
+TNULL55 = '        '           / Null value
+
+TTYPE56 = 'FCor_25 '           / Flux correction factor applied (times 1000)
+TBCOL56 =                  146 / Start column
+TFORM56 = 'I4      '           / Fortran format
+TNULL56 = '        '           / Null value
+
+TTYPE57 = 'FCor_60 '           / Flux correction factor applied (times 1000)
+TBCOL57 =                  150 / Start column
+TFORM57 = 'I4      '           / Fortran format
+TNULL57 = '        '           / Null value
+
+TTYPE58 = 'FCor_100'           / Flux correction factor applied (times 1000)
+TBCOL58 =                  154 / Start column
+TFORM58 = 'I4      '           / Fortran format
+TNULL58 = '        '           / Null value
+
+END

@@ -1,0 +1,235 @@
+               Table X.B.4 Meaning of the Source Association Fields
+
+ Catalog             Field and Meaning*
+
+ ------------------------------------------------------------------------------
+ 1 GCVS             Type             Blank
+
+                    Field1 =         Code gives meaning for Fields 2-3
+                    if Field1 = 1    Field2 and Field3 are B mag [decimag] at
+                                        max,min
+                              = 2    Field2 and Field3 are V mag [decimag] at
+                                        max,min
+                              = 3    Field2 and Field3 are photographic mag
+                                        [decimag] at max,min
+                              = 4    Field2 and Field3 are estimated V mag
+                                        [decimag] at max,min
+                              = 5    Field2 is 999 and Field3 is 0
+ ------------------------------------------------------------------------------
+ 2 Dearborn         Type             Blank
+   Obs.
+                    Field1           Code for Field2 (1,2)
+                    Field2           if Field1 is 1, Field2 is red magnitude
+                                        [decimag]*
+                                     if Field1 is 2, Field2 is 999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 3 Revised          Type             Blank
+   AFGL
+                    Field1           Magnitude at 4.2 microns [decimag]
+                    Field2           Magnitude at 11 microns [decimag]
+                    Field3           Magnitude at 27 microns [decimag]
+ ------------------------------------------------------------------------------
+ 4 2-Micron         Type             Blank
+   Sky Survey
+                    Field1           K magnitude [decimag]
+                    Field2           I magnitude [decimag]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 5 Globules         Type             Blank
+   (Wesselius)
+                    Field1           999
+                    Field2           Minimum diameter [arcsec]
+                    Field3           Maximum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 6 R C 2            Type             Blank
+
+                    Field1           Harvard V magnitude [decimag]
+                    Field2           B(T) [decimag]
+                    Field3           D(0) [arcsec]
+ ------------------------------------------------------------------------------
+ 7 Stars with       Type             Blank
+   em. lines
+                    Field1           V magnitude [decimag]
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 8 Equatorial       Type             Blank
+   IR Cat.
+                    Field1           Flux density [1.0E-16 W/cm**2/micron]
+                                        at 2.7 microns
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 9 UGC              Type             Blank
+                    Field1           Zwicky magnitude [decimag]
+                    Field2           Minimum diameter [arcsec] in B
+                    Field3           Maximum diameter [arcsec] in B
+ ------------------------------------------------------------------------------
+ 10 MCG             Type             Blank
+
+                    Field1           999
+                    Field2           Minimum diameter [arcsec] in B
+                    Field3           Maximum diameter [arcsec] in B
+ ------------------------------------------------------------------------------
+ 11 Strasbourg      Type             Blank
+ Planetary Nebulae
+                    Field1           V magnitude of Nebula [decimag]
+                    Field2           B magnitude of Center Star [decimag]
+                    Field3           Minimum diameter of Nebula [arcsec]
+ ------------------------------------------------------------------------------
+ 12 Zwicky          Type             Blank
+
+                    Field1           Zwicky magnitude [decimag]
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 13 SAO             Type             Spectral Type
+
+                    Field1           V magnitude [decimag]
+                    Field2           p(g) magnitude [decimag]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 14 ESO/            Type             First 3 characters of object type
+ Uppsala
+                    Field1           B magnitude [decimag]
+                    Field2           Maximum diameter [arcsec]
+                    Field3           Minimum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 15 Bright          Type             Spectral Type
+ Stars
+                    Field1           V magnitude [decimag]
+                    Field2           B-V [centimag]
+                    Field3           U-B [centimag]
+ ------------------------------------------------------------------------------
+ 16 Suspected       Type             Spectral Information
+ Var.
+                    Field1           V magnitude at maximum [decimag]
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 17 Carbon          Type             Spectral Type (May be truncated)
+ Stars
+                    Field1           p(g) magnitude [decimag]
+                    Field2           V magnitude [decimag]
+                    Field3           I magnitude [decimag]
+ ------------------------------------------------------------------------------
+ 18 Gliese          Type             Spectral Type (May be truncated)
+
+                    Field1           V magnitude [decimag]
+                    Field2           B-V magnitude [millimag]
+                    Field3           U-B magnitude [millimag]
+ ------------------------------------------------------------------------------
+ 19 S Stars         Type             Blank
+
+                    Field1           p(g) magnitude [millimag]
+                    Field2           V magnitude [decimag]
+                    Field3           I magnitude [decimag]
+ ------------------------------------------------------------------------------
+ 20 Parkes HII      Type             Blank
+ Survey
+                    Field1           999
+                    Field2           Minimum diameter [arcsec]
+                    Field3           Maximum diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 21 Bonn HII        Type             Blank
+ Survey
+                    Field1           Flux density at 4.875 GHz (Jy)
+                    Field2           Diameter [arcsec]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 22 Blitz           Type             Blank
+
+                    Field1           Diameter [arcsec]
+                    Field2           V(co) [Km/s]
+                    Field3           Peak T(A) [degrees K]
+ ------------------------------------------------------------------------------
+ 23 OSU             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           Diameter [arcsec]
+ ------------------------------------------------------------------------------
+ 24 IRC             Type             C if 2.2 micron sources are possibly
+                                        confused, w/good pos. blank otherwise
+
+                    Field1           Right ascension difference (IRC-IRAS)
+                                        [deciseconds of time]
+                    Field2           Declination difference (IRC-IRAS)
+                                        [seconds of arc]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 25 DDO             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 26 Arp             Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field            0
+ ------------------------------------------------------------------------------
+ 27 Markarian       Type             Blank
+
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 28 Strong          Type             Object type (GAL or QSO)
+ 5 GHz
+                    Field1           V magnitude [decimag]
+                    Field2           5 GHz flux density [deciJy]
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 29 Veron-          Type             Object classification
+ Veron
+                    Field1           V magnitude [decimag]
+                    Field2           Redshift x 1000
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 30 Zwicky          Type             Blank
+ 8 Lists
+                    Field1           999
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ 31 VV              Type             Blank
+
+                    Field1           Special flag, (see below) 999 otherwise
+                    Field2           999
+                    Field3           0
+ ------------------------------------------------------------------------------
+ * In the printed version FIELD1 is listed if present except for catalogs  2
+ and 19, where FIELD2 is given.
+
+
+================================================================================
+                  VV Catalog Flags (Catalog 31)
+================================================================================
+
+ FIELD1         Explanation
+
+ 10             VV 10 has the same coordinates  as VV 29 in the VV  Atlas.  The
+                UGC was used to confirm  that the coordinate is correct  for VV
+                29 and erroneous for VV 10.   The UGC position for VV 10  = UGC
+                10814 was adopted.
+
+ 11             The  VV  position  is  substantially  different  (>400")   from
+                positions for the  object in other  catalogs.  The VV  position
+                has  been  assumed  to  be  in  error because two or more other
+                catalogs agree on a  different position.  The UGC  position has
+                been adopted.
+
+ 12             Same as for 11, but the OSU position has been adopted.
+
+ 13             The position in the VV  Atlas, and the position listed  for the
+                VV object in  the OSU are  in disagreement.  The  true position
+                has been established to be close to that of the OSU by the  use
+                of overlay  transparencies on  the POSS.  The OSU  position has
+                been adopted.
+
+ 14             Same as for 13, but the  OSU position is not very good  either,
+                so a new position has been measured (accurate to about 1').
+================================================================================

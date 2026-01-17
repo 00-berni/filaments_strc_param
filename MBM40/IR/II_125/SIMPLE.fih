@@ -1,0 +1,44 @@
+SIMPLE  =                    T / Standard FITS format                           
+BITPIX  =                    8 / Character information                          
+NAXIS   =                    0 / No image data array present                    
+EXTEND  =                    T / There may be standard extensions               
+BLOCKED =                    T / The file may be blocked                        
+ORIGIN  = 'ADC     '           / This file written at the ADC, NASA/GSFC        
+DATE    = '23/09/91'           / Date file written (dd/mm/yy)                   
+                                                                                
+COMMENT               IRAS Catalog of Point Sources, Version 2.0                
+COMMENT                                                                         
+COMMENT (From the introduction to the IRAS Explanatory Supplement)              
+COMMENT                                                                         
+COMMENT The primary mission of the Infrared Astronomical Satellite (IRAS) was to
+COMMENT conduct a sensitive and unbiased survey of the sky in four wavelength   
+COMMENT bands centered at 12, 25, 60, and 100 microns.  The project was         
+COMMENT initiated in 1975 as a joint program of the United States, the          
+COMMENT Netherlands, and the United Kingdom.  Launched in January 1983, IRAS    
+COMMENT ceased operations in November 1983 after having successfully surveyed   
+COMMENT more than 96% of the sky.                                               
+COMMENT                                                                         
+COMMENT The results of several portions of the IRAS mission are given in a      
+COMMENT catalog of infrared point sources, in a catalog of extended sources     
+COMMENT smaller than 8', in a catalog of low-resolution spectra, and in an atlas
+COMMENT of absolute surface brightness images of the entire infrared sky.  These
+COMMENT catalogs give the characteristics of some 250,000 point sources and     
+COMMENT 20,000 small extended sources down to a limiting flux density, away from
+COMMENT confused regions of the sky, of about 0.5 Jy at 12, 25 and 60 microns   
+COMMENT and about 1.5 Jy at 100 microns for point sources, and about a factor of
+COMMENT three brighter than this for small extended sources.  The angular       
+COMMENT resolution of the instrument varied between about 0.5' at 12 microns to 
+COMMENT about 2' at 100 microns.  The positional accuracy of sources detected by
+COMMENT IRAS depends on their size, brightness and spectral energy distribution 
+COMMENT but is usually better than 20".  Approximately 5000 8-22 micron spectra 
+COMMENT of survey sources brighter than 10 Jy at 12 and 25 microns are          
+COMMENT available.                                                              
+COMMENT                                                                         
+COMMENT Source Catalog Reference:  Infrared Processing and Analysis Center, 1986
+COMMENT                                                                         
+COMMENT A copy of the documentation should accompany any computer-readable      
+COMMENT version of the catalog.  The FITS Table header(s) in this file only give
+COMMENT the basic format of the catalog.  Please refer to the documentation or  
+COMMENT source reference for a more detailed discussion of the data.            
+                                                                                
+END                                                                             

@@ -1,0 +1,66 @@
+XTENSION= 'TABLE   '           / Table extension
+BITPIX  =                    8 / Character data
+NAXIS   =                    2 / Simple 2-D matrix
+NAXIS1  =                   58 / Number of characters per record
+NAXIS2  =               142228 / Number of records in the table
+PCOUNT  =                    0 / No "random" parameters
+GCOUNT  =                    1 / Only one group
+TFIELDS =                   10 / Number of data fields per record
+EXTNAME = 'PSC_Assoc'          / IRAS Point Source Catalog - associations table
+AUTHOR  = 'IPAC    '
+REFERENC= '1987, March, Version 2.0'
+DATE    = '01/08/91'           / Date FITS table verified (dd/mm/yy)
+
+COMMENT This table contains only the point source association fields for each
+COMMENT source in the IRAS PSC.  The observational data for each source are
+COMMENT in table PSC_Data.  Each association is tagged with the IRAS source name
+COMMENT with which it is associated, as well as the sequential record number
+COMMENT within table PSC_Data where the observational data can be found.
+COMMENT Field names are chosen to be identical with the field names given in
+COMMENT the IRAS Explanatory Supplement.
+COMMENT
+
+TTYPE1  = 'PSCName '           / IRAS source name
+TBCOL1  =                    1 / Start column
+TFORM1  = 'A11     '           / Fortran format
+
+TTYPE2  = 'RecNo   '           / Main data table record number for IRAS source
+TBCOL2  =                   12 / Start column
+TFORM2  = 'I6      '           / Fortran format
+
+TTYPE3  = 'CatNum  '           / Catalog number
+TBCOL3  =                   19 / Start column
+TFORM3  = 'I2      '           / Fortran format
+
+TTYPE4  = 'Source  '           / Source identification
+TBCOL4  =                   21 / Start column
+TFORM4  = 'A15     '           / Fortran format
+
+TTYPE5  = 'Type    '           / Source type or spectral class
+TBCOL5  =                   36 / Start column
+TFORM5  = 'A5      '           / Fortran format
+TNULL5  = '        '           / Null value
+
+TTYPE6  = 'Radius  '           / Radius vector from IRAS source to association
+TBCOL6  =                   41 / Start column
+TFORM6  = 'I3      '           / Fortran format
+TUNIT6  = 'arcsec  '           / Units are seconds of arc
+
+TTYPE7  = 'Pos     '           / Position angle (E of N), IRAS source to object
+TBCOL7  =                   44 / Start column
+TFORM7  = 'I3      '           / Fortran format
+TUNIT7  = 'deg     '           / Units are degrees north to east
+
+TTYPE8  = 'Field1  '           / Object data field 1, catalog dependant
+TBCOL8  =                   47 / Start column
+TFORM8  = 'I4      '           / Fortran format
+
+TTYPE9  = 'Field2  '           / Object data field 2, catalog dependant
+TBCOL9  =                   51 / Start column
+TFORM9  = 'I4      '           / Fortran format
+
+TTYPE10 = 'Field3  '           / Object data field 3, catalog dependant
+TBCOL10 =                   55 / Start column
+TFORM10 = 'I4      '           / Fortran format
+
+END

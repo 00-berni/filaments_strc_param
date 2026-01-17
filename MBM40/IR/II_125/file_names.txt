@@ -1,0 +1,12 @@
+# Files Names
+main.dat
+assoc.dat.gz
+main.fits
+assoc.fih
+main.dat.gz
+psc.txt
+tofits.sh
+ReadMe
+meaning.txt
+main.fih
+SIMPLE.fih
