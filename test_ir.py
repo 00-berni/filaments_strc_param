@@ -350,6 +350,7 @@ if __name__ == '__main__':
     ## Commands
     parser.add_argument('-l','--list', action='store_true', help='print the list of file in the data directory')
     parser.add_argument('-s','--selections', action='store', type=int, nargs='*', default=[], help='index(ces) of the selected object(s)')
+    parser.add_argument('-o','--open-data',action='store_true')
     # filtering commands
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
     parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter. By default `2`')
@@ -540,6 +541,26 @@ if __name__ == '__main__':
                 sel, s = outputs.file[mask_sel].split('_')[-3:-1]
                 sel = int(sel)
                 s = float(s[1:])
+
+                # # #
+
+                data_file = (IR_FILES.dir + 'II_125').join('main.dat')
+                data_table = filpy.read_iras_data(data_file,store_data=True)
+
+                ra = data_table['ra'] * filpy.u.hour
+                dec = data_table['dec'] * filpy.u.degree
+
+                print(ra[0])
+
+                from astropy.coordinates import SkyCoord, ICRS
+                database = SkyCoord(ra=ra, dec=dec,equinox='J1950.0').transform_to('J2000')
+                
+                if verbose:
+                    print(data_table)
+                    print(database)
+                    print(database.to_table()['ra'])
+                
+                exit()
 
                 # # #
 
