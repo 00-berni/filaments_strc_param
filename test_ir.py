@@ -47,6 +47,10 @@ class Target():
     def px_to_coord(self, *sel: IntArrayLike) -> FloatArray:
         coord = self.wcs.pixel_to_world_values(*sel)
         return np.asarray(coord)
+    
+    def coord_to_px(self, *sel: FloatArrayLike) -> IntArray:
+        coord = self.wcs.world_to_pixel_values(*sel)
+        return np.asarray(coord)
 
     def plot(self, **figargs):
         if 'barlabel' not in figargs.keys():
@@ -445,6 +449,70 @@ if __name__ == '__main__':
                 pltkwargs = displ_kwargs[id]
 
                 data = trg.data
+
+                data_file = (IR_FILES.dir + 'II_125').join('main.dat')
+                data_table = filpy.read_iras_data(data_file,store_data=True)
+
+                ra = data_table['ra'] * filpy.u.hour
+                dec = data_table['dec'] * filpy.u.degree
+
+                print('RA',ra[0])
+
+                from astropy.coordinates import SkyCoord, ICRS, Angle
+                database = SkyCoord(ra=ra, dec=dec,equinox='J1950.0').transform_to(ICRS)
+                
+                test = Angle(trg.px_to_coord(10,10) * filpy.u.deg)
+                edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
+                ra_edg = edges[0]
+                dec_edg = edges[1]
+                min_ra  = ra_edg.min()
+                min_dec = dec_edg.min()
+                max_ra  = ra_edg.max()
+                max_dec = dec_edg.max()
+                if verbose:
+                    print(data_table)
+                    print(database)
+                    print('RA J200\n',database.to_table()['ra'].value)
+                    print('POS:',test[0].hms, test[1].dms)
+                    print('EDGES:')
+                    for r, d in zip(ra_edg.flatten(),dec_edg.flatten()):
+                        print(r.to_string('hour',sep='hms'), d.to_string('deg',sep='dms'))
+                    print('EDG RA:',min_ra.to_string('hour',sep='hms'),max_ra.to_string('hour',sep='hms'))
+                    print('EDG DEC:',min_dec.to_string('deg',sep='deg'),max_dec.to_string('deg',sep='deg'))
+
+                ra = database.to_table()['ra'].value
+                dec = database.to_table()['dec'].value
+
+                min_ra  = min_ra.value
+                min_dec = min_dec.value
+                max_ra  = max_ra.value
+                max_dec = max_dec.value
+
+                ra_pos = np.logical_and(ra < max_ra,ra > min_ra)
+                dec_pos = np.logical_and(dec < max_dec,dec > min_dec)
+                pos = np.logical_and(ra_pos,dec_pos)
+                ra_sel = ra[pos] 
+                dec_sel = dec[pos] 
+
+                if verbose:
+                    ra_sel_ang = Angle(ra_sel*filpy.u.deg)
+                    dec_sel_ang = Angle(dec_sel*filpy.u.deg)
+                    print('SOURCES')
+                    for r, d in zip(ra_sel_ang,dec_sel_ang):
+                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'))
+
+                ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+
+                _ , ax = filpy.show_image(data,projection=trg.wcs,**pltkwargs)
+                ax.plot(10,10,'or')
+                ax.plot(ra_sel_px,dec_sel_px,'xr')
+                plt.show()
+                
+
+                exit()
+
+                # # #
+
                 new_name = trg.name.split('.')[:-1] + ['fits']
                 # gaussian filter
                 gauss_filt = gaussian_filter(data, sigma=s) 
@@ -455,6 +523,7 @@ if __name__ == '__main__':
                 fdata = sobel_filter(data, remove_neg=False)
                 fgdata = sobel_filter(gauss_filt)
                 filtered_data += [fgdata]
+
 
                 from scipy.ndimage import maximum_filter
                 from photutils.detection import find_peaks
@@ -544,23 +613,6 @@ if __name__ == '__main__':
 
                 # # #
 
-                data_file = (IR_FILES.dir + 'II_125').join('main.dat')
-                data_table = filpy.read_iras_data(data_file,store_data=True)
-
-                ra = data_table['ra'] * filpy.u.hour
-                dec = data_table['dec'] * filpy.u.degree
-
-                print(ra[0])
-
-                from astropy.coordinates import SkyCoord, ICRS
-                database = SkyCoord(ra=ra, dec=dec,equinox='J1950.0').transform_to('J2000')
-                
-                if verbose:
-                    print(data_table)
-                    print(database)
-                    print(database.to_table()['ra'])
-                
-                exit()
 
                 # # #
 
