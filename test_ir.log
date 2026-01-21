@@ -4,4 +4,509 @@ Files in /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/mytest
 1 - IRIS-100_04_s2_filtered-data.npz
 
 --------------------------------------------------
-SELECTED TARGETS:
+SELECTED TARGET:
+Filename: /home/bernardo/Scrivania/FISICA/ASTROFISICA/Thesis/filaments_strc_param/MBM40/IR/IRIS-60_RA+DEC_242.64+21.822_skv2402830853177_1.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU     138   (400, 400)   float32   
+ - HEADER -
+SIMPLE  =                    T / Written by SkyView Mon Dec 15 05:19:28 EST 2025
+BITPIX  =                  -32 / 4 byte floating point                          
+NAXIS   =                    2 / Two dimensional image                          
+NAXIS1  =                  400 / Width of image                                 
+NAXIS2  =                  400 / Height of image                                
+CRVAL1  =   242.64166666666668 / Reference longitude                            
+CRVAL2  =   21.821666666666665 / Reference latitude                             
+RADESYS = 'FK5     '           / Coordinate system                              
+EQUINOX =               2000.0 / Epoch of the equinox                           
+CTYPE1  = 'RA---TAN'           / Coordinates -- projection                      
+CTYPE2  = 'DEC--TAN'           / Coordinates -- projection                      
+CRPIX1  =                200.5 / X reference pixel                              
+CRPIX2  =                200.5 / Y reference pixel                              
+CDELT1  =               -0.025 / X scale                                        
+CDELT2  =                0.025 / Y scale                                        
+COMMENT                                                                         
+COMMENT SkyView Survey metadata                                                 
+COMMENT                                                                         
+COMMENT info:        query coordinates guaranteed to return data for this surv  
+COMMENT          ey                                                             
+COMMENT ra:          0                                                          
+COMMENT dec:         0                                                          
+COMMENT radius:      1                                                          
+COMMENT Provenance:  Original IRAS data: NASA/JPL IPAC,      IRIS Reprocessing  
+COMMENT          : Canadian Institute for Theoretical Astrophysics/Institut     
+COMMENT             d'Astrophysique Spatiale     See the       IRIS website.    
+COMMENT Copyright:   Public                                                     
+COMMENT Regime:      Infrared                                                   
+COMMENT NSurvey:     4                                                          
+COMMENT Frequency:   5 THz                                                      
+COMMENT Bandpass:    3.75-6.5 THz                                               
+COMMENT Coverage:    All-sky                                                    
+COMMENT PixelScale:  0.025 deg/pix                                              
+COMMENT Units:       MJy/sr                                                     
+COMMENT Resolution:  2'                                                         
+COMMENT Coordinates: Equatorial                                                 
+COMMENT Projection:  Gnomonic(TAN)                                              
+COMMENT Equinox:     1950                                                       
+COMMENT Epoch:       1983                                                       
+COMMENT Reference:        M. Miville-Deschenes and G. Lagache, IRIS: A New Gen  
+COMMENT          eration of IRAS Maps,     Ap.J.Supplement 157, 302, 2005       
+COMMENT                                                                         
+COMMENT Survey specific cards                                                   
+COMMENT                                                                         
+SURVEY  = 'IRIS 60 micron'                                                      
+BUNIT   = 'MJY/SR  '           / INTENSITY                                      
+TELESCOP= 'IRAS    '                                                            
+INSTRUME= 'IRIS    '           / Improved Reprocessing of the IRAS Survey       
+AUTHORS = 'Marc-Antoine Miville-Deschenes & Guilaine Lagache'                   
+COMMENT   = 'IRIS is a reprocessing of the ISSA plates' /                       
+AUTODEGL=                    T / Automatic deglitching                          
+DESTRIPE=                    T / Wavelet/Fourier Destriping                     
+COR-GAIN=                    T / Scale and brightness dependant gain correction 
+COR-OFFS=                    T / Offset correction based on DIRBE data          
+HISTORY                                                                         
+HISTORY Settings used in processing:                                            
+HISTORY                                                                         
+HISTORY cache = /data/cache/surveys/                                            
+HISTORY coordinates = J2000.0                                                   
+HISTORY descriptionxslt = cgifiles/description.xsl                              
+HISTORY dft_cache = ./skycache/                                                 
+HISTORY dummy                                                                   
+HISTORY equinox = 2000                                                          
+HISTORY finalpostprocessor = skyview.ij.IJProcessor,skyview.data.BoxSmoother,sky
+HISTORY float = on                                                              
+HISTORY footertemplate = cgifiles/skyfooter.html                                
+HISTORY gallerydir = /userimages                                                
+HISTORY galleryxslt = cgifiles/gallerymultipage.xsl                             
+HISTORY geometrytwin = IRIS12,IRIS25,IRIS60,IRIS100                             
+HISTORY headertemplate = cgifiles/skyheader.html                                
+HISTORY htmlwriter = skyview.request.HTMLWriter                                 
+HISTORY imagefactory = skyview.survey.CachingImageFactory                       
+HISTORY imagesize = 12.5                                                        
+HISTORY imscale =                                                               
+HISTORY localurl = https://skyview.gsfc.nasa.gov/surveys,/skyview/htdocs/surveys
+HISTORY lut = colortables/b-w-linear.bin                                        
+HISTORY lutcbarpath = ../images/colorbars/                                      
+HISTORY mosaicker = skyview.process.Mosaicker                                   
+HISTORY name = Improved Reprocessing of the IRAS Survey: 60                     
+HISTORY noexit =                                                                
+HISTORY nullimagedir = ../images/nodata                                         
+HISTORY nwindow = on                                                            
+HISTORY output = ../../tempspace/fits/skv2721285236631_1                        
+HISTORY outputroot = ../../tempspace/fits                                       
+HISTORY pixels = 400                                                            
+HISTORY position = 16 10 34.0, +21 49 18                                        
+HISTORY postprocessor = skyview.ij.IJProcessor,skyview.request.HTMLWriter       
+HISTORY projection = Tan                                                        
+HISTORY quicklook = jpeg                                                        
+HISTORY requested_coords = 242.64166666666668, 21.821666666666665               
+HISTORY reqxpos = 242.64166666666668                                            
+HISTORY reqypos = 21.821666666666665                                            
+HISTORY resolver = SIMBAD-NED                                                   
+HISTORY rgbtemplate = cgifiles/skyrgb.html                                      
+HISTORY rgbwriter = skyview.request.RGBWriter                                   
+HISTORY sampler = Default                                                       
+HISTORY savebysurvey                                                            
+HISTORY scale = 0.025                                                           
+HISTORY scaling = Log                                                           
+HISTORY settingsupdaters = BatchCompatibility,SettingsFixer,skyview.request.Toas
+HISTORY shortname = IRIS60, IRIS 60 micron,IRIS 60, IRIS  60                    
+HISTORY sia_header = ./sia.header                                               
+HISTORY siabase = https://skyview.gsfc.nasa.gov/cgi-bin/images?                 
+HISTORY siaimagetimeout = 300000                                                
+HISTORY size = 10.0,10.0                                                        
+HISTORY spellprefix = https://skyview.gsfc.nasa.gov/surveys/iris60/             
+HISTORY spellsuffix = ,Tan,B1950.00,500,500,0.025,0.025                         
+HISTORY survey = IRIS 60,IRIS 100                                               
+HISTORY surveyfinder = skyview.survey.XMLSurveyFinder                           
+HISTORY surveymanifest = surveys/survey.manifest                                
+HISTORY surveyregimes = Radio,Millimeter,Infrared,Optical,Ultraviolet,X-ray,Gamm
+HISTORY surveysheader = cgifiles/survey.header                                  
+HISTORY surveytemplate = cgifiles/skysurvey.html                                
+HISTORY url.heasarcbase = https://heasarc.gsfc.nasa.gov/xamin/vo/cone?showoffset
+HISTORY url.ned = http://nedwww.ipac.caltech.edu/cgi-bin/nph-NEDobjsearch?search
+HISTORY url.simbad = http://simbad.u-strasbg.fr/simbad-conesearch.pl?           
+HISTORY url.vizierbase = http://vizier.u-strasbg.fr/viz-bin/votable/-dtd/-A?-out
+HISTORY urllocalhelp = https://skyview.gsfc.nasa.gov/help/help.html             
+HISTORY version = 3.5.7                                                         
+HISTORY webrootpath = /skyview/htdocs                                           
+HISTORY xmlurlprefix = https://skyview.gsfc.nasa.gov/current/jar/               
+HISTORY                                                                         
+HISTORY Map generated at: Mon Dec 15 05:19:28 EST 2025                          
+HISTORY                                                                         
+HISTORY Resampler used: NNSampler                                               
+HISTORY                                                                         
+HISTORY                                                                         
+HISTORY Image mosaicking usingskyview.process.Mosaicker                         
+HISTORY                                                                         
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I327B3H0.fits                
+HISTORY       Pixels:1100                                                       
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I294B3H0.fits                
+HISTORY       Pixels:8570                                                       
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I293B3H0.fits                
+HISTORY       Pixels:120699                                                     
+HISTORY  Used image:/skyview/htdocs/surveys/iris60/I326B3H0.fits                
+HISTORY       Pixels:29631                                                      
+HISTORY                                                                         
+END                                                                                                                                                                                                                                                                                                                                                   
+
+RA 0.002777777777777778 h
+MIN POS: 15h48m15.3495848s 16d46m52.31181747s
+MAX POS: 16h32m46.01564464s 26d42m47.43981417s
+B MIN POS: 15h45m58.57097262s 16d56m01.39046482s
+B MAX POS: 16h30m43.53196451s 26d49m03.90454466s
+WCS Keywords
+
+Number of WCS axes: 2
+CTYPE : 'RA---TAN' 'DEC--TAN' 
+CRVAL : 242.64166666666668 21.821666666666665 
+CRPIX : 200.5 200.5 
+PC1_1 PC1_2  : 1.0 0.0 
+PC2_1 PC2_2  : 0.0 1.0 
+CDELT : -0.025 0.025 
+NAXIS : 400  400
+              name         ra        dec  unc_maj  unc_min  pos_ang  nh_con  f_nu_12  f_nu_25  f_nu_60  f_nu_100  q_fnu_12  q_fnu_25  q_fnu_60  q_fnu_100
+0       00000-0359   0.002778  -3.988889       47        8       67       2   0.2500   0.3291   1.2090     2.490         1         1         3          3
+1       00000+6549   0.005278  65.820833       15        4       39       4   1.9010   0.4447   7.9340    25.830         3         3         1          1
+2       00000+5850   0.007222  58.837222       77       20       25       2   0.4161   0.7400   0.5347   119.620         1         1         3          1
+3       00000+7314   0.010556  73.249167       21       15       31       3   0.2500   0.2500   0.5645    11.511         1         1         3          1
+4       00000+5111   0.011667  51.189722       34        9       35       2   0.2458   0.2500   0.4000    15.098         3         1         1          1
+...            ...        ...        ...      ...      ...      ...     ...      ...      ...      ...       ...       ...       ...       ...        ...
+245884  23598+6437  24.131944  64.621667       31       14       18       2   0.3451   0.2560   1.0500    12.310         1         1         3          1
+245885  23599+4125  24.134444  41.423056       64       10       57       2   0.2500   0.2637   0.4000    11.216         1         3         1          1
+245886  23599+5132  24.138333  51.548889       20        8       37       3   0.4378   0.2500   0.4000    16.187         3         1         1          1
+245887  23599+0812  24.142778   8.210000       52       13       66       2   0.4864   0.3052   0.4000    11.089         3         1         1          1
+245888  23599+7345  24.146389  73.756667       15        5       22       3   5.3870   1.3720   0.4000    11.295         3         3         1          1
+
+[245889 rows x 15 columns]
+<SkyCoord (FK5: equinox=J2000.000): (ra, dec) in deg
+    [(0.04167264, -3.98888637), (0.07918535, 65.82083585),
+     (0.10834884, 58.83722474), ..., (2.07501343, 51.54889121),
+     (2.14167384,  8.21000232), (2.19585899, 73.75666898)]>
+RA SHAPE (245889,)
+RA SkyCoord (245889,)
+RA J2000
+ [0.00277818 0.00527902 0.00722326 ... 0.13833423 0.14277826 0.1463906 ]
+DEC J2000
+ [-3.98888637 65.82083585 58.83722474 ... 51.54889121  8.21000232
+ 73.75666898]
+POS: hms_tuple(h=16.0, m=30.0, s=16.585884143391638) dms_tuple(d=17.0, m=2.0, s=7.458477136848103)
+EDGES:
+16h31m16.56973879s 16d46m54.64486502s
+15h49m45.23594414s 16d46m52.31181747s
+16h32m46.01564464s 26d42m47.43981417s
+15h48m15.3495848s 26d42m43.54694266s
+EDG RA: 15h48m15.3495848s 16h32m46.01564464s
+EDG DEC: 16d46e52.31181747g 26d42e47.43981417g
+TEST [10. 10.]
+RA SEL:
+ [237.16250396 237.30833738 237.96667082 237.23333752 237.38750394
+ 237.19583783 237.50417094 237.78750471 238.2750043  237.42500406
+ 237.50000385 237.08333751 237.23333757 237.67083804 237.71667135
+ 237.73333764 238.29583741 237.61667139 237.86250412 237.9833372
+ 238.62500443 238.76667121 238.90833801 237.35833793 237.82083779
+ 237.99167113 239.23750451 239.32083734 237.40833772 238.00000457
+ 238.20000395 239.25000433 237.75000386 238.03750402 238.8500042
+ 238.94583726 239.12500478 239.34167109 237.92500477 239.11250393
+ 240.00000423 238.57083799 238.91250449 239.06667145 240.19167106
+ 239.01250458 239.83750418 240.05833788 240.08333771 238.62917059
+ 238.75000394 239.1125044  239.48333738 239.6625042  240.00417097
+ 240.57083745 240.75833729 240.90417075 241.1375047  239.70000479
+ 239.80833726 240.58750399 240.79167105 241.40417069 241.42917128
+ 239.26250445 239.57500456 239.90833772 239.98750452 240.212504
+ 240.29583728 240.55833801 240.64583788 240.77083754 241.18333789
+ 241.20833775 241.38750415 241.52083734 241.70417152 240.00833779
+ 240.23333804 241.97083813 239.7958381  239.96250397 240.01250409
+ 240.0708378  240.20417141 241.03333793 241.15417139 241.79167137
+ 241.82083751 240.1375039  240.35000427 240.60000459 241.12083795
+ 241.58750406 242.02917117 240.53333773 240.57083759 240.81250464
+ 241.70833813 242.29167073 242.51667068 242.70417076 240.65000454
+ 240.97083812 241.12500457 241.5958373  241.73750433 241.95833822
+ 242.70417148 240.85833785 240.92917074 241.25000473 241.41250479
+ 241.50417138 241.72500414 241.78750457 242.03750484 242.47083779
+ 242.61250413 242.78750436 243.03333787 243.15000477 241.05000474
+ 241.42917127 241.58750475 242.27917113 243.37083776 241.43333727
+ 241.75417108 241.96667149 242.10833744 242.24583807 243.27500489
+ 241.58750472 241.86667102 242.14167092 242.71667068 243.39167131
+ 241.7875041  242.14167062 242.27083776 242.72083729 242.85417143
+ 243.21250411 243.48333738 243.84167068 244.00000494 242.04167071
+ 242.35833743 243.05833775 243.45417156 243.73750479 242.52917086
+ 242.84167156 242.9541708  243.50417096 243.5833379  242.51667074
+ 242.8708379  242.9041715  243.46667066 243.49167082 244.06250433
+ 244.07500443 244.10417139 244.53750451 242.95000397 243.17083819
+ 243.70833784 243.91250441 244.40000481 244.47500435 243.27083768
+ 243.88750475 244.21250455 244.68333746 243.85833767 243.88750438
+ 245.35000478 245.74167109 243.79167107 243.92917074 244.10417079
+ 244.39167092 244.58333813 245.57500434 245.64583741 245.77083775
+ 244.01250443 244.17083788 244.76250409 245.23333782 245.86667109
+ 244.52917074 245.54583744 245.6500047  246.28750476 246.52083794
+ 246.6500044  244.61667153 245.62500492 244.81667112 246.35000459
+ 246.52500478 246.53750454 245.23333772 246.06250422 246.24583787
+ 246.54583803 247.30000481 246.31667127 247.16250414 247.26667136
+ 247.30000456 247.32917118 247.52917146 245.67500467 245.79167086
+ 246.19583808 246.80833752 247.21667153 247.23333775 247.68750434
+ 245.79167098 245.88750476 246.93750423 247.20000482 247.4500042
+ 247.50000441 246.42500442 246.47917111 246.70833769 246.72500413
+ 247.18750441 248.10833806 246.97917158 247.56667149 247.88750453
+ 248.09583825 246.91250436 247.49583774 247.15833792 247.26250445
+ 247.44167082 247.44583803 247.94167137 247.97083774 247.39583763
+ 247.44583787 247.67500472 248.00833755 247.75833752 247.92083809
+ 247.8333378  247.85833822 248.00000425]
+SOURCES
+15h48m39.00095041s 25d07m08.01178567s
+15h49m14.00097003s 24d23m58.01183256s
+15h51m52.00099622s 23d32m02.01204327s
+15h48m56.00100459s 23d01m48.01180845s
+15h49m33.0009464s 25d19m40.01185798s
+15h48m47.00107937s 20d00m15.01179639s
+15h50m01.00102473s 22d17m27.0118954s
+15h51m09.00112924s 18d02m12.01198608s
+15h53m06.00103135s 22d12m06.01214141s
+15h49m42.00097457s 24d15m06.01187001s
+15h50m00.00092371s 26d13m00.01189407s
+15h48m20.0010018s 23d06m19.01176018s
+15h48m56.00101624s 22d34m05.01180845s
+15h50m41.00112928s 18d00m46.01194878s
+15h50m52.00112286s 18d17m37.01196344s
+15h50m56.00103274s 22d01m15.01196877s
+15h53m11.00097922s 24d17m03.01214803s
+15h50m28.00113344s 17d49m34.01193144s
+15h51m27.00098819s 23d49m31.01201003s
+15h51m56.00092694s 26d13m11.01204858s
+15h54m30.00106376s 20d57m23.01225239s
+15h55m04.0010912s 19d50m38.01229718s
+15h55m38.00112136s 18d35m46.01234189s
+15h49m26.00110224s 19d05m20.01184862s
+15h51m17.00107078s 20d29m22.01199673s
+15h51m58.00107059s 20d32m02.01205124s
+15h56m57.00108159s 20d21m06.0124455s
+15h57m17.00096175s 25d14m03.01247166s
+15h49m38.00105302s 21d07m38.01186466s
+15h52m00.001097s 19d26m18.01205389s
+15h52m48.00094851s 25d27m10.01211757s
+15h57m00.00103996s 22d04m56.01244942s
+15h51m00.00092561s 26d12m34.01197409s
+15h52m09.00096501s 24d46m26.01206584s
+15h55m24.00100726s 23d18m37.01232349s
+15h55m47.00094141s 25d55m22.01235372s
+15h56m30.00114664s 17d33m06.01241013s
+15h57m22.00106076s 21d14m43.0124782s
+15h51m42.001144s 17d26m03.01202998s
+15h56m27.00094229s 25d56m02.0124062s
+16h00m00.00101528s 23d16m39.01268391s
+15h54m17.00111799s 18d40m14.01223524s
+15h55m39.00107734s 20d27m24.01234321s
+15h56m16.0011486s 17d27m19.01239178s
+16h00m46.00105443s 21d42m47.01274348s
+15h56m03.00109956s 19d32m41.01237472s
+15h59m21.00100213s 23d46m03.01263329s
+16h00m14.00109212s 20d05m38.01270205s
+16h00m20.00104963s 21d53m11.01270983s
+15h54m31.00094043s 25d52m33.01225371s
+15h55m00.00094489s 25d44m10.01229191s
+15h56m27.00105598s 21d23m24.0124062s
+15h57m56.00097217s 24d52m05.0125226s
+15h58m39.0010079s 23d29m22.01257866s
+16h00m01.00103277s 22d33m48.0126852s
+16h02m17.00098812s 24d31m38.01286092s
+16h03m02.00094875s 26d08m36.01291879s
+16h03m37.00097917s 24d58m45.0129637s
+16h04m33.0011282s 18d46m55.01303538s
+15h58m48.00114858s 17d34m58.01259037s
+15h59m14.00094168s 26d08m55.01262419s
+16h02m21.00095851s 25d42m38.01286607s
+16h03m10.00105276s 21d55m59.01292906s
+16h05m37.00096528s 25d40m39.01311704s
+16h05m43.00110627s 19d48m25.01312468s
+15h57m03.00106867s 20d53m53.01245335s
+15h58m18.00109361s 19d55m14.0125513s
+15h59m38.001052s 21d44m42.01265536s
+15h59m57.00108553s 20d21m25.01268002s
+16h00m51.00095925s 25d34m33.01274995s
+16h01m11.00094748s 26d03m38.0127758s
+16h02m14.00112156s 18d56m29.01285706s
+16h02m35.0010922s 20d13m38.01288408s
+16h03m05.00100913s 23d43m52.01292264s
+16h04m44.00109338s 20d18m19.01304944s
+16h04m50.00105933s 21d45m46.0130571s
+16h05m33.00099613s 24d25m51.01311195s
+16h06m05.00096055s 25d54m01.01315268s
+16h06m49.00116399s 17d19m09.01320857s
+16h00m02.00107068s 20d59m19.0126865s
+16h00m56.00112848s 18d34m10.01275642s
+16h07m53.00115107s 17d57m24.01328962s
+15h59m11.00114366s 17d49m00.01262029s
+15h59m51.00095264s 25d45m54.01267223s
+16h00m03.00098201s 24d37m12.0126878s
+16h00m17.00107303s 20d54m17.01270594s
+16h00m49.00113766s 18d09m49.01274736s
+16h04m08.00110325s 19d50m37.01300341s
+16h04m37.00113388s 18d32m10.01304049s
+16h07m10.00112774s 18d57m09.01323519s
+16h07m17.00100264s 24d17m16.01324406s
+16h00m33.00093582s 26d28m06.01272666s
+16h01m24.00102569s 22d56m33.01279259s
+16h02m24.00110269s 19d45m59.01286993s
+16h04m29.0011088s 19d37m27.01303027s
+16h06m21.00097382s 25d23m23.01317302s
+16h08m07.00107993s 21d05m43.01330731s
+16h02m08.00105609s 21d43m42.01284933s
+16h02m17.00102218s 23d08m38.01286092s
+16h03m15.00111451s 19d18m17.01293548s
+16h06m50.00115015s 17d56m22.01320984s
+16h09m10.00097452s 25d34m13.01338675s
+16h10m04.00096328s 26d05m29.01345463s
+16h10m49.00098211s 25d23m13.01351103s
+16h02m36.00108859s 20d22m57.01288537s
+16h03m53.00114774s 17d53m07.0129842s
+16h04m30.00109674s 20d08m47.01303155s
+16h06m23.00095088s 26d18m21.01317556s
+16h06m57.00103831s 22d47m11.01321871s
+16h07m50.00117197s 17d00m51.01328583s
+16h10m49.00115621s 17d53m31.01351103s
+16h03m26.00108288s 20d40m35.01294959s
+16h03m43.00097641s 25d05m48.01297139s
+16h05m00.00113573s 18d28m34.01306987s
+16h05m39.00114951s 17d54m09.01311959s
+16h06m01.00113177s 18d42m30.01314759s
+16h06m54.00099417s 24d36m23.01321491s
+16h07m09.00109666s 20d18m40.01323393s
+16h08m09.00116207s 17d28m40.01330984s
+16h09m53.00107048s 21d37m04.01344082s
+16h10m27.00099211s 24d57m02.01348347s
+16h11m09.0010456s 22d46m05.01353605s
+16h12m08.00108996s 20d55m19.01360969s
+16h12m36.00114499s 18d30m14.01364455s
+16h04m12.0011384s 18d18m52.01300853s
+16h05m43.00110392s 19d54m32.01312468s
+16h06m21.00113916s 18d24m03.01317302s
+16h09m07.0010711s 21d32m24.01338298s
+16h13m29.00106285s 22d11m35.01371038s
+16h05m44.0009447s 26d30m03.01312595s
+16h07m01.00105812s 21d57m20.01322379s
+16h07m52.00115771s 17d39m30.01328836s
+16h08m26.00098623s 25d02m28.0133313s
+16h08m59.00113781s 18d36m42.0133729s
+16h13m06.00117467s 17d10m51.01368184s
+16h06m21.00113234s 18d42m08.01317302s
+16h07m28.00104599s 22d29m55.01325799s
+16h08m34.00102139s 23d36m16.01334139s
+16h10m52.00096329s 26d09m11.01351478s
+16h13m34.00111402s 19d57m12.01371658s
+16h07m09.00098488s 25d00m07.01323393s
+16h08m34.00094917s 26d32m22.01334139s
+16h09m05.00106124s 21d57m36.01338046s
+16h10m53.00094936s 26d42m44.01351603s
+16h11m25.00114201s 18d34m03.01355604s
+16h12m51.00098679s 25d21m05.0136632s
+16h13m56.00097193s 26d02m40.01374384s
+16h15m22.00096269s 26d32m09.01385006s
+16h16m00.00118583s 16d49m45.01389683s
+16h08m10.00097145s 25d37m08.0133111s
+16h09m26.00098415s 25d11m59.01340689s
+16h12m14.00105978s 22d14m16.01361716s
+16h13m49.00117538s 17d11m20.01373517s
+16h14m57.00115043s 18d23m56.01381924s
+16h10m07.00100604s 24d21m09.01345839s
+16h11m22.00117419s 17d06m21.01355229s
+16h11m49.00099108s 25d05m45.013586s
+16h14m01.00103034s 23d37m22.01375003s
+16h14m20.00109642s 20d47m05.01377354s
+16h10m04.00097874s 25d28m02.01345463s
+16h11m29.00109585s 20d37m17.01356104s
+16h11m37.0011611s 17d42m59.01357103s
+16h13m52.00095916s 26d33m25.01373889s
+16h13m58.00099678s 25d01m33.01374632s
+16h16m15.00103992s 23d22m51.01391526s
+16h16m18.00106288s 22d23m35.01391894s
+16h16m25.00113423s 19d13m40.01392753s
+16h18m09.00108185s 21d41m40.01405478s
+16h11m48.00095261s 26d39m17.01358475s
+16h12m41.00116596s 17d33m22.01365077s
+16h14m50.00108267s 21d25m27.0138106s
+16h15m39.00105908s 22d30m39.013871s
+16h17m36.00115526s 18d20m28.01401449s
+16h17m54.00104368s 23d20m38.01403647s
+16h13m05.00104428s 22d57m43.0136806s
+16h15m33.00113953s 18d55m56.01386361s
+16h16m51.00109254s 21d07m43.01395942s
+16h18m44.00099083s 25d39m12.01409742s
+16h15m26.00104166s 23d14m44.01385499s
+16h15m33.00105066s 22d52m02.01386361s
+16h21m24.00114698s 18d58m05.01429119s
+16h22m58.00106191s 22d56m19.01440413s
+16h15m10.00105711s 22d33m40.01383527s
+16h15m43.0009772s 25d58m19.01387592s
+16h16m25.00099052s 25d28m42.01392753s
+16h17m34.00102111s 24d17m05.01401204s
+16h18m20.00115238s 18d31m11.01406819s
+16h22m18.00104272s 23d43m44.01435615s
+16h22m35.00097773s 26d31m32.01437656s
+16h23m05.00105924s 23d03m57.01441251s
+16h16m03.00106355s 22d20m44.01390051s
+16h16m41.00109118s 21d10m38.01394716s
+16h19m03.00098273s 26d01m00.01412053s
+16h20m56.00107742s 22d05m42.01425742s
+16h23m28.00106093s 23d01m18.01444003s
+16h18m07.00097793s 26d08m16.01405234s
+16h22m11.00098621s 26d08m11.01434774s
+16h22m36.00112743s 19d57m11.01437776s
+16h25m09.0011423s 19d26m28.0145604s
+16h26m05.0011047s 21d15m06.0146268s
+16h26m36.00105709s 23d26m42.01466345s
+16h18m28.00116634s 17d52m55.01407794s
+16h22m30.00117993s 17d29m38.01437056s
+16h19m16.00106868s 22d21m26.01413633s
+16h25m24.00110232s 21d18m32.01457821s
+16h26m06.00114738s 19d16m09.01462798s
+16h26m09.00108996s 21d55m46.01463153s
+16h20m56.0010536s 23d08m45.01425742s
+16h24m15.00101292s 25d10m47.01449614s
+16h24m59.00108923s 21d52m21.01454852s
+16h26m11.00112626s 20d15m48.0146339s
+16h29m12.00115513s 19d07m17.01484676s
+16h25m16.0011051s 21d10m18.01456871s
+16h28m39.00099468s 26d21m01.01480815s
+16h29m04.00112559s 20d30m32.01483741s
+16h29m12.00109542s 21d55m14.01484676s
+16h29m19.00108282s 22d30m28.01485495s
+16h30m07.00114979s 19d26m32.01491094s
+16h22m42.0011201s 20d17m49.01438495s
+16h23m10.00100712s 25d20m09.0144185s
+16h24m47.00113833s 19d36m03.01453425s
+16h27m14.00100514s 25d46m25.01470828s
+16h28m52.00116763s 18d29m58.01482337s
+16h28m56.00106085s 23d28m15.01482805s
+16h30m45.00104099s 24d30m59.01495514s
+16h23m10.00103421s 24d10m11.0144185s
+16h23m33.00114183s 19d21m08.01444601s
+16h27m45.00101634s 25d20m08.01474477s
+16h28m48.00115699s 19d00m15.01481869s
+16h29m48.00100886s 25d50m38.0148888s
+16h30m00.00105899s 23d38m42.01490279s
+16h25m42.00106147s 23d10m34.01459956s
+16h25m55.00106559s 23d00m35.01461496s
+16h26m50.0010453s 23d59m15.01467998s
+16h26m54.00099211s 26d18m06.0146847s
+16h28m45.00105935s 23d31m22.01481517s
+16h32m26.00113442s 20d20m59.01507206s
+16h27m55.00117931s 17d52m23.01475652s
+16h30m16.0011566s 19d07m39.01492142s
+16h31m33.00108689s 22d30m19.01501081s
+16h32m23.00118076s 18d06m30.0150686s
+16h27m39.00104707s 23d58m41.01473771s
+16h29m59.00105687s 23d44m20.01490162s
+16h28m38.00110147s 21d35m50.01480697s
+16h29m03.00106761s 23d10m34.01483624s
+16h29m46.00099792s 26d18m49.01488646s
+16h29m47.00112602s 20d32m36.01488763s
+16h31m46.00112834s 20d35m11.01502585s
+16h31m53.00105661s 23d54m55.01503395s
+16h29m35.00103167s 24d49m35.01487363s
+16h29m47.00108815s 22d18m06.01488763s
+16h30m42.00113289s 20d17m20.01495165s
+16h32m02.00101117s 25d56m56.01504435s
+16h31m02.00100418s 26d09m38.01497488s
+16h31m41.00114201s 19d55m49.01502007s
+16h31m20.00107085s 23d13m19.01499575s
+16h31m26.00117236s 18d27m03.0150027s
+16h32m00.00101951s 25d34m48.01504204s

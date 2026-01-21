@@ -452,9 +452,12 @@ if __name__ == '__main__':
 
                 data_file = (IR_FILES.dir + 'II_125').join('main.dat')
                 data_table = filpy.read_iras_data(data_file,store_data=True)
+                data_table_r = filpy.read_iras_data((IR_FILES.dir + 'AJ_109_2318').join('table1.dat'),store_data=True,selection='radio')
 
                 ra = data_table['ra'] * filpy.u.hour
                 dec = data_table['dec'] * filpy.u.degree
+                ra_r = data_table_r['ra'] * filpy.u.hour
+                dec_r = data_table_r['dec'] * filpy.u.degree
 
                 print('RA',ra[0])
 
@@ -479,14 +482,9 @@ if __name__ == '__main__':
                 print('B MIN POS:',Angle(sky.to_table()['ra'][0]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][0]).to_string('deg',sep='dms'))
                 print('B MAX POS:',Angle(sky.to_table()['ra'][1]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][1]).to_string('deg',sep='dms'))
 
-                exit()
-
-                min_ra  = min_ra.value
-                min_dec = min_dec.value
-                max_ra  = max_ra.value
-                max_dec = max_dec.value
 
                 database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',obstime=Time('B1983.5')).transform_to(FK5(equinox='J2000.0'))
+                database_r = SkyCoord(ra=ra_r, dec=dec_r,equinox='B1950.0').transform_to(FK5(equinox='J2000.0'))
                 if verbose:
                     print(trg.wcs)
                     print(data_table)
@@ -503,35 +501,47 @@ if __name__ == '__main__':
                     print('EDG DEC:',min_dec.to_string('deg',sep='deg'),max_dec.to_string('deg',sep='deg'))
                     print('TEST',trg.coord_to_px(test[0].deg,test[1].deg))
 
+                def filter_data(coords: SkyCoord, ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
+                    table = coords.to_table()
+                    rr = table['ra'].value
+                    dd = table['dec'].value
+                    min_rr, max_rr = ra_ext
+                    min_dd, max_dd = dec_ext
+                    rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
+                    dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
+                    pos = np.logical_and(rr_pos,dd_pos)
+                    rr = rr[pos] 
+                    dd = dd[pos] 
+                    return rr, dd
+
+                min_ra  = min_ra.value
+                min_dec = min_dec.value
+                max_ra  = max_ra.value
+                max_dec = max_dec.value
+
                 ra = database.to_table()['ra'].value
                 dec = database.to_table()['dec'].value
 
-
-                ra_pos = np.logical_and(ra < max_ra,ra > min_ra)
-                dec_pos = np.logical_and(dec < max_dec,dec > min_dec)
-                pos = np.logical_and(ra_pos,dec_pos)
-                ra_sel = ra[pos] 
-                dec_sel = dec[pos] 
+                ra_sel, dec_sel = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
+                ra_sel_r, dec_sel_r = filter_data(database_r,(min_ra,max_ra),(min_dec,max_dec))
 
                 print('RA SEL:\n',ra_sel)
 
                 ra_sel_ang = Angle(ra_sel*filpy.u.deg)
                 dec_sel_ang = Angle(dec_sel*filpy.u.deg)
+                
                 if verbose:
-                    pos = np.where(pos)[0]
                     print('SOURCES')
-                    for i, r, d in zip(pos,ra_sel_ang,dec_sel_ang):
-                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'),
-                              data_table['f_nu_12'][i],
-                              data_table['f_nu_25'][i],
-                              data_table['f_nu_60'][i],
-                              data_table['f_nu_100'][i])
+                    for r, d in zip(ra_sel_ang,dec_sel_ang):
+                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'))
 
                 ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+                ra_sel_r_px, dec_sel_r_px = trg.coord_to_px(ra_sel_r,dec_sel_r)
 
                 _ , ax = filpy.show_image(data,projection=trg.wcs,**pltkwargs)
                 ax.plot(10,10,'or')
                 ax.plot(ra_sel_px,dec_sel_px,'xr')
+                ax.plot(ra_sel_r_px,dec_sel_r_px,'+g')
                 plt.show()
                 
 
