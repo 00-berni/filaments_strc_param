@@ -715,13 +715,78 @@ def _read_iras_row(row: str) -> tuple:
            f_nu_12, f_nu_25, f_nu_60, f_nu_100, \
            q_fnu_12, q_fnu_25, q_fnu_60, q_fnu_100
 
+IRAS_DEFAULT = ['name','ra','dec','unc_maj','unc_min','pos_ang','nh_con', 'f_nu_12', 'f_nu_25', 'f_nu_60', 'f_nu_100','q_fnu_12', 'q_fnu_25', 'q_fnu_60', 'q_fnu_100']
+
+"""
+~~~~ IRAS DATA ~~~~
+Byte-by-byte Description of file: table1.dat
+--------------------------------------------------------------------------------
+   Bytes Format  Units    Label      Explanations
+--------------------------------------------------------------------------------
+   1- 11  A11    ---      IRAS       IRAS FSC2 name FHHMM.M+DDMM
+  13- 14  I2     h        RAh        IRAS FSC2 B1950 right ascension
+  16- 17  I2     min      RAm        IRAS FSC2 B1950 right ascension
+  19- 22  F4.1   s        RAs        IRAS FSC2 B1950 right ascension
+      24  A1     ---      DE-        IRAS FSC2 B1950 Declination sign
+  25- 26  I2     deg      DEd        IRAS FSC2 B1950 Declination
+  28- 29  I2     arcmin   DEm        IRAS FSC2 B1950 Declination
+  31- 32  I2     arcsec   DEs        IRAS FSC2 B1950 Declination
+      34  A1     ---    l_S12        [< ] S12 upper limit symbol
+  35- 41  F7.3   Jy       S12        IRAS 12 um flux density (1)
+      43  A1     ---    l_S25        [< ] S25 upper limit symbol
+  44- 50  F7.3   Jy       S25        IRAS 25 um flux density (1)
+      52  A1     ---    l_S60        [< ] S60 upper limit symbol
+  53- 60  F8.3   Jy       S60        IRAS 60 um flux density (1)
+      62  A1     ---    l_S100       [< ] S100 upper limit symbol
+  63- 70  F8.3   Jy       S100       IRAS 100 um flux density (1)
+  72- 73  I2     h        RA2h       ? Radio B1950 right ascension
+  75- 76  I2     min      RA2m       ? Radio B1950 right ascension
+  78- 81  F4.1   s        RA2s       ? Radio B1950 right ascension
+      83  A1     ---      DE2-        Radio B1950 Declination (sign)
+  84- 85  I2     deg      DE2d       ? Radio B1950 Declination
+  87- 88  I2     arcmin   DE2m       ? Radio B1950 Declination
+  90- 91  I2     arcsec   DE2s       ? Radio B1950 Declination
+  92- 97  I6     mJy      S4.85GHz   ? 4.85 GHz flux density (2)
+--------------------------------------------------------------------------------
+"""
+def _read_iras_row_radio(row: str) -> tuple:
+    name = row[:11].split(' ')[0]
+    # ra in hours
+    ra = float(row[12:14]) + \
+         float(row[15:17])/60 + \
+         float(row[18:22])/3600
+    # dec in deg
+    dec = -1 if row[23] == '-' else 1
+    dec *= (float(row[24:26]) + \
+            float(row[27:29])/60 + \
+            float(row[30:32])/3600
+            )
+    # flux density upper limit
+    s12 = float(row[34:41]) #: 12 um
+    s25 = float(row[43:50]) #: 25 um
+    s60 = float(row[52:60]) #: 60 um
+    s100 = float(row[62:70]) #: 100 um
+    # 04.85 GHz flux density
+    s_radio = int(row[91:97]) if '\n' not in row[91:97] else 0
+    return name, ra, dec, \
+           s12, s25, s60, s100, \
+           s_radio
+
+IRAS_RADIO = ['name','ra','dec','s_12','s_25','s_60','s_100','s_radio']
+
 from pandas import DataFrame    
-def read_iras_data(data_file: str,*, store_data: bool = True) -> DataFrame:
+def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal['default','radio'] = 'default') -> DataFrame:
     import numpy as np
     with open(data_file,'r') as file:
         rows = file.readlines()
-    columns = ['name','ra','dec','unc_maj','unc_min','pos_ang','nh_con', 'f_nu_12', 'f_nu_25', 'f_nu_60', 'f_nu_100','q_fnu_12', 'q_fnu_25', 'q_fnu_60', 'q_fnu_100']   
-    data_frame = DataFrame(data=[_read_iras_row(row) for row in rows],columns=columns)
+    columns = []
+    if selection == 'default':
+            columns[:] = IRAS_DEFAULT[:]
+            rows = [_read_iras_row(row) for row in rows]
+    elif selection == 'radio':
+            columns[:] = IRAS_RADIO[:]
+            rows = [_read_iras_row_radio(row) for row in rows]
+    data_frame = DataFrame(data=rows,columns=columns)
     data = data_frame.to_numpy().transpose()
     if store_data:
         storing_dir = FileVar(filename=data_file,path=True).dir
