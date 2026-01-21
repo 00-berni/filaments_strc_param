@@ -1,0 +1,120 @@
+J/AJ/109/2318                       Extragalactic IRAS sources (Condon+ 1995)
+================================================================================
+Radio identifications of extragalactic IRAS sources
+     Condon J.J., Anderson E., Broderick J.J.
+    <Astron. J. 109, 2318 (1995)>
+    =1995AJ....109.2318C
+================================================================================
+ADC_Keywords: Infrared sources ; Radio sources
+
+Abstract:
+    Extragalactic sources detected at lambda=60um were selected from the
+    IRAS Faint Source Catalog, Version 2 (Cat. II/156) by the criterion
+    S(60um)>=S(12um). They were identified by position coincidence with
+    radio sources stronger than 25mJy at 4.85GHz in the 6.0sr declination
+    band 0deg<Dec.<+75deg (excluding the 0.05sr region 12h40m<R.A.<14h40m,
+    0deg<Dec.<+5deg) and with radio sources stronger than 80mJy in 
+    the 3.4sr area 0h<R.A.<20h, -40deg<Dec.<0deg (plus the region
+    12h40m<R.A.<14h40m, 0deg<Dec.<+5deg). Fields containing new candidate
+    identifications were mapped by the VLA at 4.86GHz with about 15" FWHM
+    resolution. Difficult cases were confirmed or rejected with the aid of
+    accurate (sigma~1") radio and optical positions. The final sample of
+    354 identifications in Omega=9.4sr is reliable and large enough to
+    contain statistically useful numbers of radio-loud FIR galaxies and
+    quasars. The logarithmic FIR/radio flux ratio parameter q can be used
+    to distinguish radio sources powered by "starbursts" from those
+    powered by "monsters." Starbursts and normal spiral galaxies in a
+    lambda=60um flux-limited sample have a narrow (sigma_q=0.14+/-0.01) q
+    distribution with mean <q>=2.74+/-0.01, and none have "warm" FIR
+    spectra [{alpha}(25um, 60um)<1.5]. The absence of radio-quiet (but not
+    completely silent) blazars indicates that nearly all blazars become
+    optically thin at frequencies {nu}<~100GHz. Nonthermal sources with
+    steep FIR/optical spectra and dust-embedded sources visible only at
+    FIR and radio wavelengths must be very rare.
+
+File Summary:
+--------------------------------------------------------------------------------
+ FileName   Lrecl    Records   Explanations
+--------------------------------------------------------------------------------
+ReadMe         80          .   This file
+table1.dat     97        354   Infrared and radio data
+table2.dat     96        354   Optical data and derived quantities
+--------------------------------------------------------------------------------
+
+See also:
+     II/156 : IRAS Faint Source Catalog, |b| > 10, Version 2.0 (Moshir+ 1989)
+    VIII/14 : 87GB Catalog of radio sources (Gregory et al., 1991)
+
+Byte-by-byte Description of file: table1.dat
+--------------------------------------------------------------------------------
+   Bytes Format  Units    Label      Explanations
+--------------------------------------------------------------------------------
+   1- 11  A11    ---      IRAS       IRAS FSC2 name FHHMM.M+DDMM
+  13- 14  I2     h        RAh        IRAS FSC2 B1950 right ascension
+  16- 17  I2     min      RAm        IRAS FSC2 B1950 right ascension
+  19- 22  F4.1   s        RAs        IRAS FSC2 B1950 right ascension
+      24  A1     ---      DE-        IRAS FSC2 B1950 Declination sign
+  25- 26  I2     deg      DEd        IRAS FSC2 B1950 Declination
+  28- 29  I2     arcmin   DEm        IRAS FSC2 B1950 Declination
+  31- 32  I2     arcsec   DEs        IRAS FSC2 B1950 Declination
+      34  A1     ---    l_S12        [< ] S12 upper limit symbol
+  35- 41  F7.3   Jy       S12        IRAS 12 um flux density (1)
+      43  A1     ---    l_S25        [< ] S25 upper limit symbol
+  44- 50  F7.3   Jy       S25        IRAS 25 um flux density (1)
+      52  A1     ---    l_S60        [< ] S60 upper limit symbol
+  53- 60  F8.3   Jy       S60        IRAS 60 um flux density (1)
+      62  A1     ---    l_S100       [< ] S100 upper limit symbol
+  63- 70  F8.3   Jy       S100       IRAS 100 um flux density (1)
+  72- 73  I2     h        RA2h       ? Radio B1950 right ascension
+  75- 76  I2     min      RA2m       ? Radio B1950 right ascension
+  78- 81  F4.1   s        RA2s       ? Radio B1950 right ascension
+      83  A1     ---      DE2-        Radio B1950 Declination (sign)
+  84- 85  I2     deg      DE2d       ? Radio B1950 Declination
+  87- 88  I2     arcmin   DE2m       ? Radio B1950 Declination
+  90- 91  I2     arcsec   DE2s       ? Radio B1950 Declination
+  92- 97  I6     mJy      S4.85GHz   ? 4.85 GHz flux density (2)
+--------------------------------------------------------------------------------
+Note (1): Flux densities at 12, 25, 60, and 100um from
+          (in descending order of preference)
+     the IRAS Catalog of Large Optical Galaxies (Rice et al., Cat. VII/109)
+     the revised IRAS Bright Galaxy Sample (Soifer et al. 1989AJ.....98..766S)
+     the IRAS Small Scale Structures Catalog (Helou & Walker, Cat. VII/73) and
+     the FSC2 itself (Moshir et al., Cat. II/156)
+Note (2): 4.85GHz flux density from the 87GB source catalog
+     (Gregory & Condon 1991, Cat. VIII/14) or measured from the 87GB 
+     or 90GB sky maps, and corrected for strong confusing sources 
+     visible in the 4.86GHz VLA maps.
+--------------------------------------------------------------------------------
+
+Byte-by-byte Description of file: table2.dat
+--------------------------------------------------------------------------------
+   Bytes Format  Units    Label    Explanations
+--------------------------------------------------------------------------------
+   1- 11  A11    ---      IRAS     IRAS FSC2 name FHHMM.M+DDMM
+  13- 25  A13    ---      Name     Common name
+  27- 28  I2     h        RAh      ? Optical B1950 right ascension
+  30- 31  I2     min      RAm      ? Optical B1950 right ascension
+  33- 37  F5.2   s        RAs      ? Optical B1950 right ascension
+      39  A1     ---      DE-      Optical B1950 Declination sign
+  40- 41  I2     deg      DEd      ? Optical B1950 Declination
+  43- 44  I2     arcmin   DEm      ? Optical B1950 Declination
+  46- 49  F4.1   arcsec   DEs      ? Optical B1950 Declination
+  51- 58  A8     ---      Type     Identification morphology from the UGC
+  60- 63  F4.1   mag      mp       ? Apparent photographic magnitude
+  65- 70  F6.1   Mpc      Dist     ? Distance assuming Ho=50km/s/Mpc (1)
+      72  A1     ---    l_q        [<] Upper limit symbol for q
+  73- 77  F5.2   ---      q        Log FIR/radio flux-ratio parameter, 4.85 GHz
+  79- 83  F5.2   ---      alp      ? Radio spectral index between 1.4 and 5GHz
+      85  A1     ---    l_alpIR    [>] Lower limit symbol for alpIR
+  86- 90  F5.2   ---      alpIR    FIR spectral index between 25-60 um
+  92- 96  A5     ---      ES       Energy source: S=stars, M=monster
+--------------------------------------------------------------------------------
+Note (1): Distance from the Revised Shapley-Ames Catalog
+     (Sandage & Tammann 1981, Cat. VII/51) or the Hubble distance 
+     based on H_0=50km/s/Mpc, q0=1/2.
+--------------------------------------------------------------------------------
+
+Origin: AAS CD-ROM series, Volume 5, 1995         Lee Brotzman [ADS] 17-Jul-1995
+================================================================================
+(End)                                                         [CDS]  23-Oct-1996
+
