@@ -435,7 +435,7 @@ if __name__ == '__main__':
         if data_filter:
             targets = TargetList(file_names=[IR_FILES[i] for i in selections],hotpx=hotpx,verbose=verbose)
             if display_plots:
-                targets.plot(show=True)
+                targets.plot(True,*displ_kwargs)
 
             from scipy.ndimage import gaussian_filter
             sigma = args.sigma
@@ -458,35 +458,54 @@ if __name__ == '__main__':
 
                 print('RA',ra[0])
 
-                from astropy.coordinates import SkyCoord, ICRS, Angle
-                database = SkyCoord(ra=ra, dec=dec,equinox='J1950.0').transform_to(ICRS)
+                from astropy.coordinates import SkyCoord, ICRS, Angle, FK5
+                from astropy.time import Time
                 
                 test = Angle(trg.px_to_coord(10,10) * filpy.u.deg)
                 edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
                 ra_edg = edges[0]
                 dec_edg = edges[1]
+
                 min_ra  = ra_edg.min()
                 min_dec = dec_edg.min()
                 max_ra  = ra_edg.max()
                 max_dec = dec_edg.max()
+
+
+                print('MIN POS:',min_ra.to_string('hour',sep='hms'),min_dec.to_string('deg',sep='dms'))
+                print('MAX POS:',max_ra.to_string('hour',sep='hms'),max_dec.to_string('deg',sep='dms'))
+
+                sky = SkyCoord(ra=[min_ra,max_ra],dec=[min_dec,max_dec],equinox='J2000').transform_to(FK5(equinox='B1950.0'))
+                print('B MIN POS:',Angle(sky.to_table()['ra'][0]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][0]).to_string('deg',sep='dms'))
+                print('B MAX POS:',Angle(sky.to_table()['ra'][1]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][1]).to_string('deg',sep='dms'))
+
+                exit()
+
+                min_ra  = min_ra.value
+                min_dec = min_dec.value
+                max_ra  = max_ra.value
+                max_dec = max_dec.value
+
+                database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',obstime=Time('B1983.5')).transform_to(FK5(equinox='J2000.0'))
                 if verbose:
+                    print(trg.wcs)
                     print(data_table)
                     print(database)
-                    print('RA J200\n',database.to_table()['ra'].value)
+                    print('RA SHAPE',ra.shape)
+                    print('RA SkyCoord',database.shape)
+                    print('RA J2000\n',Angle(database.to_table()['ra']).hour)
+                    print('DEC J2000\n',Angle(database.to_table()['dec']).deg)
                     print('POS:',test[0].hms, test[1].dms)
                     print('EDGES:')
                     for r, d in zip(ra_edg.flatten(),dec_edg.flatten()):
                         print(r.to_string('hour',sep='hms'), d.to_string('deg',sep='dms'))
                     print('EDG RA:',min_ra.to_string('hour',sep='hms'),max_ra.to_string('hour',sep='hms'))
                     print('EDG DEC:',min_dec.to_string('deg',sep='deg'),max_dec.to_string('deg',sep='deg'))
+                    print('TEST',trg.coord_to_px(test[0].deg,test[1].deg))
 
                 ra = database.to_table()['ra'].value
                 dec = database.to_table()['dec'].value
 
-                min_ra  = min_ra.value
-                min_dec = min_dec.value
-                max_ra  = max_ra.value
-                max_dec = max_dec.value
 
                 ra_pos = np.logical_and(ra < max_ra,ra > min_ra)
                 dec_pos = np.logical_and(dec < max_dec,dec > min_dec)
@@ -494,12 +513,19 @@ if __name__ == '__main__':
                 ra_sel = ra[pos] 
                 dec_sel = dec[pos] 
 
+                print('RA SEL:\n',ra_sel)
+
+                ra_sel_ang = Angle(ra_sel*filpy.u.deg)
+                dec_sel_ang = Angle(dec_sel*filpy.u.deg)
                 if verbose:
-                    ra_sel_ang = Angle(ra_sel*filpy.u.deg)
-                    dec_sel_ang = Angle(dec_sel*filpy.u.deg)
+                    pos = np.where(pos)[0]
                     print('SOURCES')
-                    for r, d in zip(ra_sel_ang,dec_sel_ang):
-                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'))
+                    for i, r, d in zip(pos,ra_sel_ang,dec_sel_ang):
+                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'),
+                              data_table['f_nu_12'][i],
+                              data_table['f_nu_25'][i],
+                              data_table['f_nu_60'][i],
+                              data_table['f_nu_100'][i])
 
                 ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
 
