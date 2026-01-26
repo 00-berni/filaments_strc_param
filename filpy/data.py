@@ -498,7 +498,7 @@ class DataDir(PathVar):
         if file_list:
             print('\nFiles in '+self.path)
             for i, file in enumerate(file_list):
-                print(f'{i} - {file}')
+                print(f'{i:2d} - {file}')
         else:
             print('The directory is EMPTY')
 
@@ -520,6 +520,7 @@ class DataDir(PathVar):
     def __sub__(self, iter: int) -> 'DataDir':
         new_path = self.join(self.directories()[:-iter])
         return DataDir(path=new_path, mkdir=False)
+    
 
 class DataFile(FileVar):
     def __init__(self, dirpath: Union[str,DataDir,PathVar]):
@@ -692,22 +693,22 @@ def _read_iras_row(row: str) -> tuple:
             float(row[23:25])/3600
     )
     # unc ellipse major axis
-    unc_maj =  int(row[25:28]) 
+    unc_maj = int(row[25:28]) 
     # unc ellipse minor axis 
-    unc_min =  int(row[28:31])
+    unc_min = int(row[28:31])
     # pos angle
     pos_ang = int(row[31:34])
     # numb of times observed
     nh_con = int(row[34:36])
     # avg non-color corrected flux density
-    f_nu_12 = float(row[36:45]) #: 12 um
-    f_nu_25 = float(row[45:54]) #: 25 um
-    f_nu_60 = float(row[54:63]) #: 60 um
+    f_nu_12  = float(row[36:45]) #: 12 um
+    f_nu_25  = float(row[45:54]) #: 25 um
+    f_nu_60  = float(row[54:63]) #: 60 um
     f_nu_100 = float(row[62:72]) #: 100 um
     # flux density quality
-    q_fnu_12 = int(row[72]) #: 12 um
-    q_fnu_25 = int(row[73]) #: 25 um
-    q_fnu_60 = int(row[74]) #: 60 um
+    q_fnu_12  = int(row[72]) #: 12 um
+    q_fnu_25  = int(row[73]) #: 25 um
+    q_fnu_60  = int(row[74]) #: 60 um
     q_fnu_100 = int(row[75]) #: 100 um
     return name, ra, dec, \
            unc_maj, unc_min, pos_ang, \
@@ -762,9 +763,9 @@ def _read_iras_row_radio(row: str) -> tuple:
             float(row[30:32])/3600
             )
     # flux density upper limit
-    s12 = float(row[34:41]) #: 12 um
-    s25 = float(row[43:50]) #: 25 um
-    s60 = float(row[52:60]) #: 60 um
+    s12  = float(row[34:41]) #: 12 um
+    s25  = float(row[43:50]) #: 25 um
+    s60  = float(row[52:60]) #: 60 um
     s100 = float(row[62:70]) #: 100 um
     # 04.85 GHz flux density
     s_radio = int(row[91:97]) if '\n' not in row[91:97] else 0
