@@ -50,7 +50,7 @@ class Target():
     
     def coord_to_px(self, *sel: FloatArrayLike) -> IntArray:
         coord = self.wcs.world_to_pixel_values(*sel)
-        return np.asarray(coord)
+        return np.asarray(coord).astype(int)
 
     def plot(self, **figargs):
         if 'barlabel' not in figargs.keys():
@@ -86,8 +86,11 @@ class Target():
             Warning('To run self.plot_network, self.disperse() or self.skel() is required')
             pass
 
-    def __getitem__(self, sel: Union[int,slice,list,tuple]) -> FloatArrayLike:
-        return self.data[sel]
+    def __getitem__(self, sel: Union[int,slice,list,tuple,str]) -> Union[FloatArrayLike, str]:
+        if isinstance(sel,str):
+            return self.header[sel]
+        else:
+            return self.data[sel]
 
     def __setitem__(self, sel: Union[int,slice,list,tuple], item: FloatArrayLike) -> None:
         self.data[sel] = item
@@ -450,6 +453,77 @@ if __name__ == '__main__':
 
                 data = trg.data
 
+                from astropy.coordinates import SkyCoord, ICRS, Angle, FK5
+                from astropy.time import Time
+
+                def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
+                    if isinstance(coords,SkyCoord):
+                        table = coords.to_table()
+                        rr = table['ra'].value
+                        dd = table['dec'].value
+                    else:
+                        rr, dd = coords
+                    min_rr, max_rr = ra_ext
+                    min_dd, max_dd = dec_ext
+                    rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
+                    dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
+                    pos = np.logical_and(rr_pos,dd_pos)
+                    rr = rr[pos] 
+                    dd = dd[pos] 
+                    return rr, dd, pos
+
+                if 'B1950' in trg.name:
+                    test = [[[0,1],[2,3]],[[0,0],[1,1]]]
+                    print('\n'.join([f'{i[0]},{j[0]}\n{i[1]},{j[1]}' for i,j in zip(test[0],test[1])]))
+                    test = trg.px_to_coord(*test)
+                    print(test)
+                    test0, test1 = test
+                    test = trg.coord_to_px(test0.flatten(),test1.flatten())
+                    print(test.astype(int))
+
+
+
+                    data_file = (IR_FILES.dir + 'II_125').join('main.dat')
+                    data_table = filpy.read_iras_data(data_file,store_data=True)
+                    print('RA:\n',data_table['ra'])
+                    # data_table.to_csv((IR_FILES.dir + 'II_125').join('main'),sep=',',columns=['name','ra','dec'])
+                    ra  = Angle(data_table['ra'] * filpy.u.hour).deg
+                    dec = data_table['dec']
+
+
+                    edges = Angle(trg.px_to_coord([[0,trg.shape[1]],[0,trg.shape[1]]],[[0,0],[trg.shape[0],trg.shape[0]]]) * filpy.u.deg)
+                    ra_edg  = edges[0]
+                    dec_edg = edges[1]
+
+                    min_ra  = ra_edg.min().deg
+                    min_dec = dec_edg.min().deg
+                    max_ra  = ra_edg.max().deg
+                    max_dec = dec_edg.max().deg
+
+                    print(ra_edg.deg,dec_edg.deg)
+
+                    test_ra = Angle('16h23m33s').deg
+                    test_de = Angle(19*filpy.u.deg).deg
+                    test_pt = trg.coord_to_px(test_ra,test_de)
+
+
+                    # database = SkyCoord(ra=ra* filpy.u.deg, dec=dec* filpy.u.deg,equinox='B1950.0',obstime=Time('B1983.5')) 
+                    ra_sel, dec_sel, pos = filter_data((ra,dec),(min_ra,max_ra),(min_dec,max_dec))
+                    ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+
+
+
+                    _ , ax = filpy.show_image(data,projection=trg.wcs,**pltkwargs)
+                    ax.scatter(ra_sel_px,dec_sel_px,c=data_table['f_nu_60'][pos],marker='x',cmap='plasma')
+                    ax.plot(*test_pt,'or')
+                    plt.show()
+
+
+                    raise Exception('Yi')
+                    
+                else:
+                    raise Exception('Yeah')
+
                 data_file = (IR_FILES.dir + 'II_125').join('main.dat')
                 data_table = filpy.read_iras_data(data_file,store_data=True)
                 data_table_r = filpy.read_iras_data((IR_FILES.dir + 'AJ_109_2318').join('table1.dat'),store_data=True,selection='radio')
@@ -461,8 +535,6 @@ if __name__ == '__main__':
 
                 print('RA',ra[0])
 
-                from astropy.coordinates import SkyCoord, ICRS, Angle, FK5
-                from astropy.time import Time
                 
                 test = Angle(trg.px_to_coord(10,10) * filpy.u.deg)
                 edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
@@ -501,18 +573,6 @@ if __name__ == '__main__':
                     print('EDG DEC:',min_dec.to_string('deg',sep='deg'),max_dec.to_string('deg',sep='deg'))
                     print('TEST',trg.coord_to_px(test[0].deg,test[1].deg))
 
-                def filter_data(coords: SkyCoord, ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
-                    table = coords.to_table()
-                    rr = table['ra'].value
-                    dd = table['dec'].value
-                    min_rr, max_rr = ra_ext
-                    min_dd, max_dd = dec_ext
-                    rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
-                    dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
-                    pos = np.logical_and(rr_pos,dd_pos)
-                    rr = rr[pos] 
-                    dd = dd[pos] 
-                    return rr, dd
 
                 min_ra  = min_ra.value
                 min_dec = min_dec.value
