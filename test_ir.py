@@ -50,7 +50,7 @@ class Target():
     
     def coord_to_px(self, *sel: FloatArrayLike) -> IntArray:
         coord = self.wcs.world_to_pixel_values(*sel)
-        return np.asarray(coord).astype(int)
+        return np.round(np.asarray(coord))
 
     def plot(self, **figargs):
         if 'barlabel' not in figargs.keys():
@@ -361,6 +361,7 @@ if __name__ == '__main__':
     # filtering commands
     parser.add_argument('-f','--filter', action='store_true', help='sobel filter')
     parser.add_argument('--sigma', action='store', type=float, nargs='*', default=[2], help='set the sigma for the Gaussian filter. By default `2`')
+    parser.add_argument('-C','--cat-file', action='store', type=str, nargs='*', help='the catalog file to open')
     # masking commands
     parser.add_argument('-m','--mask', action='store_true', help='mask point sources')
     parser.add_argument('--nshift', action='store', type=int, nargs='*', default=[5], help='set the number of sigma from the point source. By default `5`')
@@ -447,9 +448,11 @@ if __name__ == '__main__':
 
             filtered_data = [] 
             for id, sel in enumerate(selections):
+                # selected data
                 trg = targets[id]
                 s = sigma[id]
                 pltkwargs = displ_kwargs[id]
+                cat_file = args.cat_file[id]
 
                 data = trg.data
 
@@ -472,136 +475,59 @@ if __name__ == '__main__':
                     dd = dd[pos] 
                     return rr, dd, pos
 
-                if 'B1950' in trg.name:
-                    test = [[[0,1],[2,3]],[[0,0],[1,1]]]
-                    print('\n'.join([f'{i[0]},{j[0]}\n{i[1]},{j[1]}' for i,j in zip(test[0],test[1])]))
-                    test = trg.px_to_coord(*test)
-                    print(test)
-                    test0, test1 = test
-                    test = trg.coord_to_px(test0.flatten(),test1.flatten())
-                    print(test.astype(int))
-
-
-
-                    data_file = (IR_FILES.dir + 'II_125').join('main.dat')
-                    data_table = filpy.read_iras_data(data_file,store_data=True)
-                    print('RA:\n',data_table['ra'])
-                    # data_table.to_csv((IR_FILES.dir + 'II_125').join('main'),sep=',',columns=['name','ra','dec'])
-                    ra  = Angle(data_table['ra'] * filpy.u.hour).deg
-                    dec = data_table['dec']
-
-
-                    edges = Angle(trg.px_to_coord([[0,trg.shape[1]],[0,trg.shape[1]]],[[0,0],[trg.shape[0],trg.shape[0]]]) * filpy.u.deg)
-                    ra_edg  = edges[0]
-                    dec_edg = edges[1]
-
-                    min_ra  = ra_edg.min().deg
-                    min_dec = dec_edg.min().deg
-                    max_ra  = ra_edg.max().deg
-                    max_dec = dec_edg.max().deg
-
-                    print(ra_edg.deg,dec_edg.deg)
-
-                    test_ra = Angle('16h23m33s').deg
-                    test_de = Angle(19*filpy.u.deg).deg
-                    test_pt = trg.coord_to_px(test_ra,test_de)
-
-
-                    # database = SkyCoord(ra=ra* filpy.u.deg, dec=dec* filpy.u.deg,equinox='B1950.0',obstime=Time('B1983.5')) 
-                    ra_sel, dec_sel, pos = filter_data((ra,dec),(min_ra,max_ra),(min_dec,max_dec))
-                    ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
-
-
-
-                    _ , ax = filpy.show_image(data,projection=trg.wcs,**pltkwargs)
-                    ax.scatter(ra_sel_px,dec_sel_px,c=data_table['f_nu_60'][pos],marker='x',cmap='plasma')
-                    ax.plot(*test_pt,'or')
-                    plt.show()
-
-
-                    raise Exception('Yi')
-                    
-                else:
-                    raise Exception('Yeah')
-
-                data_file = (IR_FILES.dir + 'II_125').join('main.dat')
-                data_table = filpy.read_iras_data(data_file,store_data=True)
-                data_table_r = filpy.read_iras_data((IR_FILES.dir + 'AJ_109_2318').join('table1.dat'),store_data=True,selection='radio')
-
-                ra = data_table['ra'] * filpy.u.hour
-                dec = data_table['dec'] * filpy.u.degree
-                ra_r = data_table_r['ra'] * filpy.u.hour
-                dec_r = data_table_r['dec'] * filpy.u.degree
-
-                print('RA',ra[0])
-
-                
-                test = Angle(trg.px_to_coord(10,10) * filpy.u.deg)
+                # compute the edges
                 edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
                 ra_edg = edges[0]
                 dec_edg = edges[1]
-
                 min_ra  = ra_edg.min()
                 min_dec = dec_edg.min()
                 max_ra  = ra_edg.max()
                 max_dec = dec_edg.max()
-
-
-                print('MIN POS:',min_ra.to_string('hour',sep='hms'),min_dec.to_string('deg',sep='dms'))
-                print('MAX POS:',max_ra.to_string('hour',sep='hms'),max_dec.to_string('deg',sep='dms'))
-
-                sky = SkyCoord(ra=[min_ra,max_ra],dec=[min_dec,max_dec],equinox='J2000').transform_to(FK5(equinox='B1950.0'))
-                print('B MIN POS:',Angle(sky.to_table()['ra'][0]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][0]).to_string('deg',sep='dms'))
-                print('B MAX POS:',Angle(sky.to_table()['ra'][1]).to_string('hour',sep='hms'),Angle(sky.to_table()['dec'][1]).to_string('deg',sep='dms'))
-
-
-                database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',obstime=Time('B1983.5')).transform_to(FK5(equinox='J2000.0'))
-                database_r = SkyCoord(ra=ra_r, dec=dec_r,equinox='B1950.0').transform_to(FK5(equinox='J2000.0'))
                 if verbose:
-                    print(trg.wcs)
-                    print(data_table)
-                    print(database)
-                    print('RA SHAPE',ra.shape)
-                    print('RA SkyCoord',database.shape)
-                    print('RA J2000\n',Angle(database.to_table()['ra']).hour)
-                    print('DEC J2000\n',Angle(database.to_table()['dec']).deg)
-                    print('POS:',test[0].hms, test[1].dms)
-                    print('EDGES:')
-                    for r, d in zip(ra_edg.flatten(),dec_edg.flatten()):
-                        print(r.to_string('hour',sep='hms'), d.to_string('deg',sep='dms'))
-                    print('EDG RA:',min_ra.to_string('hour',sep='hms'),max_ra.to_string('hour',sep='hms'))
-                    print('EDG DEC:',min_dec.to_string('deg',sep='deg'),max_dec.to_string('deg',sep='deg'))
-                    print('TEST',trg.coord_to_px(test[0].deg,test[1].deg))
-
-
+                    print('MIN POS:',min_ra.to_string('hour',sep='hms'),min_dec.to_string('deg',sep='dms'))
+                    print('MAX POS:',max_ra.to_string('hour',sep='hms'),max_dec.to_string('deg',sep='dms'))
                 min_ra  = min_ra.value
                 min_dec = min_dec.value
                 max_ra  = max_ra.value
                 max_dec = max_dec.value
 
+                # open the catalog
+                data_file = (IR_FILES.dir + 'II_125').join(cat_file)
+                data_table = filpy.read_iras_data(data_file,store_data=True)
+                # set the units
+                ra = data_table['ra'] * filpy.u.hour
+                dec = data_table['dec'] * filpy.u.degree
+                # transform from B1950 to J2000
+                database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',frame='fk5').transform_to(FK5(equinox='J2000.0'))
+                # database = database
                 ra = database.to_table()['ra'].value
                 dec = database.to_table()['dec'].value
-
-                ra_sel, dec_sel = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
-                ra_sel_r, dec_sel_r = filter_data(database_r,(min_ra,max_ra),(min_dec,max_dec))
-
-                print('RA SEL:\n',ra_sel)
-
-                ra_sel_ang = Angle(ra_sel*filpy.u.deg)
-                dec_sel_ang = Angle(dec_sel*filpy.u.deg)
-                
                 if verbose:
+                    print(data_table)
+                    print(database)
+                    print('EDGES:')
+                    for r, d in zip(ra_edg.flatten(),dec_edg.flatten()):
+                        print(r.to_string('hour',sep='hms'), d.to_string('deg',sep='dms'))
+
+                # select objects within the field only
+                ra_sel, dec_sel, pos = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
+                if verbose:
+                    ra_sel_ang = Angle(ra_sel*filpy.u.deg)
+                    dec_sel_ang = Angle(dec_sel*filpy.u.deg)
                     print('SOURCES')
                     for r, d in zip(ra_sel_ang,dec_sel_ang):
                         print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'))
-
+                # compute the corresponding pixel positions
                 ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
-                ra_sel_r_px, dec_sel_r_px = trg.coord_to_px(ra_sel_r,dec_sel_r)
 
-                _ , ax = filpy.show_image(data,projection=trg.wcs,**pltkwargs)
-                ax.plot(10,10,'or')
+                # plot all
+                pltkwargs['show'] = False
+                _ , ax = trg.plot(**pltkwargs)
+                xlim = ax.get_xlim()
+                ylim = ax.get_ylim()
                 ax.plot(ra_sel_px,dec_sel_px,'xr')
-                ax.plot(ra_sel_r_px,dec_sel_r_px,'+g')
+                ax.set_xlim(xlim)
+                ax.set_ylim(ylim)
                 plt.show()
                 
 
