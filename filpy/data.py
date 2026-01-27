@@ -685,7 +685,7 @@ def _read_iras_row(row: str) -> tuple:
     # ra in hours
     ra = float(row[11:13]) + \
          float(row[13:15])/60 + \
-         float(row[15:18])/3600
+         float('.'.join([row[15:17],row[17]]))/3600
     # dec in deg
     dec = -1 if row[18] == '-' else 1
     dec *= (float(row[19:21]) + \
@@ -693,9 +693,9 @@ def _read_iras_row(row: str) -> tuple:
             float(row[23:25])/3600
     )
     # unc ellipse major axis
-    unc_maj = int(row[25:28]) 
+    unc_maj = float('.'.join([row[25:27],row[27]])) 
     # unc ellipse minor axis 
-    unc_min = int(row[28:31])
+    unc_min = float('.'.join([row[28:30],row[30]]))
     # pos angle
     pos_ang = int(row[31:34])
     # numb of times observed
@@ -778,22 +778,31 @@ IRAS_RADIO = ['name','ra','dec','s_12','s_25','s_60','s_100','s_radio']
 from pandas import DataFrame    
 def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal['default','radio'] = 'default') -> DataFrame:
     import numpy as np
-    with open(data_file,'r') as file:
-        rows = file.readlines()
-    columns = []
-    if selection == 'default':
-            columns[:] = IRAS_DEFAULT[:]
-            rows = [_read_iras_row(row) for row in rows]
-    elif selection == 'radio':
-            columns[:] = IRAS_RADIO[:]
-            rows = [_read_iras_row_radio(row) for row in rows]
-    data_frame = DataFrame(data=rows,columns=columns)
-    data = data_frame.to_numpy().transpose()
-    if store_data:
-        storing_dir = FileVar(filename=data_file,path=True).dir
-        storing_file = storing_dir.split()[-1].lower()
-        np.savez(storing_dir.join(storing_file),
-                 columns=columns, 
-                 data=data
-                )
+    ext = data_file.split('.')[-1]
+    if ext == 'dat':
+        with open(data_file,'r') as file:
+            rows = file.readlines()
+        columns = []
+        if selection == 'default':
+                columns[:] = IRAS_DEFAULT[:]
+                rows = [_read_iras_row(row) for row in rows]
+        elif selection == 'radio':
+                columns[:] = IRAS_RADIO[:]
+                rows = [_read_iras_row_radio(row) for row in rows]
+        data_frame = DataFrame(data=rows,columns=columns)
+        data = data_frame.to_numpy().transpose()
+        if store_data:
+            storing_dir = FileVar(filename=data_file,path=True).dir
+            storing_file = storing_dir.split()[-1].lower()
+            np.savez(storing_dir.join(storing_file),
+                    columns=columns, 
+                    data=data
+                    )
+    elif ext == 'npz':
+        cat_data = np.load(data_file,allow_pickle=True)
+        columns = cat_data['columns']
+        data = cat_data['data']
+        data_frame = DataFrame(data=data.transpose(),columns=columns)
+    else: 
+        raise ValueError(f'.{ext} is not allowed')
     return data_frame
