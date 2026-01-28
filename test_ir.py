@@ -456,78 +456,121 @@ if __name__ == '__main__':
 
                 data = trg.data
 
-                from astropy.coordinates import SkyCoord, ICRS, Angle, FK5
-                from astropy.time import Time
+                if '_sel.npz' not in cat_file:
+                    from astropy.coordinates import SkyCoord, Angle, FK5
 
-                def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
-                    if isinstance(coords,SkyCoord):
-                        table = coords.to_table()
-                        rr = table['ra'].value
-                        dd = table['dec'].value
-                    else:
-                        rr, dd = coords
-                    min_rr, max_rr = ra_ext
-                    min_dd, max_dd = dec_ext
-                    rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
-                    dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
-                    pos = np.logical_and(rr_pos,dd_pos)
-                    rr = rr[pos] 
-                    dd = dd[pos] 
-                    return rr, dd, pos
+                    def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
+                        if isinstance(coords,SkyCoord):
+                            table = coords.to_table()
+                            rr = table['ra'].value
+                            dd = table['dec'].value
+                        else:
+                            rr, dd = coords
+                        min_rr, max_rr = ra_ext
+                        min_dd, max_dd = dec_ext
+                        rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
+                        dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
+                        pos = np.logical_and(rr_pos,dd_pos)
+                        rr = rr[pos] 
+                        dd = dd[pos] 
+                        return rr, dd, pos
 
-                # compute the edges
-                edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
-                ra_edg = edges[0]
-                dec_edg = edges[1]
-                min_ra  = ra_edg.min()
-                min_dec = dec_edg.min()
-                max_ra  = ra_edg.max()
-                max_dec = dec_edg.max()
-                if verbose:
-                    print('MIN POS:',min_ra.to_string('hour',sep='hms'),min_dec.to_string('deg',sep='dms'))
-                    print('MAX POS:',max_ra.to_string('hour',sep='hms'),max_dec.to_string('deg',sep='dms'))
-                min_ra  = min_ra.value
-                min_dec = min_dec.value
-                max_ra  = max_ra.value
-                max_dec = max_dec.value
+                    # compute the edges
+                    edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
+                    ra_edg = edges[0]
+                    dec_edg = edges[1]
+                    min_ra  = ra_edg.min()
+                    min_dec = dec_edg.min()
+                    max_ra  = ra_edg.max()
+                    max_dec = dec_edg.max()
+                    if verbose:
+                        print('MIN POS:',min_ra.to_string('hour',sep='hms'),min_dec.to_string('deg',sep='dms'))
+                        print('MAX POS:',max_ra.to_string('hour',sep='hms'),max_dec.to_string('deg',sep='dms'))
+                    min_ra  = min_ra.value
+                    min_dec = min_dec.value
+                    max_ra  = max_ra.value
+                    max_dec = max_dec.value
 
-                # open the catalog
-                data_file = (IR_FILES.dir + 'II_125').join(cat_file)
-                data_table = filpy.read_iras_data(data_file,store_data=True)
-                # set the units
-                ra = data_table['ra'] * filpy.u.hour
-                dec = data_table['dec'] * filpy.u.degree
-                # transform from B1950 to J2000
-                database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',frame='fk5').transform_to(FK5(equinox='J2000.0'))
-                # database = database
-                ra = database.to_table()['ra'].value
-                dec = database.to_table()['dec'].value
-                if verbose:
-                    print(data_table)
-                    print(database)
-                    print('EDGES:')
-                    for r, d in zip(ra_edg.flatten(),dec_edg.flatten()):
-                        print(r.to_string('hour',sep='hms'), d.to_string('deg',sep='dms'))
+                    # open the catalog
+                    data_file = (IR_FILES.dir + 'II_125').join(cat_file)
+                    data_table = filpy.read_iras_data(data_file,store_data=True)
+                    # set the units
+                    ra = data_table['ra'] * filpy.u.hour
+                    dec = data_table['dec'] * filpy.u.degree
+                    # transform from B1950 to J2000
+                    database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',frame='fk5').transform_to(FK5(equinox='J2000.0'))
+                    # database = database
+                    ra = database.to_table()['ra'].value
+                    dec = database.to_table()['dec'].value
+                    if verbose:
+                        print(data_table)
+                        print(database)
+                        print('EDGES:')
 
-                # select objects within the field only
-                ra_sel, dec_sel, pos = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
-                if verbose:
-                    ra_sel_ang = Angle(ra_sel*filpy.u.deg)
-                    dec_sel_ang = Angle(dec_sel*filpy.u.deg)
-                    print('SOURCES')
-                    for r, d in zip(ra_sel_ang,dec_sel_ang):
-                        print(r.to_string('hour',sep='hms'),d.to_string('deg',sep='dms'))
-                # compute the corresponding pixel positions
-                ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+                    # select objects within the field only
+                    ra_sel, dec_sel, pos = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
+                    # compute the corresponding pixel positions
+                    ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+
+                    # get the flux
+                    band = trg.nickname.split('-')[1]
+                    if '_row' in band:
+                        band = band[:-4]
+                    flux = data_table['f_nu_'+band][pos]
+
+                    # store results
+                    from pandas import DataFrame
+                    tmp_cols = {'ra': float,
+                                'dec': float,
+                                'ra_px': int,
+                                'dec_px': int,
+                                'f12': float,
+                                'f25': float,
+                                'f60': float,
+                                'f100': float,
+                                'pos': bool
+                                }
+                    tmp_data = [ra_sel,
+                                dec_sel,
+                                ra_sel_px,
+                                dec_sel_px,
+                                data_table['f_nu_12'][pos],
+                                data_table['f_nu_25'][pos],
+                                data_table['f_nu_60'][pos],
+                                data_table['f_nu_100'][pos],
+                                pos
+                                ]
+                    sel_name = '.'.join(cat_file.split('.')[:-1]) + '_sel.pkl'
+                    DataFrame(data=np.transpose(tmp_data),columns=list(tmp_cols.keys())).astype(dtype=tmp_cols).to_pickle((IR_FILES.dir + 'II_125').join(sel_name))
+                    print('Store selected data in '+(IR_FILES.dir + 'II_125').join(sel_name))
+                    del tmp_cols,tmp_data
+                else:
+                    from pandas import read_pickle
+                    # open selected catalog data
+                    data_file = (IR_FILES.dir + 'II_125').join(cat_file)
+                    data_table = read_pickle(data_file)
+                    ra_sel  = data_table['ra']
+                    dec_sel = data_table['dec']
+                    ra_sel_px = data_table['ra_px']
+                    dec_sel_px = data_table['dec_px']
+                    
+                    # get the flux
+                    band = trg.nickname.split('-')[1]
+                    if '_row' in band:
+                        band = band[:-4]
+                    print('BAND: '+band)
+                    flux = data_table['f'+band]
 
                 # plot all
                 pltkwargs['show'] = False
-                _ , ax = trg.plot(**pltkwargs)
+                fig , ax = trg.plot(**pltkwargs)
                 xlim = ax.get_xlim()
                 ylim = ax.get_ylim()
-                ax.plot(ra_sel_px,dec_sel_px,'xr')
+                # ax.plot(ra_sel_px,dec_sel_px,'xr')
+                image = ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x')
                 ax.set_xlim(xlim)
                 ax.set_ylim(ylim)
+                fig.colorbar(image,ax=ax)
                 plt.show()
                 
 
