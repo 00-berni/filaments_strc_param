@@ -1,5 +1,5 @@
 import os
-from pandas import DataFrame
+from pandas import DataFrame, read_pickle
 import astropy.units as u
 from .typing import *
 
@@ -717,6 +717,7 @@ def _read_iras_row(row: str) -> tuple:
            q_fnu_12, q_fnu_25, q_fnu_60, q_fnu_100
 
 IRAS_DEFAULT = ['name','ra','dec','unc_maj','unc_min','pos_ang','nh_con', 'f_nu_12', 'f_nu_25', 'f_nu_60', 'f_nu_100','q_fnu_12', 'q_fnu_25', 'q_fnu_60', 'q_fnu_100']
+TYPES_DEFAULT = [str,float,float,float,float,int,int,float,float,float,float,int,int,int,int]
 
 """
 ~~~~ IRAS DATA ~~~~
@@ -774,6 +775,7 @@ def _read_iras_row_radio(row: str) -> tuple:
            s_radio
 
 IRAS_RADIO = ['name','ra','dec','s_12','s_25','s_60','s_100','s_radio']
+TYPES_RADIO = [str,float,float,float,float,float,float,int]
 
 from pandas import DataFrame    
 def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal['default','radio'] = 'default') -> DataFrame:
@@ -786,23 +788,18 @@ def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal
         if selection == 'default':
                 columns[:] = IRAS_DEFAULT[:]
                 rows = [_read_iras_row(row) for row in rows]
+                dtypes = {col: typ for col, typ in zip(IRAS_DEFAULT,TYPES_DEFAULT)}
         elif selection == 'radio':
                 columns[:] = IRAS_RADIO[:]
                 rows = [_read_iras_row_radio(row) for row in rows]
-        data_frame = DataFrame(data=rows,columns=columns)
-        data = data_frame.to_numpy().transpose()
+                dtypes = {col: typ for col, typ in zip(IRAS_RADIO,TYPES_RADIO)}
+        data_frame = DataFrame(data=rows,columns=columns).astype(dtype=dtypes)
         if store_data:
             storing_dir = FileVar(filename=data_file,path=True).dir
             storing_file = storing_dir.split()[-1].lower()
-            np.savez(storing_dir.join(storing_file),
-                    columns=columns, 
-                    data=data
-                    )
-    elif ext == 'npz':
-        cat_data = np.load(data_file,allow_pickle=True)
-        columns = cat_data['columns']
-        data = cat_data['data']
-        data_frame = DataFrame(data=data.transpose(),columns=columns)
+            data_frame.to_pickle(storing_dir.join(storing_file+'.pkl'))
+    elif ext == 'pkl':
+        data_frame = read_pickle(data_file)
     else: 
         raise ValueError(f'.{ext} is not allowed')
     return data_frame
