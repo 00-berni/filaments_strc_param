@@ -693,9 +693,9 @@ def _read_iras_row(row: str) -> tuple:
             float(row[23:25])/3600
     )
     # unc ellipse major axis
-    unc_maj = float('.'.join([row[25:27],row[27]])) 
+    unc_maj = float(row[25:28]) 
     # unc ellipse minor axis 
-    unc_min = float('.'.join([row[28:30],row[30]]))
+    unc_min = float(row[28:31])
     # pos angle
     pos_ang = int(row[31:34])
     # numb of times observed
