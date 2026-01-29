@@ -48,16 +48,25 @@ class Target():
         coord = self.wcs.pixel_to_world_values(*sel)
         return np.asarray(coord)
     
-    def coord_to_px(self, *sel: FloatArrayLike) -> IntArray:
+    def coord_to_px(self, *sel: FloatArrayLike, rounding: bool = True) -> IntArray:
         coord = self.wcs.world_to_pixel_values(*sel)
-        return np.round(np.asarray(coord))
+        if rounding:
+            return np.round(np.asarray(coord))
+        else:
+            return np.asarray(coord)
 
     def plot(self, **figargs):
         if 'barlabel' not in figargs.keys():
-            figargs['barlabel'] = INT_UNIT
+            figargs['barlabel'] = self.header['BUNIT']
         if 'title' not in figargs.keys():
             figargs['title'] = self.name
-        return filpy.show_image(self.data, projection=self.wcs,**figargs)
+        figargs['show'] = False
+        fig, ax = filpy.show_image(self.data, projection=self.wcs,**figargs)
+        xlabel = self.header['CTYPE1'].split('--')[0]
+        ylabel = self.header['CTYPE2'].split('--')[0]
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        return fig, ax
     
     def disperse(self, nsig: float, ncut: Optional[float], nsmooth: int, nthreads: int, patches: bool = True, outdir: str = '', skl_sel: str = 'skl_brk') -> None:
         if len(self.shape) == 3:
@@ -247,8 +256,6 @@ def sobel_filter(data: FloatArray, remove_neg: bool = True) -> FloatArray:
         fdata[fdata < 0] = 0
     return fdata
 
-
-INT_UNIT = 'MJy / sr'
 
 IR_FILES = filpy.IR_PATHS
 
@@ -456,8 +463,9 @@ if __name__ == '__main__':
 
                 data = trg.data
 
-                if '_sel.npz' not in cat_file:
-                    from astropy.coordinates import SkyCoord, Angle, FK5
+                from astropy.coordinates import Angle
+                if '_sel.pkl' not in cat_file:
+                    from astropy.coordinates import SkyCoord, FK5
 
                     def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
                         if isinstance(coords,SkyCoord):
@@ -499,7 +507,6 @@ if __name__ == '__main__':
                     dec = data_table['dec'] * filpy.u.degree
                     # transform from B1950 to J2000
                     database = SkyCoord(ra=ra, dec=dec,equinox='B1950.0',frame='fk5').transform_to(FK5(equinox='J2000.0'))
-                    # database = database
                     ra = database.to_table()['ra'].value
                     dec = database.to_table()['dec'].value
                     if verbose:
@@ -510,7 +517,7 @@ if __name__ == '__main__':
                     # select objects within the field only
                     ra_sel, dec_sel, pos = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
                     # compute the corresponding pixel positions
-                    ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel)
+                    ra_sel_px, dec_sel_px = trg.coord_to_px(ra_sel,dec_sel,rounding=False)
 
                     # get the flux
                     band = trg.nickname.split('-')[1]
@@ -519,6 +526,7 @@ if __name__ == '__main__':
                     flux = data_table['f_nu_'+band][pos]
 
                     # store results
+                    pos = np.where(pos)[0]
                     from pandas import DataFrame
                     tmp_cols = {'ra': float,
                                 'dec': float,
@@ -562,17 +570,36 @@ if __name__ == '__main__':
                     flux = data_table['f'+band]
 
                 # plot all
-                pltkwargs['show'] = False
                 fig , ax = trg.plot(**pltkwargs)
                 xlim = ax.get_xlim()
                 ylim = ax.get_ylim()
                 # ax.plot(ra_sel_px,dec_sel_px,'xr')
-                image = ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x')
+                image = ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x',vmax=10)
                 ax.set_xlim(xlim)
                 ax.set_ylim(ylim)
                 fig.colorbar(image,ax=ax)
+                ax.grid(linestyle='dashed',alpha=0.5)
                 plt.show()
                 
+                from astropy.stats import sigma_clipped_stats
+                from photutils.detection import DAOStarFinder
+                mean, median, std = sigma_clipped_stats(data, sigma=3.0)
+                print('ASTRO:',np.array((mean, median, std)))
+                daofind = DAOStarFinder(fwhm=3.0, threshold=1.*std)
+                print(daofind)
+                sources = daofind(data - median)
+                print(sources.colnames)
+                print('\t'.join(['x', 'y', 'sharpness', 'roundness1', 'roundness2']))
+                for source in sources:
+                    print('\t'.join(['{:.0f}','{:.0f}','{:f}','{:f}','{:f}']).format(source['xcentroid'], source['ycentroid'], source['sharpness'], source['roundness1'], source['roundness2']))
+                from photutils.aperture import CircularAperture
+                positions = np.transpose((sources['xcentroid'], sources['ycentroid']))
+                apertures = CircularAperture(positions, r=4.0)
+                fig, ax = trg.plot(**pltkwargs)
+                apertures.plot(ax=ax,color='blue', lw=1.5, alpha=0.5)
+                ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x',vmax=10)
+                plt.show()
+
 
                 exit()
 
