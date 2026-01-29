@@ -34,7 +34,12 @@ class PathVar():
 
     Attributes
     ----------
-    PATH : str
+    _path : str
+        directory path
+
+    Properties
+    ----------
+    path : str
         directory path
     """
 
@@ -45,13 +50,14 @@ class PathVar():
         ----------
         path : str, optional
             path of the directory. If `path == ''` the current 
-            directory path is set, by default ''
+            directory path is set, by default `''`
+        mkdir : bool, optional
+            if `True` it creates the directory
         """
         self._path = path if path != '' else this_dir()
         if mkdir and path != '':
             self.make_dir()
             
-
     @property
     def path(self) -> str:
         return self._path
@@ -681,6 +687,26 @@ Byte-per-byte Description of file: main.dat
 --------------------------------------------------------------------------------
 """
 def _read_iras_row(row: str) -> tuple:
+    """Read a row of `II_125/main.dat`
+
+    Parameters
+    ----------
+    row : str
+        a string 157 char long with information
+        reported in notes
+
+    Returns
+    -------
+    outputs : tuple
+        tuple with name, ra, dec, uncertainties in 
+        positions, avg fluxes in each band and the 
+        corresponding quality
+
+    Notes
+    -----
+
+    """
+    # identifier
     name = row[:11].split(' ')[0]
     # ra in hours
     ra = float(row[11:13]) + \
@@ -779,12 +805,36 @@ TYPES_RADIO = [str,float,float,float,float,float,float,int]
 
 from pandas import DataFrame    
 def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal['default','radio'] = 'default') -> DataFrame:
-    import numpy as np
-    ext = data_file.split('.')[-1]
+    """Read IRAS catalog
+
+    Parameters
+    ----------
+    data_file : str
+        catalog file path
+    store_data : bool, optional
+        if `True` data will be saved in pickle format, by default True
+    selection : Literal['default','radio'], optional
+        catalog type, by default 'default'
+
+    Returns
+    -------
+    data_frame : DataFrame
+        catalog dataframe
+
+    Raises
+    ------
+    ValueError
+        `.dat` or `.pkl` only are allowed
+    """
+    ext = data_file.split('.')[-1]      #: file extention
+    # read from `.dat` file
     if ext == 'dat':
+        # read the catalog file
         with open(data_file,'r') as file:
             rows = file.readlines()
+        # initialize a list for the columns
         columns = []
+        # extract the catalog data
         if selection == 'default':
                 columns[:] = IRAS_DEFAULT[:]
                 rows = [_read_iras_row(row) for row in rows]
@@ -795,9 +845,11 @@ def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal
                 dtypes = {col: typ for col, typ in zip(IRAS_RADIO,TYPES_RADIO)}
         data_frame = DataFrame(data=rows,columns=columns).astype(dtype=dtypes)
         if store_data:
+            # store data in pickle mode
             storing_dir = FileVar(filename=data_file,path=True).dir
             storing_file = storing_dir.split()[-1].lower()
             data_frame.to_pickle(storing_dir.join(storing_file+'.pkl'))
+    # read from `.pkl` file
     elif ext == 'pkl':
         data_frame = read_pickle(data_file)
     else: 
