@@ -711,13 +711,15 @@ def _read_iras_row(row: str) -> tuple:
     # ra in hours
     ra = float(row[11:13]) + \
          float(row[13:15])/60 + \
-         float('.'.join([row[15:17],row[17]]))/3600
+         float(row[15:18])/10/3600
     # dec in deg
-    dec = -1 if row[18] == '-' else 1
-    dec *= (float(row[19:21]) + \
-            float(row[21:23])/60 + \
-            float(row[23:25])/3600
-    )
+    dec = float(row[19:21]) + \
+          float(row[21:23])/60 + \
+          float(row[23:25])/3600         
+    # check the sign
+    if row[18] == '-': 
+        dec *= -1
+    
     # unc ellipse major axis
     unc_maj = float(row[25:28]) 
     # unc ellipse minor axis 
@@ -784,11 +786,13 @@ def _read_iras_row_radio(row: str) -> tuple:
          float(row[15:17])/60 + \
          float(row[18:22])/3600
     # dec in deg
-    dec = -1 if row[23] == '-' else 1
-    dec *= (float(row[24:26]) + \
-            float(row[27:29])/60 + \
-            float(row[30:32])/3600
-            )
+    dec = float(row[24:26]) + \
+          float(row[27:29])/60 + \
+          float(row[30:32])/3600
+    # check the sign
+    if row[23] == '-':
+        dec *= -1
+
     # flux density upper limit
     s12  = float(row[34:41]) #: 12 um
     s25  = float(row[43:50]) #: 25 um
@@ -844,8 +848,8 @@ def read_iras_data(data_file: str,*, store_data: bool = True, selection: Literal
                 rows = [_read_iras_row_radio(row) for row in rows]
                 dtypes = {col: typ for col, typ in zip(IRAS_RADIO,TYPES_RADIO)}
         data_frame = DataFrame(data=rows,columns=columns).astype(dtype=dtypes)
+        # store data in pickle mode
         if store_data:
-            # store data in pickle mode
             storing_dir = FileVar(filename=data_file,path=True).dir
             storing_file = storing_dir.split()[-1].lower()
             data_frame.to_pickle(storing_dir.join(storing_file+'.pkl'))
