@@ -48,7 +48,7 @@ class Target():
         coord = self.wcs.pixel_to_world_values(*sel)
         return np.asarray(coord)
     
-    def coord_to_px(self, *sel: FloatArrayLike, rounding: bool = True) -> IntArray:
+    def coord_to_px(self, *sel: FloatArrayLike, rounding: bool = False) -> IntArray:
         coord = self.wcs.world_to_pixel_values(*sel)
         if rounding:
             return np.round(np.asarray(coord))
@@ -467,21 +467,22 @@ if __name__ == '__main__':
                 if '_sel.pkl' not in cat_file:
                     from astropy.coordinates import SkyCoord, FK5
 
-                    def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], ra_ext: tuple[float,float], dec_ext: tuple[float,float]) -> tuple[FloatArray,FloatArray]:
+                    def filter_data(coords: Union[SkyCoord,tuple[FloatArray,FloatArray]], data_shape: tuple[int,int]) -> tuple[FloatArray,FloatArray,FloatArray,FloatArray,BoolArray]:
                         if isinstance(coords,SkyCoord):
                             table = coords.to_table()
                             rr = table['ra'].value
                             dd = table['dec'].value
                         else:
                             rr, dd = coords
-                        min_rr, max_rr = ra_ext
-                        min_dd, max_dd = dec_ext
-                        rr_pos = np.logical_and(rr < max_rr,rr > min_rr)
-                        dd_pos = np.logical_and(dd < max_dd,dd > min_dd)
-                        pos = np.logical_and(rr_pos,dd_pos)
-                        rr = rr[pos] 
-                        dd = dd[pos] 
-                        return rr, dd, pos
+
+                        x, y = trg.coord_to_px(ra,dec,rounding=False)
+                        sh_y, sh_x = data_shape
+                        pos = np.logical_and(np.logical_and(x>=0,x<sh_x),np.logical_and(y>=0,y<sh_y))
+                        rr_sel = rr[pos]
+                        dd_sel = dd[pos]
+                        rr_px = x[pos]
+                        dd_px = y[pos]
+                        return rr_sel, dd_sel, rr_px, dd_px, pos
 
                     # compute the edges
                     edges = Angle(trg.px_to_coord([[0,trg.shape[0]],[0,trg.shape[0]]],[[0,0],[trg.shape[1],trg.shape[1]]]) * filpy.u.deg)
@@ -514,6 +515,21 @@ if __name__ == '__main__':
                         print(database)
                         print('EDGES:')
 
+                    x,y = trg.coord_to_px(ra,dec)
+                    print('PX VALS')
+                    print('NAN',np.any(np.logical_or(np.isnan(x),np.isnan(y))))
+                    print('NEG',np.any(np.logical_or(x<0,y<0)))
+                    print('MAJ',np.any(np.logical_or(x>=data.shape[1],y>=data.shape[0])))
+                    sh_y,sh_x = data.shape
+                    pos = np.logical_and(np.logical_and(x>=0,x<sh_x),np.logical_and(y>=0,y<sh_y))
+                    fig , ax = trg.plot(**pltkwargs)
+                    xlim = ax.get_xlim()
+                    ylim = ax.get_ylim()
+                    ax.plot(x[pos],y[pos],'xr')
+                    plt.show()  
+
+                    exit()
+
                     # select objects within the field only
                     ra_sel, dec_sel, pos = filter_data(database,(min_ra,max_ra),(min_dec,max_dec))
                     # compute the corresponding pixel positions
@@ -525,38 +541,25 @@ if __name__ == '__main__':
                         band = band[:-4]
                     flux = data_table['f_nu_'+band][pos]
 
+                    # cut the dataframe 
+                    data_table = data_table[pos]
+                    # update ra and dec to J2000
+                    data_table['ra'] = ra_sel
+                    data_table['dec'] = dec_sel
+                    # add the positions in px
+                    data_table['ra_px'] = ra_sel_px
+                    data_table['dec_px'] = dec_sel_px
                     # store results
-                    pos = np.where(pos)[0]
-                    from pandas import DataFrame
-                    tmp_cols = {'ra': float,
-                                'dec': float,
-                                'ra_px': int,
-                                'dec_px': int,
-                                'f12': float,
-                                'f25': float,
-                                'f60': float,
-                                'f100': float,
-                                'pos': bool
-                                }
-                    tmp_data = [ra_sel,
-                                dec_sel,
-                                ra_sel_px,
-                                dec_sel_px,
-                                data_table['f_nu_12'][pos],
-                                data_table['f_nu_25'][pos],
-                                data_table['f_nu_60'][pos],
-                                data_table['f_nu_100'][pos],
-                                pos
-                                ]
                     sel_name = '.'.join(cat_file.split('.')[:-1]) + '_sel.pkl'
-                    DataFrame(data=np.transpose(tmp_data),columns=list(tmp_cols.keys())).astype(dtype=tmp_cols).to_pickle((IR_FILES.dir + 'II_125').join(sel_name))
+                    data_table.to_pickle((IR_FILES.dir + 'II_125').join(sel_name))
                     print('Store selected data in '+(IR_FILES.dir + 'II_125').join(sel_name))
-                    del tmp_cols,tmp_data
                 else:
                     from pandas import read_pickle
                     # open selected catalog data
                     data_file = (IR_FILES.dir + 'II_125').join(cat_file)
                     data_table = read_pickle(data_file)
+                    print(data_table)
+                    # extract positional data
                     ra_sel  = data_table['ra']
                     dec_sel = data_table['dec']
                     ra_sel_px = data_table['ra_px']
@@ -567,19 +570,27 @@ if __name__ == '__main__':
                     if '_row' in band:
                         band = band[:-4]
                     print('BAND: '+band)
-                    flux = data_table['f'+band]
+                    flux = data_table['f_nu_'+band]
+
+                fmax_pos = flux == max(flux)
+                cat_max_data = data[np.round(dec_sel_px[fmax_pos].to_numpy()).astype(int),np.round(ra_sel_px[fmax_pos].to_numpy()).astype(int)]
+                print('FLUX RATIO MAX', Angle(np.sqrt(max(flux)*1e-6/np.max(data)),unit='rad').to_string('deg',sep='dms'))                
+                print('FLUX RATIO CAT', Angle(np.sqrt(max(flux)*1e-6/cat_max_data),unit='rad').to_string('deg',sep='dms'))                
+                print('CAT MAX DATA',cat_max_data,np.max(data))
 
                 # plot all
                 fig , ax = trg.plot(**pltkwargs)
                 xlim = ax.get_xlim()
                 ylim = ax.get_ylim()
                 # ax.plot(ra_sel_px,dec_sel_px,'xr')
-                image = ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x',vmax=10)
+                image = ax.scatter(ra_sel_px,dec_sel_px,c=flux,cmap='viridis',marker='x',vmax=4)
                 ax.set_xlim(xlim)
                 ax.set_ylim(ylim)
                 fig.colorbar(image,ax=ax)
                 ax.grid(linestyle='dashed',alpha=0.5)
                 plt.show()
+                
+                exit()
                 
                 from astropy.stats import sigma_clipped_stats
                 from photutils.detection import DAOStarFinder
